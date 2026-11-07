@@ -7,6 +7,7 @@ import os
 import pytest
 
 os.environ["TRANSPORTE_SEM_ENV"] = "1"
+os.environ["AUTONOMO_PAUSA_S"] = "0"   # o piloto pausa entre passos só para a tela acompanhar
 for _chave in ("AI_PROXY_TOKEN", "WHATSAPP_DESTINO", "WHATSAPP_SIMULAR", "WHATSAPP_PONTE"):
     os.environ.pop(_chave, None)
 

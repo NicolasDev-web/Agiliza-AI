@@ -88,6 +88,11 @@ def _criar(c: sqlite3.Connection) -> None:
       id integer primary key autoincrement, quando text, aprovacao_id integer, para_usuario text,
       texto text, origem text, situacao text, aviso text, destino text);
     create index if not exists ix_aprov_situacao on aprovacoes(situacao);
+    create table if not exists autonomo_diario (
+      id integer primary key autoincrement, quando text, tipo text, titulo text, texto text,
+      impacto_reais real, ref text, detalhe text);
+    create index if not exists ix_auto_ref on autonomo_diario(ref);
+    create table if not exists autonomo_config (chave text primary key, valor text);
     """)
     colunas = {r[1] for r in c.execute("pragma table_info(usuarios)")}
     for falta in ("email", "senha_hash"):   # estado.db criado antes do login
@@ -123,7 +128,7 @@ def reiniciar() -> None:
     with _TRAVA:
         c = con()
         c.executescript("delete from aprovacoes; delete from prazos_vigentes; delete from alertas; delete from mensagens;"
-                        "delete from sqlite_sequence;")
+                        "delete from autonomo_diario; delete from sqlite_sequence;")   # o modo do piloto (ligado/pausado) fica
         c.commit()
 
 
@@ -389,6 +394,82 @@ def marcar_ciente(aid: int) -> None:
     with _TRAVA:
         con().execute("update alertas set ciente = 1 where id = ?", (aid,))
         con().commit()
+
+
+# ---------------------------------------------------------------------------- piloto automático (agente autônomo)
+MODOS_PILOTO = ("ligado", "pausado")
+
+
+def autonomo_modo() -> str:
+    """Ligado por padrão; AUTONOMO=0 no ambiente começa pausado. A gerente liga e pausa na tela dela."""
+    r = _linhas("select valor from autonomo_config where chave = 'modo'")
+    if r and r[0]["valor"] in MODOS_PILOTO:
+        return r[0]["valor"]
+    return "pausado" if os.environ.get("AUTONOMO", "1") == "0" else "ligado"
+
+
+def definir_autonomo_modo(modo: str, por: str) -> str:
+    if modo not in MODOS_PILOTO:
+        raise ErroDeRegra("o piloto automático fica ligado ou pausado")
+    with _TRAVA:
+        con().execute("insert or replace into autonomo_config (chave, valor) values ('modo', ?)", (modo,))
+        con().commit()
+    registrar_decisao_autonoma("modo", f"Piloto automático {modo} por {por}",
+                               "Pausado, o agente não age sozinho; continua respondendo no chat." if modo == "pausado"
+                               else "O agente volta a rotear, abrir incidentes e levar propostas sozinho, dentro da política.")
+    return modo
+
+
+def registrar_decisao_autonoma(tipo: str, titulo: str, texto: str, impacto: float | None = None,
+                               ref: str | None = None, detalhe: dict | None = None) -> dict:
+    """Diário do piloto: cada coisa que o agente decidiu sozinho, com o porquê."""
+    with _TRAVA:
+        c = con()
+        cur = c.execute("insert into autonomo_diario (quando,tipo,titulo,texto,impacto_reais,ref,detalhe) values (?,?,?,?,?,?,?)",
+                        (_agora(), tipo, titulo, texto, impacto, ref, json.dumps(detalhe or {}, ensure_ascii=False, default=str)))
+        c.commit()
+        d = _decisao(_linhas("select * from autonomo_diario where id = ?", (cur.lastrowid,))[0])
+    BARRAMENTO.publicar("todos", "autonomo", decisao=d)
+    return d
+
+
+def _decisao(r: dict) -> dict:
+    r["detalhe"] = json.loads(r["detalhe"] or "{}")
+    return r
+
+
+def ja_decidido(ref: str) -> bool:
+    return bool(_linhas("select 1 from autonomo_diario where ref = ? limit 1", (ref,)))
+
+
+def listar_decisoes_autonomas(limite: int = 40) -> list[dict]:
+    return [_decisao(r) for r in _linhas("select * from autonomo_diario order by id desc limit ?", (int(limite),))]
+
+
+def resumo_autonomo() -> dict:
+    """Números do painel 'o agente decidiu sozinho'."""
+    linhas = _linhas("select tipo, count(*) n, coalesce(sum(impacto_reais), 0) r, "
+                     "coalesce(sum(json_extract(detalhe, '$.envios')), 0) e from autonomo_diario group by tipo")
+    por = {l["tipo"]: l for l in linhas}
+    g = lambda t, k: por.get(t, {}).get(k, 0) or 0
+    return {"rotas_trocadas": int(g("rota", "e")), "economia_rotas": round(g("rota", "r"), 2),
+            "incidentes": int(g("incidente", "n")), "propostas": int(g("proposta", "n")),
+            "impacto_propostas": round(g("proposta", "r"), 2), "lembretes": int(g("lembrete", "n")),
+            "decisoes": int(sum(l["n"] for l in linhas if l["tipo"] != "modo"))}
+
+
+def trocas_de_rota_feitas() -> tuple[set[str], dict[str, int]]:
+    """Envios que já tiveram a rota trocada (pelo chat ou pelo piloto) e quantos por UF hoje.
+    O teto de 40% por UF/dia vale para o dia todo, não para cada chamada."""
+    hoje = datetime.now().strftime("%Y-%m-%d")
+    ja, por_uf = set(), {}
+    for r in _linhas("select quando, detalhe from alertas where categoria = 'troca_de_rota'"):
+        for t in json.loads(r["detalhe"] or "{}").get("trocas", []):
+            ja.add(t.get("envio_id"))
+            if str(r["quando"]).startswith(hoje):
+                uf = str(t.get("destino", "")).split("/")[-1]
+                por_uf[uf] = por_uf.get(uf, 0) + 1
+    return ja, por_uf
 
 
 # ---------------------------------------------------------------------------- placar do gerente

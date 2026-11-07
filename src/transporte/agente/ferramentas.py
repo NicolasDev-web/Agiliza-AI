@@ -378,6 +378,13 @@ def consultar_aprovacoes(aprovacao_id=None, _diario: Diario | None = None):
             "aprovadas_no_cenario": estado.contar_aprovadas(), "limite": estado.MAX_APROVACOES}
 
 
+def consultar_piloto_automatico(limite=10):
+    """O que o agente decidiu sozinho, em segundo plano (piloto automático): rotas, incidentes, propostas, lembretes."""
+    return {"modo": estado.autonomo_modo(), "resumo": estado.resumo_autonomo(),
+            "decisoes": [{"quando": d["quando"], "tipo": d["tipo"], "titulo": d["titulo"], "porque": d["texto"][:400]}
+                         for d in estado.listar_decisoes_autonomas(int(limite or 10))]}
+
+
 def _resumo_aprovacao(a: dict) -> dict:
     return {"id": a["id"], "resumo": a["resumo"], "situacao": a["situacao"], "decidido_por": a["decidido_por"],
             "valor_proposto": a["valor_proposto"], "valor_final": a["valor_final"],
@@ -474,6 +481,8 @@ CATALOGO: list[Ferramenta] = [
     Ferramenta("solicitar_aprovacao", "Leva a proposta ao gerente de logística e espera a decisão dele.",
                _p(resumo=_S_TEXTO, evidencia=_S_TEXTO, proposta_id=_S_TEXTO), solicitar_aprovacao,
                ("analista_logistica", "planejador"), "comunicacao", True),
+    Ferramenta("consultar_piloto_automatico", "O que você decidiu SOZINHO em segundo plano (piloto automático): rotas trocadas, incidentes abertos, propostas levadas à gerente, lembretes, com o porquê de cada uma.",
+               _p(limite=_S_NUM), consultar_piloto_automatico, TODOS),
     Ferramenta("consultar_aprovacoes", "Pedidos de aprovação (aguardando, aprovado com o valor final, recusado). SEM aprovacao_id lista todos; para a gerente, os que esperam a decisão dela.",
                _p(aprovacao_id=_S_NUM), consultar_aprovacoes, ("analista_logistica", "planejador", "consulta"), "leitura", True),
     Ferramenta("acionar_pessoa", "Chama a pessoa certa quando a decisão não é do agente: gerente_logistica, marketing, comercial, cx, financeiro, operacao_cd1, operacao_cd2.",

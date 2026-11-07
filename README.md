@@ -96,6 +96,29 @@ No pé das telas do analista e da gerente há a "Visão geral das entregas" (rec
 
 A pergunta vira um filtro pequeno e fechado (`src/transporte/analise.py`); o navegador só desenha o que cabe nele, então nada inventado chega à tela. Sem token de IA, um leitor de frases por palavra-chave resolve (custo zero). Com a IA do evento, uma chamada curta (~550 tokens de entrada, ~60 de saída) devolve o mesmo filtro, validado do mesmo jeito; se ela falhar, cai nas palavras-chave. O texto sob o gráfico sai de modelos de frase com os números do painel (`dashboard/analise.js`), sem chamar IA.
 
+### Piloto automático: o agente decide sozinho
+
+Além de responder no chat, o agente trabalha **sozinho em segundo plano** (`src/transporte/autonomo.py`). A cada ciclo
+(30 s; `AUTONOMO_INTERVALO_S`), sem ninguém pedir, ele:
+
+1. **Roteia os envios novos** ainda não coletados para a transportadora de menor custo total (frete + custo esperado de
+   atraso pelo histórico da região), até 40% dos envios novos de cada estado **no dia** (somando chat e piloto). A Marina
+   recebe o alerta financeiro.
+2. **Abre incidente** com a transportadora abaixo da meta de 92% em prefixos com 30+ envios, com a evidência dos piores
+   prefixos. Negociar continua sendo da gerente, que é avisada.
+3. **Escolhe o que levar à gerente**: até 3 propostas de prazo esperando ao mesmo tempo, gastando com cuidado o orçamento
+   de 12 aprovações (R$ 15 cada). Com a IA do evento, o modelo prioriza entre candidatas que as regras já liberaram (o que
+   ele inventar fora da lista é descartado); sem IA, vai pelo maior custo de atraso evitável. Não insiste no que a Marina
+   recusou.
+4. **Lembra a gerente** de pedidos parados há mais de 10 min.
+
+As **regras** decidem o que pode ser feito (no código); a IA só escolhe entre opções permitidas e explica. O agente nunca
+aprova, nunca negocia com transportadora e nunca muda o prazo do site sem a gerente. Cada decisão vai para um diário com
+o porquê, que as duas telas mostram ("Piloto automático"). O painel mostra a contagem até o próximo ciclo (e o horário),
+e, enquanto o agente analisa, acende e mostra cada passo ao vivo (✓ feito, ● agora) com o que ele achou. **Só a gerente liga e pausa** o piloto; a pausa continua depois
+de "Reiniciar demonstração", e o reinício dá um ciclo inteiro de calma antes de o piloto agir de novo. No chat, "o que você
+decidiu sozinho?" usa a ferramenta `consultar_piloto_automatico`. `AUTONOMO=0` começa pausado.
+
 ### WhatsApp por QR code (sem API da Meta)
 
 A Marina conecta o WhatsApp dela lendo um QR code, uma vez, na tela dela ("WhatsApp do Lucas"). Dali em diante cada decisão sai pelo número dela para o número do analista, com o texto escrito pelo agente e o cartão em imagem.

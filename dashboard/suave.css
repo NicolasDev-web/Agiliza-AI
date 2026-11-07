@@ -114,3 +114,47 @@ body.pagina-analista, body.pagina-gerente, body.pagina-login { background: linea
 .barra-mic.ligado { background: var(--perda); } .barra-mic.ligado::before { border-color: #fff; box-shadow: 0 7px 0 -4px #fff; }
 .barra-chip { justify-self: start; background: var(--cobalto); color: var(--branco); font-family: var(--mono); font-size: 11.5px; padding: 6px 14px; border-radius: 999px; max-width: 100%; }
 @media (max-width: 760px) { .barra-analise { right: var(--g); bottom: 84px; } .analise-lin { grid-template-columns: 110px 1fr 56px; } }
+
+/* ---------- piloto automático (piloto.js) ---------- */
+.piloto { margin: 0 var(--g) 22px; }
+.piloto-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.piloto-topo h2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.piloto-sub { font-size: 13px; color: var(--tinta-2); margin-top: 4px; max-width: 72ch; }
+.piloto-botoes { display: flex; gap: 8px; flex-wrap: wrap; }
+.piloto-estado { font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--tinta-2); display: inline-flex; align-items: center; gap: 6px; }
+.piloto-estado i { width: 8px; height: 8px; border-radius: 50%; background: var(--neutro, #9a9cb8); display: inline-block; }
+.piloto-estado.ligado i { background: var(--bom, #1f9d6b); }
+.piloto-estado.rodando i { background: var(--cobalto); animation: piloto-pulso 1s ease-in-out infinite; }
+.piloto-estado.pausado i { background: var(--perda); }
+@keyframes piloto-pulso { 50% { opacity: .25; } }
+.piloto-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin: 16px 0 14px; }
+.piloto-kpi { background: #f6f6fb; border-radius: var(--raio); padding: 12px 14px; }
+.piloto-kpi b { display: block; font-size: 26px; font-weight: 400; color: var(--cobalto); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.piloto-kpi span { font-size: 12px; color: var(--tinta-2); }
+.piloto-diario { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; max-height: 340px; overflow-y: auto; }
+.piloto-diario li { display: grid; grid-template-columns: 26px 1fr; gap: 8px; padding: 9px 6px; border-top: 1px solid var(--linha); border-radius: 8px; transition: background 1.2s; }
+.piloto-diario li.nova { background: rgba(47, 55, 196, .08); }
+.piloto-ico { font-size: 16px; line-height: 1.3; }
+.piloto-diario b { font-weight: 550; font-size: 13.5px; }
+.piloto-diario small { color: var(--tinta-3); font-size: 11.5px; }
+.piloto-txt { font-size: 12.5px; color: var(--tinta-2); margin-top: 2px; }
+.piloto-erro { font-size: 12px; color: var(--perda); margin-top: 8px; }
+@media (max-width: 640px) { .piloto { margin: 0 16px 18px; } .piloto-topo { flex-direction: column; } }
+.piloto-relogio { font-variant-numeric: tabular-nums; }
+.piloto-barra { height: 4px; border-radius: 4px; background: #ececf5; margin-top: 10px; max-width: 360px; overflow: hidden; }
+.piloto-barra i { display: block; height: 100%; width: 0; background: var(--cobalto); border-radius: 4px; transition: width 1s linear; }
+/* enquanto o piloto analisa: o painel acende e os passos aparecem ao vivo */
+.piloto { transition: box-shadow .4s; }
+.piloto.analisando { box-shadow: 0 0 0 2px var(--cobalto), 0 10px 30px -12px rgba(47, 55, 196, .55); }
+.piloto-passos { margin-top: 14px; padding: 12px 14px; border-radius: var(--raio); background: #f6f6fb; }
+.piloto-passos.ao-vivo { background: rgba(47, 55, 196, .07); }
+.piloto-passos-titulo { font-size: 12px; font-weight: 550; color: var(--tinta-2); margin-bottom: 6px; }
+.piloto-passos.ao-vivo .piloto-passos-titulo { color: var(--cobalto); }
+.piloto-passos ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.piloto-passos li { display: grid; grid-template-columns: 18px 1fr; gap: 6px; font-size: 13px; color: var(--tinta-3); }
+.piloto-passos li.feito { color: var(--tinta); }
+.piloto-passos li.feito .piloto-marca { color: var(--bom); }
+.piloto-passos li.agora { color: var(--cobalto); font-weight: 550; }
+.piloto-passos li.agora .piloto-marca { animation: piloto-pulso 0.9s ease-in-out infinite; }
+.piloto-passos small { color: var(--tinta-3); font-weight: 400; font-size: 12px; }
+@media (prefers-reduced-motion: reduce) { .piloto-estado.rodando i, .piloto-passos li.agora .piloto-marca { animation: none; } }

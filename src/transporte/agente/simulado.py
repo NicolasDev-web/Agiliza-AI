@@ -455,6 +455,26 @@ def _quer_concorrente(s: str) -> bool:
     return any(k in s for k in ["concorrente", "concorrencia", "barato", "competi", "mercado"])
 
 
+def _quer_piloto(s: str) -> bool:
+    return bool(re.search(r"sozinh|piloto|automatic|autonom|sem (eu|ninguem) pedir|por conta propria", s))
+
+
+def _piloto(sessao) -> Iterator[dict]:
+    """O que o agente decidiu sozinho em segundo plano."""
+    yield from _rodar(sessao, "consultar_piloto_automatico", {"limite": 6})
+    r = sessao._ultimo
+    res, dec = r.get("resumo", {}), [d for d in r.get("decisoes", []) if d["tipo"] != "modo"]
+    if not dec:
+        yield _fim(sessao, "O piloto automático ainda não tomou nenhuma decisão neste cenário"
+                           + (" (está pausado na tela da Marina)." if r.get("modo") == "pausado" else ". O primeiro ciclo roda em instantes."))
+        return
+    linhas = "\n".join(f"• {d['titulo']}" for d in dec[:5])
+    yield _fim(sessao, f"Sozinho, em segundo plano, eu já: troquei *{res.get('rotas_trocadas', 0)}* rotas "
+                       f"({_brl(res.get('economia_rotas'))} de saldo), abri *{res.get('incidentes', 0)}* incidente(s) com transportadora "
+                       f"e levei *{res.get('propostas', 0)}* proposta(s) à Marina.\n\n*Últimas decisões:*\n{linhas}\n\n"
+                       "Tudo dentro da política: prazo do site continua sendo decisão da Marina, e ela pode me pausar.")
+
+
 def _status_aprovacoes(sessao) -> Iterator[dict]:
     yield from _rodar(sessao, "consultar_aprovacoes", {})
     r = sessao._ultimo
@@ -561,6 +581,9 @@ def responder_sem_ia(sessao, pergunta: str) -> Iterator[dict]:
     s = _sem_acento(pergunta)
     if SAUDACAO.fullmatch(s.strip()):
         yield from _ola(sessao)
+        return
+    if _quer_piloto(s):   # vale para o analista e para a gerente: é só leitura
+        yield from _piloto(sessao)
         return
     uf, prefixo = _lugar_na_pergunta(pergunta)
     cep_uf, cep_prefixo, aproximado = _cep_na_pergunta(pergunta)

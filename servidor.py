@@ -27,7 +27,7 @@ from urllib.parse import parse_qs, urlparse
 RAIZ = Path(__file__).resolve().parent
 sys.path.insert(0, str(RAIZ / "src"))
 
-from transporte import estado, whatsapp  # noqa: E402
+from transporte import autonomo, estado, whatsapp  # noqa: E402
 from transporte.agente import entender  # noqa: E402
 from transporte.agente.llm import Cliente  # noqa: E402
 from transporte.agente.ferramentas import PAPEL_AGENTE, PAPEL_CONSULTA  # noqa: E402
@@ -236,9 +236,29 @@ class Handler(BaseHTTPRequestHandler):
                     estado.marcar_ciente(int(m.group(1)))
                     self._json({"ok": True, "placar": estado.placar()})
                 return
+            # ---- piloto automático: o agente age sozinho em segundo plano; a gerente liga e pausa
+            if caminho == "/api/autonomo" and metodo == "GET":
+                if self._quem(q, corpo):
+                    self._json(autonomo.PILOTO.status())
+                return
+            if caminho == "/api/autonomo/modo" and metodo == "POST":
+                u = self._quem(q, corpo, "gerente")
+                if u:
+                    try:
+                        estado.definir_autonomo_modo(corpo.get("modo", ""), u["nome"])
+                    except estado.ErroDeRegra as e:
+                        return self._json({"erro": str(e)}, 409)
+                    self._json(autonomo.PILOTO.status())
+                return
+            if caminho == "/api/autonomo/rodar" and metodo == "POST":
+                if self._quem(q, corpo):
+                    autonomo.PILOTO.agora()
+                    self._json({"ok": True, "rodando": True})
+                return
             if caminho == "/api/demo/reiniciar" and metodo == "POST":
                 if self._quem(q, corpo, "gerente"):
                     estado.reiniciar()
+                    autonomo.PILOTO.reiniciar()
                     estado.BARRAMENTO.publicar("todos", "reiniciado")
                     self._json({"ok": True})
                 return
@@ -374,7 +394,10 @@ def main() -> None:
     if servidor is None:
         raise SystemExit("Nenhuma porta livre entre %d e %d." % (args.porta, args.porta + 10))
     iniciar_ponte()
+    if os.environ.get("AUTONOMO_THREAD", "1") != "0":
+        autonomo.PILOTO.iniciar()
     print(f"\nAgiliza AI · versão {VERSAO} · modo: {modo}", flush=True)
+    print(f"  Piloto automático: {estado.autonomo_modo()} (ciclo a cada {autonomo.INTERVALO} s; a gerente pausa na tela dela)", flush=True)
     print(f"  Entrar:   http://localhost:{porta}/login.html", flush=True)
     print(f"  Conferir: http://localhost:{porta}/api/saude  (deve mostrar \"app\": \"Agiliza AI\" e versão {VERSAO})\n", flush=True)
     servidor.serve_forever()

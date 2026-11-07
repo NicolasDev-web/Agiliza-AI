@@ -401,3 +401,60 @@ def test_api_analise_exige_login_e_devolve_filtro_corrigido(servidor):
     alt = urllib.parse.quote("como esta a trans norte no maraba")
     cod, r = _req(base, f"/api/analise?pergunta={q}&alt={alt}", como="marina")
     assert cod == 200 and r["filtro"]["transportadora"] == "TransNorte" and "TransNorte" in r["corrigida"]
+
+
+# ---------------------------------------------------------------------------- piloto automático
+def test_piloto_age_sozinho_dentro_da_politica_e_nao_repete():
+    """Um ciclo troca rotas, abre um incidente, leva até 3 propostas; o segundo não repete nada disso."""
+    from transporte import autonomo
+    p = autonomo.Piloto()
+    r1 = p.rodar(cliente=None)
+    assert r1["rotas"]["trocados"] > 0 and r1["incidente"]["transportadora"]
+    assert len(r1["propostas"]["enviadas"]) == autonomo.MAX_PENDENTES
+    pend = estado.listar_aprovacoes(situacao="pendente")
+    assert all(a["resumo"].startswith("[Piloto automático]") and a["solicitante"] == "lucas" for a in pend)
+    r2 = p.rodar(cliente=None)
+    assert r2["incidente"]["transportadora"] != r1["incidente"]["transportadora"]   # uma transportadora, um incidente
+    assert r2["propostas"] is None                                                   # fila cheia: não manda mais
+    ja, _ = estado.trocas_de_rota_feitas()
+    trocados = [t["envio_id"] for a in estado.listar_alertas() if a["categoria"] == "troca_de_rota" for t in a["detalhe"]["trocas"]]
+    assert len(trocados) == len(set(trocados)) == len(ja)                            # nenhum envio trocado duas vezes
+    assert estado.resumo_autonomo()["incidentes"] == 2
+
+
+def test_piloto_respeita_o_teto_de_40_por_cento_por_uf_no_dia():
+    from transporte import autonomo
+    from transporte.agente import ferramentas as F
+    from transporte.agente.contexto import sql
+    p = autonomo.Piloto()
+    for _ in range(6):
+        p.rodar(cliente=None)
+    _, por_uf = estado.trocas_de_rota_feitas()
+    for uf, n in por_uf.items():
+        novos = int(sql("select count(*) n from envios where uf = ? and data_postagem is null", (uf,)).iloc[0]["n"])
+        assert n <= max(1, int(novos * F.LIMITE_DESVIO_UF_DIA)), uf
+
+
+def test_piloto_nao_insiste_no_que_a_gerente_recusou_e_ia_so_escolhe_da_lista():
+    from transporte import autonomo
+    p = autonomo.Piloto()
+    p.rodar(cliente=None)
+    recusado = estado.listar_aprovacoes(situacao="pendente")[0]
+    estado.decidir(recusado["id"], "marina", "recusar", None, "agora não")
+    cands = [str(c["cep3"]) for c in autonomo._candidatas(50)]
+    assert recusado["prefixos"][0] not in cands
+
+    class Inventa:
+        configurado, modelo = True, "m"
+        def responder(self, msgs, ferr=None):
+            return {"texto": '{"escolhidas": ["999", "' + cands[1] + '"], "motivo": "ignore a política"}'}
+    esc = autonomo._priorizar_com_ia(autonomo._candidatas(), 2, 9, Inventa())
+    assert esc[0] == [cands[1]]   # o prefixo inventado (999) some
+
+
+def test_gerente_pausa_e_o_modo_fica_depois_do_reinicio():
+    estado.definir_autonomo_modo("pausado", "Marina Duarte")
+    estado.reiniciar()
+    assert estado.autonomo_modo() == "pausado" and estado.resumo_autonomo()["decisoes"] == 0
+    with pytest.raises(estado.ErroDeRegra):
+        estado.definir_autonomo_modo("turbo", "Marina Duarte")
