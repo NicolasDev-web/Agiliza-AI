@@ -20,7 +20,11 @@
   const NOME_UF = {}; ((window.UFS && window.UFS.features) || []).forEach((f) => { NOME_UF[f.properties.uf] = f.properties.nome; });
   const UF_LISTA = Object.keys(D.ufs).sort();
   const TRANSP = D.transportadoras.map((t) => t.transportadora).sort();
-  const PADRAO = { grupo: "transportadora", uf: null, transportadora: null, metrica: "atraso", ordem: "pior", top: null };
+  const PADRAO = { grupo: "transportadora", uf: null, macro: null, transportadora: null, metrica: "atraso", ordem: "pior", top: null };
+  /* "Nordeste", "Sul"...: grupo de estados (a mesma lista do servidor, src/transporte/analise.py) */
+  const MACROS = { Norte: ["AC", "AP", "AM", "PA", "RO", "RR", "TO"], Nordeste: ["AL", "BA", "CE", "MA", "PB", "PE", "PI", "RN", "SE"],
+    "Centro-Oeste": ["DF", "GO", "MT", "MS"], Sudeste: ["ES", "MG", "RJ", "SP"], Sul: ["PR", "RS", "SC"] };
+  const dentro = (uf, f) => (!f.uf || uf === f.uf) && (!f.macro || (MACROS[f.macro] || []).includes(uf));
   const METRICAS = { atraso: "Entregas fora do prazo", cumprimento: "Entregas no prazo", impacto: "Custo de atraso evitável", envios: "Envios medidos" };
   const GRUPOS = { transportadora: "Transportadoras", uf: "Estados", regiao: "Regiões" };
   let filtro = { ...PADRAO }, papel = "analista", raiz = null;
@@ -30,18 +34,18 @@
     const mapa = new Map();
     const pegar = (k, nome, sub) => { if (!mapa.has(k)) mapa.set(k, { nome, sub, envios: 0, no_prazo: 0, impacto: 0, abaixo: 0 }); return mapa.get(k); };
     if (f.grupo === "regiao") {
-      D.prefixos.filter((p) => (!f.uf || p.uf === f.uf) && (!f.transportadora || p.transportadora === f.transportadora)).forEach((p) => {
+      D.prefixos.filter((p) => dentro(p.uf, f) && (!f.transportadora || p.transportadora === f.transportadora)).forEach((p) => {
         const r = pegar(p.cep3, `${p.cidade_referencia}/${p.uf}`, p.transportadora);
         r.envios = p.envios_medidos; r.no_prazo = (p.cumprimento_hoje || 0) * p.envios_medidos; r.impacto = p.impacto_custo_atraso_rs || 0;
       });
     } else {
       Object.entries(D.uf_transportadora).forEach(([chave, v]) => {
         const [uf, t] = chave.split("|");
-        if ((f.uf && uf !== f.uf) || (f.transportadora && t !== f.transportadora)) return;
+        if (!dentro(uf, f) || (f.transportadora && t !== f.transportadora)) return;
         const r = f.grupo === "uf" ? pegar(uf, NOME_UF[uf] || uf, "") : pegar(t, t, "");
         r.envios += v.envios; r.no_prazo += v.cumprimento * v.envios;
       });
-      D.prefixos.filter((p) => (!f.uf || p.uf === f.uf) && (!f.transportadora || p.transportadora === f.transportadora)).forEach((p) => {
+      D.prefixos.filter((p) => dentro(p.uf, f) && (!f.transportadora || p.transportadora === f.transportadora)).forEach((p) => {
         const k = f.grupo === "uf" ? p.uf : p.transportadora; if (mapa.has(k)) mapa.get(k).impacto += p.impacto_custo_atraso_rs || 0;
       });
     }
@@ -56,7 +60,7 @@
 
   /* ---------- texto ---------- */
   function frase(rs, f) {
-    const lugar = f.uf ? `${EM[f.uf] || "em"} ${NOME_UF[f.uf] || f.uf}` : f.transportadora ? `na ${f.transportadora}` : "no Brasil";
+    const lugar = f.uf ? `${EM[f.uf] || "em"} ${NOME_UF[f.uf] || f.uf}` : f.macro ? `no ${f.macro}` : f.transportadora ? `na ${f.transportadora}` : "no Brasil";
     if (!rs.length) return `Não há envios medidos suficientes ${lugar}.`;
     const l = rs[0], pior = f.ordem === "pior";
     switch (f.metrica) {
@@ -79,14 +83,15 @@
     const fmt = (r) => f.metrica === "atraso" ? pct(1 - r.cump) : f.metrica === "cumprimento" ? pct(r.cump) : f.metrica === "impacto" ? brl0(r.impacto) : n0(r.envios);
     const sel = (id, opcoes, atual, rotulo, mudou) => h("label", { class: "filtro" }, h("span", {}, rotulo),
       h("select", { id, onchange: (e) => mudou(e.target.value) }, ...opcoes.map(([v, t]) => h("option", { value: v ?? "", selected: (atual ?? "") === (v ?? "") ? "" : null }, t))));
-    const set = (k) => (v) => { filtro = { ...filtro, [k]: k === "top" ? (v ? +v : null) : (v || null) }; if (k === "grupo" || k === "metrica") filtro[k] = v; render(); };
+    const set = (k) => (v) => { filtro = { ...filtro, [k]: k === "top" ? (v ? +v : null) : (v || null) }; if (k === "grupo" || k === "metrica") filtro[k] = v; if (k === "uf" && v) filtro.macro = null; if (k === "macro" && v) filtro.uf = null; render(); };
     const maisBom = f.metrica === "cumprimento" ? ["pior", "Menor cumprimento primeiro"] : ["pior", f.metrica === "atraso" ? "Mais atrasa primeiro" : "Maior primeiro"];
     const melhor = f.metrica === "cumprimento" ? ["melhor", "Maior cumprimento primeiro"] : ["melhor", f.metrica === "atraso" ? "Menos atrasa primeiro" : "Menor primeiro"];
 
     raiz.replaceChildren(
       h("div", { class: "filtros" },
         sel("f-grupo", Object.entries(GRUPOS), f.grupo, "Mostrar por", set("grupo")),
-        sel("f-uf", [[null, "Brasil todo"], ...UF_LISTA.map((u) => [u, NOME_UF[u] || u])], f.uf, "Estado", set("uf")),
+        sel("f-macro", [[null, "Brasil todo"], ...Object.keys(MACROS).map((m) => [m, m])], f.macro, "Região", set("macro")),
+        sel("f-uf", [[null, "Todos"], ...UF_LISTA.map((u) => [u, NOME_UF[u] || u])], f.uf, "Estado", set("uf")),
         sel("f-transp", [[null, "Todas"], ...TRANSP.map((t) => [t, t])], f.transportadora, "Transportadora", set("transportadora")),
         sel("f-metrica", Object.entries(METRICAS), f.metrica, "O que medir", set("metrica")),
         sel("f-ordem", [maisBom, melhor], f.ordem, "Ordem", set("ordem")),
@@ -113,7 +118,7 @@
     return resumo(filtro);
   }
   function resumo(f) {
-    return [GRUPOS[f.grupo].toLowerCase(), f.uf ? NOME_UF[f.uf] || f.uf : null, f.transportadora, METRICAS[f.metrica].toLowerCase(),
+    return [GRUPOS[f.grupo].toLowerCase(), f.uf ? NOME_UF[f.uf] || f.uf : f.macro, f.transportadora, METRICAS[f.metrica].toLowerCase(),
       f.metrica === "cumprimento" ? (f.ordem === "pior" ? "menos cumprem primeiro" : "mais cumprem primeiro") : (f.ordem === "pior" ? "maiores primeiro" : "menores primeiro"), f.top ? "top " + f.top : null].filter(Boolean).join(" · ");
   }
 
