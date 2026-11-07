@@ -92,3 +92,25 @@ body.pagina-analista, body.pagina-gerente, body.pagina-login { background: linea
 .dica .botao { grid-column: 2; grid-row: 1 / span 2; }
 .dica .ganho { color: var(--bom); font-family: var(--mono); font-size: 11.5px; }
 .dicas-todas { margin-top: 4px; }
+
+/* ---------- filtros e barra de perguntas ---------- */
+.visao > summary small { font-weight: 400; color: var(--tinta-3); margin-left: 10px; font-size: 12.5px; }
+.analise { display: grid; gap: 14px; padding: 0 22px 22px; }
+.filtros { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: end; }
+.filtro { display: grid; gap: 3px; font-size: 11.5px; color: var(--tinta-3); font-family: var(--mono); }
+.filtro select { font-family: var(--sans); font-size: 13.5px; color: var(--tinta); padding: 8px 12px; border: 0; border-radius: 12px; background: var(--papel-claro); min-width: 130px; cursor: pointer; }
+.analise-frase { font-size: 17px; letter-spacing: -0.01em; line-height: 1.4; max-width: 70ch; }
+.analise .pan-kpis { grid-column: auto; }
+.analise-grafico { padding: 18px 20px; }
+.analise-lin { grid-template-columns: minmax(130px, 220px) 1fr 70px; }
+.analise-lin span small { display: block; color: var(--tinta-3); font-size: 11.5px; }
+.pan-cartao small { display: block; }
+.barra-analise { position: fixed; left: var(--g); right: 270px; bottom: 22px; z-index: 2500; display: grid; gap: 6px; max-width: 900px; }
+.barra-form { display: flex; gap: 8px; align-items: center; background: var(--branco); border-radius: 999px; padding: 7px 8px 7px 20px; box-shadow: 0 10px 34px -10px rgba(21, 24, 79, .4), 0 0 0 1px var(--linha); }
+.barra-form input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font-size: 15px; padding: 8px 0; }
+.barra-ok, .barra-mic { width: 38px; height: 38px; border-radius: 50%; border: 0; cursor: pointer; display: grid; place-items: center; font-size: 17px; }
+.barra-ok { background: var(--cobalto); color: var(--branco); }
+.barra-mic { background: var(--papel-claro); } .barra-mic::before { content: ""; width: 9px; height: 15px; border: 2px solid var(--cobalto); border-radius: 6px; box-shadow: 0 7px 0 -4px var(--cobalto); }
+.barra-mic.ligado { background: var(--perda); } .barra-mic.ligado::before { border-color: #fff; box-shadow: 0 7px 0 -4px #fff; }
+.barra-chip { justify-self: start; background: var(--cobalto); color: var(--branco); font-family: var(--mono); font-size: 11.5px; padding: 6px 14px; border-radius: 999px; max-width: 100%; }
+@media (max-width: 760px) { .barra-analise { right: var(--g); bottom: 84px; } .analise-lin { grid-template-columns: 110px 1fr 56px; } }

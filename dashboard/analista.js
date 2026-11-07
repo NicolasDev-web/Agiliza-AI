@@ -23,7 +23,7 @@
   [["Melhor rota dos envios novos", "Qual a melhor rota para os envios novos de SP?"], ["Qual prazo precisa mudar?", "Qual prazo do site precisa mudar?"], ["Onde há mais problemas?", "Onde resolvemos mais problemas?"]]
     .forEach(([t, p]) => $("#acoes").append(h("button", { type: "button", class: "botao botao-cobalto", onclick: () => window.AgilizaAgente && window.AgilizaAgente.perguntar(p) }, h("span", { class: "botao-icone", "aria-hidden": "true" }, "→"), t)));
 
-  $("#visao").addEventListener("toggle", () => { if ($("#visao").open && window.Agiliza.panorama) window.Agiliza.panorama($("#panorama"), "analista"); }, { once: true });
+  if (window.Agiliza.analise) window.Agiliza.analise.montar($("#panorama"), "analista");
 
   /* ---------- mapa (coordenadas reais dos municípios) ---------- */
   const temMapa = typeof L !== "undefined";

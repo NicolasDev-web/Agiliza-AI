@@ -192,6 +192,15 @@ class Handler(BaseHTTPRequestHandler):
                 if u:
                     self._json({"mensagens": estado.listar_mensagens(u["id"]), "canal": whatsapp.configuracao()["canal"]})
                 return
+            if caminho == "/api/analise" and metodo == "GET":
+                if self._quem(q, corpo):
+                    from transporte import analise
+                    texto = (q.get("pergunta") or [""])[0].strip()[:300]
+                    alts = [a for a in (q.get("alt") or [""])[0].split("||") if a.strip()]
+                    texto = entender.escolher([texto] + alts) or texto
+                    filtro, origem = analise.interpretar(texto, Cliente())
+                    self._json({"filtro": filtro, "origem": origem, "corrigida": texto})
+                return
             if caminho == "/api/dicas" and metodo == "GET":
                 if self._quem(q, corpo, "analista_logistica"):
                     from transporte import dicas

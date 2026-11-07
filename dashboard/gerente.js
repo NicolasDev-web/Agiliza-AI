@@ -151,6 +151,6 @@
   $("#reiniciar").addEventListener("click", async () => { if (confirm("Zerar pedidos, decisões, prazos aprovados e alertas?")) { await api("/api/demo/reiniciar", "POST", {}); carregar(); } });
   await carregar().catch((e) => { $("#fila").replaceChildren(h("p", { class: "vazio" }, "Não consegui falar com o servidor: " + e.message)); });
   conectar();
-  $("#visao").addEventListener("toggle", () => { if ($("#visao").open && window.Agiliza.panorama) window.Agiliza.panorama($("#panorama"), "gerente"); }, { once: true });
+  if (window.Agiliza.analise) window.Agiliza.analise.montar($("#panorama"), "gerente");
   carregarZap(); setInterval(carregarZap, 3000);
 })();

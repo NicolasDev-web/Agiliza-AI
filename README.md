@@ -90,6 +90,12 @@ Como o ciclo fecha, ao vivo (SSE por usuário):
 O motivo escrito pela gerente é tratado como **dado, nunca como ordem** (no prompt de reescrita e no aviso ao agente).
 As regras valem no servidor (`src/transporte/estado.py`, `tests/test_estado.py`): só o gerente decide, nunca a própria proposta, no máximo 12 aprovações por cenário (R$ 15 cada pedido), prazo inteiro de no mínimo 2 dias úteis. O estado fica em `data/processed/estado.db` (gravável, ignorado pelo git); a base do desafio segue só de leitura. "Reiniciar demonstração" na tela da gerente zera tudo.
 
+### Visão geral com filtros e barra de perguntas
+
+No pé das telas do analista e da gerente há a "Visão geral das entregas" (recolhida) e uma barra de perguntas fixa embaixo. Escreva ou fale, por exemplo "Mostre as transportadoras do Pará, das que mais atrasam": os filtros se ajustam e o gráfico, os números e a frase de cima mudam. Os mesmos filtros (mostrar por, estado, transportadora, o que medir, ordem, quantos) podem ser mexidos à mão.
+
+A pergunta vira um filtro pequeno e fechado (`src/transporte/analise.py`); o navegador só desenha o que cabe nele, então nada inventado chega à tela. Sem token de IA, um leitor de frases por palavra-chave resolve (custo zero). Com a IA do evento, uma chamada curta (~550 tokens de entrada, ~60 de saída) devolve o mesmo filtro, validado do mesmo jeito; se ela falhar, cai nas palavras-chave. O texto sob o gráfico sai de modelos de frase com os números do painel (`dashboard/analise.js`), sem chamar IA.
+
 ### WhatsApp por QR code (sem API da Meta)
 
 A Marina conecta o WhatsApp dela lendo um QR code, uma vez, na tela dela ("WhatsApp do Lucas"). Dali em diante cada decisão sai pelo número dela para o número do analista, com o texto escrito pelo agente e o cartão em imagem.
@@ -171,6 +177,8 @@ src/transporte/agente/  ferramentas, roteamento, llm (proxy), loop (eventos), si
 servidor.py          servidor: conversa por SSE, eventos por usuário, aprovações, arquivos do painel
 src/transporte/estado.py   login, fila de aprovação, alertas financeiros, tempo real (estado.db)
 src/transporte/cartao.py, whatsapp.py   cartão de imagem e envio da decisão ao analista (pela ponte em whatsapp/)
+src/transporte/analise.py              pergunta -> filtro dos gráficos
+src/transporte/dicas.py                dicas do agente para o analista
 src/transporte/agente/entender.py     correção do que a voz entendeu e versão falada da resposta
 src/transporte/base.py, geo.py   base SQLite e geografia (coordenadas, distâncias)
 scripts/             01_processar.py, 02_base_de_dados.py

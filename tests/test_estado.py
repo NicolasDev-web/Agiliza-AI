@@ -390,3 +390,14 @@ def test_voz_corrige_nomes_e_a_resposta_leva_a_fala(servidor):
     assert entendi and "TransNorte" in entendi[0]["texto"] and "Marabá" in entendi[0]["texto"]
     resp = [e for e in evs if e["tipo"] == "resposta"][0]
     assert resp["fala"] and "*" not in resp["fala"] and len(resp["fala"]) <= 340
+
+
+def test_api_analise_exige_login_e_devolve_filtro_corrigido(servidor):
+    base, _ = servidor
+    import urllib.parse
+    cod, _ = _req(base, "/api/analise?pergunta=oi")
+    assert cod == 401
+    q = urllib.parse.quote("como esta a trans note")
+    alt = urllib.parse.quote("como esta a trans norte no maraba")
+    cod, r = _req(base, f"/api/analise?pergunta={q}&alt={alt}", como="marina")
+    assert cod == 200 and r["filtro"]["transportadora"] == "TransNorte" and "TransNorte" in r["corrigida"]
