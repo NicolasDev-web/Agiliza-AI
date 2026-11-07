@@ -20,6 +20,21 @@ const PASTA = path.join(__dirname, "sessao");
 let estado = "iniciando", qr = null, numero = null, sock = null, tentativas = 0;
 const enviadas = [];   // só no modo simulado, para os testes conferirem
 
+/* Quando o celular de quem recebe não consegue decifrar uma mensagem, ele pede o reenvio. Sem guardar o que
+ * foi enviado, a ponte não tem o que reenviar e a pessoa vê "Aguardando mensagem. Essa ação pode levar
+ * alguns minutos". Por isso guardamos as últimas mensagens (getMessage) e contamos as tentativas. */
+const enviadasPorId = new Map();
+function guardarEnviada(msg) {
+  if (!msg || !msg.key || !msg.key.id) return;
+  enviadasPorId.set(msg.key.id, msg.message);
+  if (enviadasPorId.size > 300) enviadasPorId.delete(enviadasPorId.keys().next().value);
+}
+const tentativasDeReenvio = new Map();
+const contadorDeReenvio = {
+  get: (k) => tentativasDeReenvio.get(k), set: (k, v) => { tentativasDeReenvio.set(k, v); },
+  del: (k) => { tentativasDeReenvio.delete(k); }, flushAll: () => { tentativasDeReenvio.clear(); },
+};
+
 async function qrImagem(texto) { return QRCode.toDataURL(texto, { margin: 1, width: 360, color: { dark: "#1c2150", light: "#ffffff" } }); }
 
 /* ---------- WhatsApp de verdade ---------- */
@@ -31,7 +46,8 @@ async function iniciar() {
   const pino = require("pino");
   const { state, saveCreds } = await useMultiFileAuthState(PASTA);
   let version; try { ({ version } = await fetchLatestBaileysVersion()); } catch (e) { /* usa a que vem no pacote */ }
-  sock = makeWASocket({ auth: state, version, logger: pino({ level: "silent" }), browser: Browsers.macOS("Agiliza AI"), markOnlineOnConnect: false, syncFullHistory: false });
+  sock = makeWASocket({ auth: state, version, logger: pino({ level: "silent" }), browser: Browsers.macOS("Agiliza AI"), markOnlineOnConnect: false, syncFullHistory: false,
+    getMessage: async (key) => enviadasPorId.get(key.id), msgRetryCounterCache: contadorDeReenvio });
   sock.ev.on("creds.update", saveCreds);
   sock.ev.on("connection.update", async (u) => {
     if (u.qr) { qr = await qrImagem(u.qr); estado = "aguardando_qr"; }
@@ -54,8 +70,9 @@ async function enviar({ numero: para, texto, imagem_base64: img }) {
   const jid = digitos + "@s.whatsapp.net";
   const [existe] = await sock.onWhatsApp(jid);
   if (!existe || !existe.exists) throw new Error("esse número não tem WhatsApp");
-  if (img) await sock.sendMessage(existe.jid, { image: Buffer.from(img, "base64"), caption: texto });
-  else await sock.sendMessage(existe.jid, { text: texto });
+  const enviada = img ? await sock.sendMessage(existe.jid, { image: Buffer.from(img, "base64"), caption: texto })
+                      : await sock.sendMessage(existe.jid, { text: texto });
+  guardarEnviada(enviada);
 }
 
 async function sair() {

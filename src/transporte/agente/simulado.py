@@ -390,6 +390,67 @@ def _quer_custo(s: str) -> bool:
     return bool(re.search(r"perd|prejuizo|quanto (a gente )?(custa|gasta|economiz)|custo|impacto|dinheiro|em reais", s))
 
 
+def _quer_ranking(s: str) -> bool:
+    """'Melhores transportadoras do Nordeste', 'pior do Sul', 'como estão as entregas no Sudeste'."""
+    if re.search(r"problema|reclama|chamado|extravio|avaria|resolvemos|rota|rotear|envios? novo|despach|propost|precisa mudar|prazo do site", s) or _quer_concorrente(s):
+        return False
+    return bool(re.search(r"transportadora|melhor|pior|ranking|entrega|desempenho|cumprimento|no prazo|como esta|como estao|como vai", s))
+
+
+def _ranking_regiao(sessao, nome: str, ufs: list[str]) -> Iterator[dict]:
+    """Transportadoras de uma região, do melhor ao pior cumprimento de prazo (soma dos estados, ponderada pelos envios)."""
+    nome_bonito = nome.replace("centro oeste", "Centro-Oeste").title()
+    acum: dict[str, dict] = {}
+    for uf in ufs:
+        yield from _rodar(sessao, "medir_desempenho", {"uf": uf})
+        for l in sessao._ultimo.get("linhas", []):
+            a = acum.setdefault(l["transportadora"], {"envios": 0.0, "no_prazo": 0.0, "extravios": 0.0, "ufs": 0})
+            e = float(l.get("envios") or 0)
+            a["envios"] += e; a["no_prazo"] += e * float(l.get("cumprimento") or 0)
+            a["extravios"] += float(l.get("extravios") or 0); a["ufs"] += 1
+    if not acum:
+        yield _fim(sessao, f"Não achei envios medidos no {nome_bonito}.")
+        return
+    rank = sorted(({"t": k, "c": v["no_prazo"] / v["envios"] if v["envios"] else 0, **v} for k, v in acum.items() if v["envios"] >= 30),
+                  key=lambda x: -x["c"])
+    linhas = "\n".join(f"{'🟢' if r['c'] >= 0.92 else '🔴'} {r['t']}: {_pct(r['c'])} no prazo ({int(r['envios'])} envios, {int(r['ufs'])} estados"
+                       + (f", {int(r['extravios'])} extravios" if r["extravios"] else "") + ")" for r in rank)
+    yield _fim(sessao, f"*{nome_bonito}*: transportadoras do melhor ao pior, de 03/09 a 02/11 ({len(ufs)} estados).\n\n{linhas}\n\n"
+                       f"*Melhor:* {rank[0]['t']}. *Pior:* {rank[-1]['t']}. A meta é 92%.\n"
+                       "Quer ver um estado em detalhe ou o que fazer com quem está abaixo?")
+
+
+def _quer_problemas(s: str) -> bool:
+    return bool(re.search(r"problema|reclama|chamado|extravio|avaria|resolvemos|dor", s))
+
+
+def _problemas_regiao(sessao, nome: str, ufs: list[str]) -> Iterator[dict]:
+    """Chamados e extravios de uma região inteira, por estado e por transportadora."""
+    nome_bonito = nome.replace("centro oeste", "Centro-Oeste").title()
+    por_uf: dict[str, dict] = {}
+    por_transp: dict[str, float] = {}
+    for uf in ufs:   # "uf" dá a taxa certa do estado; "transportadora" (filtrada pelo estado) dá quem gerou os chamados
+        yield from _rodar(sessao, "consultar_problemas", {"agrupar_por": "uf", "uf": uf})
+        for l in sessao._ultimo.get("linhas", []):
+            por_uf[uf] = {"chamados": float(l.get("chamados") or 0), "extravios": float(l.get("extravios") or 0),
+                          "taxa": float(l.get("chamados_por_100_envios") or 0)}
+        yield from _rodar(sessao, "consultar_problemas", {"agrupar_por": "transportadora", "uf": uf})
+        for l in sessao._ultimo.get("linhas", []):
+            por_transp[l["transportadora"]] = por_transp.get(l["transportadora"], 0) + float(l.get("chamados") or 0)
+    if not por_uf:
+        yield _fim(sessao, f"Não achei chamados no {nome_bonito}.")
+        return
+    estados = sorted(por_uf.items(), key=lambda kv: -kv[1]["taxa"])[:4]
+    transps = sorted(por_transp.items(), key=lambda kv: -kv[1])
+    total = int(sum(v["chamados"] for v in por_uf.values())); extr = int(sum(v["extravios"] for v in por_uf.values()))
+    yield _fim(sessao, f"*{nome_bonito}*, de 03/09 a 02/11: {total} chamados e {extr} extravios.\n\n"
+                       "*Estados com mais chamados (por 100 envios):*\n"
+                       + "\n".join(f"• {k}: {v['taxa']:.1f} ({int(v['chamados'])} chamados)" for k, v in estados)
+                       + "\n\n*Transportadoras com mais chamados:*\n"
+                       + "\n".join(f"• {k}: {int(v)} chamados" for k, v in transps[:5])
+                       + "\n\nQuer que eu monte a proposta de prazo para onde dói mais?")
+
+
 def _quer_concorrente(s: str) -> bool:
     return any(k in s for k in ["concorrente", "concorrencia", "barato", "competi", "mercado"])
 
@@ -442,6 +503,10 @@ def _consulta(sessao, pergunta, s, uf, prefixo, transp, regiao=None, local=None)
         yield from _status_aprovacoes(sessao)
     elif _quer_custo(s):
         yield from _impacto(sessao, propor=False)
+    elif regiao and not prefixo and _quer_ranking(s):
+        yield from _ranking_regiao(sessao, regiao[0], regiao[1])
+    elif regiao and not prefixo and _quer_problemas(s):
+        yield from _problemas_regiao(sessao, regiao[0], regiao[1])
     elif any(k in s for k in ["problema", "reclama", "chamado", "extravio", "pior"]):
         yield from _problemas(sessao, uf, local)
     elif regiao and not any(k in s for k in ["aprova", "troca", "muda", "propon"]):
@@ -523,6 +588,10 @@ def responder_sem_ia(sessao, pergunta: str) -> Iterator[dict]:
         yield from _aprovar(sessao, uf)
     elif pedido_de_prazo:
         yield from _prazo(sessao, uf, pergunta)
+    elif regiao and not prefixo and _quer_ranking(s):
+        yield from _ranking_regiao(sessao, regiao[0], regiao[1])
+    elif regiao and not prefixo and _quer_problemas(s):
+        yield from _problemas_regiao(sessao, regiao[0], regiao[1])
     elif _quer_custo(s) and not prefixo:
         yield from _impacto(sessao)
     elif any(k in s for k in ["problema", "reclama", "chamado", "extravio", "avaria", "resolvemos", "dor", "pior"]):
