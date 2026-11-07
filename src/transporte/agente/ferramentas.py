@@ -219,11 +219,11 @@ def consultar_regras_site(prefixo_cep=None, uf=None):
     if uf:
         where.append("uf = ?"); args.append(uf.upper())
     filtro = (" where " + " and ".join(where)) if where else ""
-    d = sql("select * from regras" + filtro + " limit 12", tuple(args))
+    d = sql("select * from regras" + filtro + " limit 40", tuple(args))
     vig = estado.prazos_vigentes()
     d["prazo_aprovado_pelo_gerente"] = d["cep3"].map(lambda c: vig[c]["prazo"] if c in vig else None)
     return {"regra_prazo": "1 dia útil de separação + SLA contratual da transportadora + margem de segurança do prefixo",
-            "frete_gratis_acima_de": 199.0, "linhas": _tabela(d, 12)}
+            "frete_gratis_acima_de": 199.0, "linhas": _tabela(d, 40)}
 
 
 def consultar_politicas():
@@ -256,7 +256,9 @@ def ver_propostas_de_prazo(uf=None, acao=None, top=8):
             l["prazo_aprovado_pelo_gerente"] = v["prazo"]
             l["prazo_site_hoje"] = v["prazo"]
             l["acao"] = "ja_aprovada"
-    return {"total": total, "linhas": linhas}
+    soma = sql("select coalesce(sum(impacto_custo_atraso_rs), 0) s from propostas" + filtro, tuple(args)).iloc[0]["s"]
+    return {"total": total, "soma_impacto_rs_60_dias": round(float(soma), 2), "soma_impacto_rs_por_mes": round(float(soma) / 2, 2),
+            "linhas": linhas}
 
 
 # ----------------------------------------------------------------------------- ação
@@ -472,7 +474,7 @@ CATALOGO: list[Ferramenta] = [
     Ferramenta("solicitar_aprovacao", "Leva a proposta ao gerente de logística e espera a decisão dele.",
                _p(resumo=_S_TEXTO, evidencia=_S_TEXTO, proposta_id=_S_TEXTO), solicitar_aprovacao,
                ("analista_logistica", "planejador"), "comunicacao", True),
-    Ferramenta("consultar_aprovacoes", "Como estão os pedidos de aprovação já enviados ao gerente (aguardando, aprovado com o valor final, recusado).",
+    Ferramenta("consultar_aprovacoes", "Pedidos de aprovação (aguardando, aprovado com o valor final, recusado). SEM aprovacao_id lista todos; para a gerente, os que esperam a decisão dela.",
                _p(aprovacao_id=_S_NUM), consultar_aprovacoes, ("analista_logistica", "planejador", "consulta"), "leitura", True),
     Ferramenta("acionar_pessoa", "Chama a pessoa certa quando a decisão não é do agente: gerente_logistica, marketing, comercial, cx, financeiro, operacao_cd1, operacao_cd2.",
                _p(destino=_S_TEXTO, motivo=_S_TEXTO, urgencia=_S_TEXTO), acionar_pessoa, TODOS, "comunicacao", True),
@@ -500,7 +502,11 @@ def executar(nome: str, argumentos: dict, papel: str = PAPEL_AGENTE, diario: Dia
         return {"recusado": True,
                 "motivo": f"'{nome}' é do papel {' ou '.join(f.papeis)}, e o agente é {papel}.",
                 "o_que_fazer": "use solicitar_aprovacao ou acionar_pessoa para levar a decisão a quem é de direito."}
-    args = {k: v for k, v in (argumentos or {}).items() if v is not None}
+    # Modelos costumam preencher filtro vazio com "TODOS" ou "": isso significa "sem filtro", não um estado chamado TODOS.
+    sem_filtro = {"todos", "todas", "all", "brasil", "*", "qualquer", "null", "none", "n/a", ""}
+    filtros = {"uf", "prefixo_cep", "transportadora", "acao", "envio_id", "codigo_rastreio", "cep"}
+    args = {k: v for k, v in (argumentos or {}).items()
+            if v is not None and not (k in filtros and isinstance(v, str) and v.strip().lower() in sem_filtro)}
     try:
         if f.passa_diario:
             args["_diario"] = diario

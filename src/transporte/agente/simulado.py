@@ -67,6 +67,52 @@ def _transportadora_na_pergunta(t: str) -> str | None:
     return None
 
 
+REGIOES = {
+    "nordeste": ["MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA"],
+    "norte": ["AC", "AP", "AM", "PA", "RO", "RR", "TO"],
+    "sudeste": ["SP", "RJ", "MG", "ES"],
+    "sul": ["PR", "SC", "RS"],
+    "centro oeste": ["DF", "GO", "MT", "MS"],
+}
+
+
+def _regiao_na_pergunta(t: str) -> tuple[str | None, list[str]]:
+    """'Nordeste', 'Sul'... Os nomes das transportadoras (TransNorte, Rápido Sul) não contam como região."""
+    s = _sem_acento(t).replace("transnorte", " ").replace("rapido sul", " ").replace("-", " ")
+    for nome, ufs in REGIOES.items():
+        if re.search(rf"\b{nome}\b", s):
+            return nome, ufs
+    return None, []
+
+
+def _cep_na_pergunta(t: str) -> tuple[str | None, str | None, bool]:
+    """CEP escrito na frase -> (uf, prefixo medido, aproximado). Se o prefixo exato não é medido, usa o mais próximo."""
+    from .contexto import tabela
+    m = re.search(r"(?<!\d)(\d{5})(?:-?\d{3})?(?!\d)|cep\s*(\d{3,5})", _sem_acento(t))
+    if not m:
+        return None, None, False
+    cep3 = (m.group(1) or m.group(2))[:3].zfill(3)
+    regras = tabela("regras")
+    exato = regras[regras["cep3"].astype(str).str.zfill(3) == cep3]
+    if len(exato):
+        return exato.iloc[0]["uf"], cep3, False
+    alvo = int(cep3)
+    prox = min(regras.itertuples(), key=lambda r: abs(int(r.cep3) - alvo))
+    return prox.uf, str(prox.cep3).zfill(3), True
+
+
+def _cidade_do_prefixo(prefixo: str | None) -> str | None:
+    if not prefixo:
+        return None
+    from .contexto import tabela
+    r = tabela("regras")
+    r = r[r["cep3"].astype(str).str.zfill(3) == prefixo]
+    return f"{r.iloc[0]['cidade_referencia']}/{r.iloc[0]['uf']}" if len(r) else None
+
+
+SAUDACAO = re.compile(r"(oi+|ola|opa|e ai|hey|hello|bom dia|boa tarde|boa noite|ajuda|help|o que (voce )?(faz|sabe fazer)|quem (e )?voce)[ !.?]*")
+
+
 def _rodar(sessao, nome: str, args: dict) -> Iterator[dict]:
     yield _evento("ferramenta", nome=nome, argumentos=args,
                   tipo_ferramenta=F.POR_NOME[nome].tipo, rotulo=rotulo_da_ferramenta(nome, args))
@@ -78,6 +124,9 @@ def _rodar(sessao, nome: str, args: dict) -> Iterator[dict]:
 
 
 def _fim(sessao, texto: str) -> dict:
+    nota = getattr(sessao, "_nota", None)
+    if nota:
+        texto, sessao._nota = f"{nota}\n\n{texto}", None
     return _evento("resposta", texto=texto, diario=sessao.diario.acoes, custo=sessao.diario.custo)
 
 
@@ -90,7 +139,7 @@ def _brl(x) -> str:
 
 
 # --------------------------------------------------------------------------- roteiros
-def _problemas(sessao, uf) -> Iterator[dict]:
+def _problemas(sessao, uf, local=None) -> Iterator[dict]:
     passos = list(_rodar(sessao, "consultar_problemas", {"agrupar_por": "transportadora", **({"uf": uf} if uf else {})}))
     yield from passos
     por_transp = sessao._ultimo.get("linhas", [])
@@ -108,7 +157,7 @@ def _problemas(sessao, uf) -> Iterator[dict]:
 
     lugares = ", ".join(_lugar(l) for l in por_lugar[:3])
     texto = (
-        f"Olhei os chamados e as ocorrências de 03/09 a 02/11.\n\n"
+        f"Olhei os chamados e as ocorrências{' de ' + local if local else ''}, de 03/09 a 02/11.\n\n"
         f"*Quem mais dá trabalho:* {pior.get('transportadora')}, com {pior.get('chamados_por_100_envios')} chamados "
         f"a cada 100 envios ({int(pior.get('chamados', 0))} chamados e {int(pior.get('extravios', 0))} extravios).\n"
         f"*O que mais aparece:* {str(m1.get('motivo', '')).replace('_', ' ')} ({int(m1.get('chamados', 0))} chamados), "
@@ -282,6 +331,69 @@ def _prazo(sessao, uf, pergunta) -> Iterator[dict]:
     yield _fim(sessao, texto)
 
 
+def _impacto(sessao, propor: bool = True) -> Iterator[dict]:
+    """Quanto o atraso custa: soma do custo evitável nas regiões em que o site promete menos do que se entrega."""
+    yield from _rodar(sessao, "ver_propostas_de_prazo", {"acao": "aumentar", "top": 200})
+    ls = sessao._ultimo.get("linhas", [])
+    total = sum(l.get("impacto_custo_atraso_rs") or 0 for l in ls)
+    if not ls:
+        yield _fim(sessao, "Não sobrou região com custo de atraso evitável: tudo que dava para corrigir já foi aprovado.")
+        return
+    top = "\n".join(f"• {l['cidade_referencia']}/{l['uf']}: {_brl(l['impacto_custo_atraso_rs'])} (site {int(l['prazo_site_hoje'])} → {int(l['prazo_proposto'])} dias)" for l in ls[:3])
+    texto = (f"Nos 60 dias medidos (03/09 a 02/11), o atraso custou cerca de *{_brl(total)}* em *{len(ls)}* regiões em que o site "
+             f"promete menos do que a transportadora entrega, uns *{_brl(total / 2)} por mês*.\n\n"
+             f"*Maiores custos:*\n{top}\n\n"
+             "Conta só o custo de atraso (regras de parametros.md); o efeito na conversão ainda não entra. ")
+    texto += "Quer que eu monte a proposta da primeira região para a Marina?" if propor else "A decisão é sua; eu só mostro a conta."
+    yield _fim(sessao, texto)
+
+
+def _regiao(sessao, nome: str, ufs: list[str], concorrentes: bool) -> Iterator[dict]:
+    """Uma região inteira (Nordeste, Sul...): roda a ferramenta estado por estado e resume."""
+    nome_bonito = nome.replace("centro oeste", "Centro-Oeste").title()
+    linhas = []
+    for uf in ufs:
+        yield from _rodar(sessao, "consultar_concorrentes" if concorrentes else "ver_propostas_de_prazo",
+                          {"uf": uf} if concorrentes else {"uf": uf, "top": 200})
+        linhas += sessao._ultimo.get("linhas", [])
+    if not linhas:
+        yield _fim(sessao, f"Não achei dados do {nome_bonito}.")
+        return
+    if concorrentes:
+        lentos = sorted((l for l in linhas if (l.get("diferenca") or 0) > 0), key=lambda l: -l["diferenca"])
+        fretes = sorted(l["frete_conc_mediana"] for l in linhas if l.get("frete_conc_mediana"))
+        top = "\n".join(f"• {l['cidade_referencia']}/{l['uf']}: nosso site {int(l['nosso_prazo'])} dias, concorrentes {int(l['prazo_conc_mediana'])} (+{int(l['diferenca'])})" for l in lentos[:4])
+        yield _fim(sessao, f"*{nome_bonito}* ({len(linhas)} prefixos olhados): mostramos prazo maior que o dos concorrentes em *{len(lentos)}*.\n"
+                           + (f"O frete mediano deles fica em torno de R$ {fretes[len(fretes) // 2]:.2f}.\n" if fretes else "")
+                           + (f"\n*Onde estamos mais atrás:*\n{top}\n" if top else "\nNão estamos atrás em nenhum prefixo.\n")
+                           + "\nObservação: produto esgotado no concorrente mostra 1 dia sem ser prazo real; isso fica de fora.")
+        return
+    aum = sorted((l for l in linhas if l.get("acao") == "aumentar"), key=lambda l: -(l.get("impacto_custo_atraso_rs") or 0))
+    red = [l for l in linhas if l.get("acao") == "reduzir"]
+    top = "\n".join(f"• {l['cidade_referencia']}/{l['uf']}: site {int(l['prazo_site_hoje'])} → {int(l['prazo_proposto'])} dias ({_brl(l['impacto_custo_atraso_rs'])})" for l in aum[:4])
+    yield _fim(sessao, f"*{nome_bonito}*: de {len(linhas)} prefixos, *{len(aum)}* precisam de prazo maior e *{len(red)}* podem baixar.\n"
+                       + (f"\n*Mais urgentes:*\n{top}\n" if top else "")
+                       + "\nQuer que eu monte a proposta de uma delas para a Marina?")
+
+
+def _ola(sessao) -> Iterator[dict]:
+    if sessao.papel == F.PAPEL_CONSULTA:
+        yield _fim(sessao, "Oi, Marina! Eu explico o que o analista propôs e mostro os números, mas a decisão é sua. "
+                           "Pergunte, por exemplo: “O que está esperando minha decisão?”, “Por que Marabá?” ou “Quanto perdemos por mês com atraso?”")
+    else:
+        yield _fim(sessao, "Oi, Lucas! Eu leio os portais das transportadoras, meço quem entrega no prazo e monto propostas de prazo para a Marina. "
+                           "Pergunte, por exemplo: “Qual prazo do site precisa mudar?”, “Qual a melhor rota para os envios novos de SP?” "
+                           "ou “Onde resolvemos mais problemas?”")
+
+
+def _quer_custo(s: str) -> bool:
+    return bool(re.search(r"perd|prejuizo|quanto (a gente )?(custa|gasta|economiz)|custo|impacto|dinheiro|em reais", s))
+
+
+def _quer_concorrente(s: str) -> bool:
+    return any(k in s for k in ["concorrente", "concorrencia", "barato", "competi", "mercado"])
+
+
 def _status_aprovacoes(sessao) -> Iterator[dict]:
     yield from _rodar(sessao, "consultar_aprovacoes", {})
     r = sessao._ultimo
@@ -295,11 +407,13 @@ def _status_aprovacoes(sessao) -> Iterator[dict]:
         extra = f" (valor final: {p['valor_final']:g})" if p.get("valor_final") is not None else ""
         com = f"\n   Ela escreveu: \"{p['comentario_do_gerente']}\"" if p.get("comentario_do_gerente") else ""
         linhas.append(f"{nomes.get(p['situacao'], p['situacao'])}{extra}: {p['resumo']}{com}")
-    yield _fim(sessao, "Como estão os pedidos para a Marina:\n\n" + "\n".join(linhas) +
+    pend = sum(1 for p in pedidos if p["situacao"] == "pendente")
+    abre = (f"{pend} pedido(s) ainda esperando a Marina" if pend else "A Marina já respondeu tudo") + f", de {len(pedidos)} no total.\n\n"
+    yield _fim(sessao, abre + "\n".join(linhas) +
                f"\n\nO cenário permite {r.get('limite')} aprovações; já foram {r.get('aprovadas_no_cenario')}.")
 
 
-def _explicar(sessao, uf, prefixo, pergunta) -> Iterator[dict]:
+def _explicar(sessao, uf, prefixo, pergunta, gerente=True) -> Iterator[dict]:
     """Agente de consulta (gerente): explica uma região em palavras simples, sem propor nada."""
     filtro = {"uf": uf} if uf else {}
     yield from _rodar(sessao, "ver_propostas_de_prazo", {"top": 200, **filtro} if prefixo else {"acao": "aumentar", "top": 5, **filtro})
@@ -319,15 +433,19 @@ def _explicar(sessao, uf, prefixo, pergunta) -> Iterator[dict]:
         texto += f"Os concorrentes mostram cerca de {int(conc['prazo_conc_mediana'])} dias.\n"
     if p["acao"] in ("aumentar", "reduzir"):
         texto += f"\nA conta aponta para {int(p['prazo_proposto'])} dias ({_brl(p['impacto_custo_atraso_rs'])} de custo de atraso em jogo)."
-    texto += "\n\nA decisão é sua: eu só explico."
+    texto += "\n\nA decisão é sua: eu só explico." if gerente else "\n\nSe quiser, monto a proposta e mando para a Marina."
     yield _fim(sessao, texto)
 
 
-def _consulta(sessao, pergunta, s, uf, prefixo, transp) -> Iterator[dict]:
+def _consulta(sessao, pergunta, s, uf, prefixo, transp, regiao=None, local=None) -> Iterator[dict]:
     if any(k in s for k in ["pedido", "pendente", "esperando", "aprovacao", "aprovacoes"]):
         yield from _status_aprovacoes(sessao)
+    elif _quer_custo(s):
+        yield from _impacto(sessao, propor=False)
     elif any(k in s for k in ["problema", "reclama", "chamado", "extravio", "pior"]):
-        yield from _problemas(sessao, uf)
+        yield from _problemas(sessao, uf, local)
+    elif regiao and not any(k in s for k in ["aprova", "troca", "muda", "propon"]):
+        yield from _regiao(sessao, regiao[0], regiao[1], concorrentes=_quer_concorrente(s))
     elif any(k in s for k in ["aprova", "troca", "muda", "propon", "proponha"]):
         yield _fim(sessao, "Isso eu não faço: quem aprova é você, na fila de decisões, e as trocas de rota ficam com o analista. "
                            "Posso explicar qualquer pedido, se quiser.")
@@ -376,27 +494,46 @@ def _nao_entendi(sessao) -> Iterator[dict]:
 def responder_sem_ia(sessao, pergunta: str) -> Iterator[dict]:
     yield _evento("aviso", texto="Modo sem IA: roteiro local decidindo os passos, com as mesmas ferramentas.")
     s = _sem_acento(pergunta)
+    if SAUDACAO.fullmatch(s.strip()):
+        yield from _ola(sessao)
+        return
     uf, prefixo = _lugar_na_pergunta(pergunta)
+    cep_uf, cep_prefixo, aproximado = _cep_na_pergunta(pergunta)
+    if cep_prefixo and not prefixo:
+        uf, prefixo = cep_uf, cep_prefixo
+        if aproximado:
+            sessao._nota = (f"_Não meço o prefixo exato desse CEP; usei o mais próximo que tenho, {prefixo} "
+                            f"({_cidade_do_prefixo(prefixo)})._")
     uf = uf or _uf_na_pergunta(pergunta)
+    regiao = _regiao_na_pergunta(pergunta)
+    regiao = regiao if regiao[0] and not prefixo else None
+    local = _cidade_do_prefixo(prefixo) or uf
     transp = _transportadora_na_pergunta(pergunta)
     sessao._prefixo_pedido = prefixo
     # "mude o prazo de Marabá para 18", "as 3 maiores do Pará", "peça à Marina...": é pedido de proposta, não de aprovação
     pedido_de_prazo = bool(_lugares_na_pergunta(pergunta) or _quantos(s)) and any(
         k in s for k in ["prazo", "muda", "mude", "altera", "ajusta", "peca", "pedir", "solicita", "proponha", "propor", "proposta"])
     if sessao.papel == F.PAPEL_CONSULTA:
-        yield from _consulta(sessao, pergunta, s, uf, prefixo, transp)
+        yield from _consulta(sessao, pergunta, s, uf, prefixo, transp, regiao, local)
         return
-    if any(k in s for k in ["ja respondeu", "marina respondeu", "resposta da marina", "aprovacoes", "aprovou", "recusou", "decidiu"]):
+    if any(k in s for k in ["ja respondeu", "marina respondeu", "resposta da marina", "aprovacoes", "aprovou", "recusou", "decidiu",
+                            "respondeu", "pendente", "aguardando", "esperando", "quantos pedidos", "meus pedidos", "fila"]):
         yield from _status_aprovacoes(sessao)
     elif any(k in s for k in ["aprova", "autoriza"]) or (any(k in s for k in ["pode mudar", "muda o prazo", "mude o prazo"]) and not pedido_de_prazo):
         yield from _aprovar(sessao, uf)
     elif pedido_de_prazo:
         yield from _prazo(sessao, uf, pergunta)
+    elif _quer_custo(s) and not prefixo:
+        yield from _impacto(sessao)
     elif any(k in s for k in ["problema", "reclama", "chamado", "extravio", "avaria", "resolvemos", "dor", "pior"]):
-        yield from _problemas(sessao, uf)
+        yield from _problemas(sessao, uf, local)
     elif any(k in s for k in ["rota", "rotear", "transportadora para", "qual transportadora", "envio", "env0", "melhor caminho", "despach"]):
         yield from _rota(sessao, uf, pergunta)
-    elif any(k in s for k in ["prazo", "sla", "proposta", "site", "concorrente"]):
+    elif regiao and not prefixo:
+        yield from _regiao(sessao, regiao[0], regiao[1], concorrentes=_quer_concorrente(s))
+    elif prefixo and not re.search(r"propo|mude|mudar|muda |ajust|suba|subir|baix|reduz|aument|mand|envie|pedir|pede", s):
+        yield from _explicar(sessao, uf, prefixo, pergunta, gerente=False)   # só perguntou: explica, não abre pedido
+    elif prefixo or any(k in s for k in ["prazo", "sla", "proposta", "site", "concorrente"]):
         yield from _prazo(sessao, uf, pergunta)
     elif uf or transp or any(k in s for k in ["desempenho", "cumprimento", "como esta", "no prazo", "ranking", "entrega", "situacao", "resumo", "panorama", "geral", "como vai", "como estamos"]):
         yield from _desempenho(sessao, uf, transp)

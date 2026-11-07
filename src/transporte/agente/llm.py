@@ -19,6 +19,8 @@ from pathlib import Path
 
 def carregar_env(caminho: str | Path = ".env") -> None:
     """Lê um .env simples, sem depender do python-dotenv."""
+    if os.getenv("TRANSPORTE_SEM_ENV"):   # testes: não ler o .env real
+        return
     p = Path(caminho)
     if not p.exists():
         return
@@ -55,7 +57,7 @@ class Cliente:
         if not self.token:
             raise SemCredencial("Falta AI_PROXY_TOKEN. Copie .env.example para .env e ponha o token do evento.")
         dados = json.dumps(corpo).encode() if corpo is not None else None
-        cab = {"Content-Type": "application/json", "Authorization": f"Bearer {self.token}",
+        cab = {"Content-Type": "application/json", "Authorization": f"Bearer {self.token}", "User-Agent": "Agiliza-AI/1.0",
                "x-api-key": self.token, "anthropic-version": "2023-06-01"}
         req = urllib.request.Request(f"{self.url}{caminho}", data=dados, headers=cab, method=metodo)
         try:
@@ -89,7 +91,7 @@ class Cliente:
         corpo += (f'--{lim}\r\nContent-Disposition: form-data; name="file"; filename="voz.{ext}"\r\n'
                   f"Content-Type: {mime}\r\n\r\n").encode() + audio + f"\r\n--{lim}--\r\n".encode()
         req = urllib.request.Request(f"{self.url}/v1/audio/transcriptions", data=corpo, method="POST", headers={
-            "Content-Type": f"multipart/form-data; boundary={lim}", "Authorization": f"Bearer {self.token}"})
+            "Content-Type": f"multipart/form-data; boundary={lim}", "Authorization": f"Bearer {self.token}", "User-Agent": "Agiliza-AI/1.0"})
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as r:
                 return (json.loads(r.read().decode()).get("text") or "").strip()
