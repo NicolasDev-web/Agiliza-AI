@@ -284,7 +284,7 @@
     const p = D.prefixos.find((x) => x.cep3 === estado.selCep);
     const caixa = $("#msg");
     if (!p) { caixa.replaceChildren(h("p", { class: "ficha-vazia" }, "Escolha uma região na tabela para ver a mensagem que o agente mandaria.")); return; }
-    const topo = h("div", { class: "msg-topo" }, h("span", { class: "msg-avatar", "aria-hidden": "true" }), "Agente de logística · para o gerente de logística · demonstração");
+    const topo = h("div", { class: "msg-topo" }, h("span", { class: "msg-avatar", "aria-hidden": "true" }), "Agente de logística · mensagem para a Marina Duarte (gerente) · demonstração");
     let texto, acoes = null;
     if (p.acao === "aumentar" || p.acao === "reduzir") {
       const conc = p.prazo_conc_mediana == null ? "" : ` Os concorrentes mostram cerca de ${dias(p.prazo_conc_mediana)} dias.`;
@@ -292,8 +292,7 @@
         ? `A ${p.transportadora} entrega só ${pct(p.cumprimento_hoje)} dos pedidos no prazo na região ${p.cep3} (${p.cidade_referencia}/${p.uf}). O site promete ${dias(p.prazo_site_hoje)} dias, mas 9 em cada 10 entregas levam até ${dias(p.prazo_proposto)}. Sugiro mostrar ${dias(p.prazo_proposto)} dias.${conc} Isso evita cerca de ${brl(p.impacto_custo_atraso_rs)} de custo com atraso no período. Você aprova?`
         : `Na região ${p.cep3} (${p.cidade_referencia}/${p.uf}) a ${p.transportadora} entrega mais rápido do que o site promete: 9 em cada 10 chegam em até ${dias(p.prazo_proposto)} dias e o site mostra ${dias(p.prazo_site_hoje)}. Sugiro mostrar ${dias(p.prazo_proposto)} para ficar mais competitivo.${conc} Você aprova?`;
       acoes = h("div", { class: "msg-acoes" },
-        ...["Aprovar", "Ajustar", "Ignorar"].map((t, i) => h("button", { class: "botao " + (i === 0 ? "botao-cheio" : "botao-cobalto"), onclick: () => decidir(p, t) }, h("span", { class: "botao-icone", "aria-hidden": "true" }, ["✓", "~", "×"][i]), t)),
-        h("button", { class: "botao botao-cobalto", onclick: () => decidir(p, null) }, h("span", { class: "botao-icone", "aria-hidden": "true" }, "↺"), "Desfazer"));
+        h("a", { class: "botao botao-cheio", href: "login.html" }, h("span", { class: "botao-icone", "aria-hidden": "true" }, "→"), "Decidir na tela da gerente"));
     } else if (p.acao === "manter") {
       texto = `Região ${p.cep3} (${p.cidade_referencia}/${p.uf}): o prazo de ${dias(p.prazo_site_hoje)} dias está certo para a ${p.transportadora}. Nada a aprovar.`;
     } else {
@@ -301,10 +300,17 @@
     }
     caixa.replaceChildren(topo, h("p", { class: "msg-texto" }, texto), acoes, h("p", { class: "msg-estado", id: "msg-estado" }, estado.status[p.cep3] || ""));
   }
-  function decidir(p, t) {
-    if (t) estado.status[p.cep3] = `${t}: simulação da demonstração, nada foi alterado no site.`; else delete estado.status[p.cep3];
-    montarTabela();
+  /* o que a Marina aprovou (servidor) passa a valer aqui; sem servidor, o painel segue estático */
+  function aplicarAprovados() {
+    fetch("/api/prazos-vigentes").then((r) => (r.ok ? r.json() : null)).then((d) => {
+      if (!d) return;
+      estado.status = {};
+      for (const [cep, v] of Object.entries(d.prazos || {})) estado.status[cep] = `Aprovado pela ${v.por}: site mostra ${dias(v.prazo)} dias (era ${dias(v.prazo_anterior)}). Vale só na demonstração.`;
+      montarTabela();
+    }).catch(() => {});
   }
+  aplicarAprovados();
+  try { const f = new EventSource("/api/eventos?usuario=marina"); f.onmessage = (m) => { try { if (JSON.parse(m.data).tipo === "prazos_mudaram") aplicarAprovados(); } catch (e) {} }; } catch (e) {}
 
   /* ---------- método ---------- */
   (function metodo() {

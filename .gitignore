@@ -9,3 +9,4 @@ data/processed/*.parquet
 data/processed/envios_medidos.csv
 data/processed/transporte.db
 data/processed/*.tmp
+data/processed/estado.db*

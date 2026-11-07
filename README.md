@@ -46,7 +46,8 @@ mapa por regiões, rampa de uma cor só e pixels como textura.
 
 ## Parte 2: o agente trabalhando em tempo real
 
-`python servidor.py` abre **http://localhost:8000**, a página "Agente ao vivo": à esquerda uma conversa
+`python servidor.py` abre **http://localhost:8000**, uma tela de entrada com dois usuários (veja
+"Dois usuários" abaixo). A tela do analista é o "Agente ao vivo": à esquerda uma conversa
 estilo WhatsApp, à direita a *mesa do agente*. A cada pergunta o agente decide quais ferramentas usar
 e a interface mostra, na hora, cada passo: a ferramenta chamada, o que voltou, a rota no mapa e o
 pedido de aprovação que chega para o gerente. Exemplos:
@@ -54,11 +55,36 @@ pedido de aprovação que chega para o gerente. Exemplos:
 - "Onde resolvemos mais problemas?" cruza chamados do SAC, ocorrências e extravios por transportadora, estado e motivo.
 - "Qual a melhor rota para os envios novos de SP?" compara as transportadoras de cada envio ainda não coletado
   (frete + custo esperado de atraso, pelo histórico real da região) e **troca sozinho** dentro do limite de 40% por estado/dia.
-- "Como está o prazo de Belo Horizonte?" mede, compara com concorrentes, escreve a proposta com evidência e **leva à gerente**.
+- "Qual prazo do site precisa mudar?" mede, compara com concorrentes, escreve a proposta com evidência e **leva à gerente**.
+- "A Marina já respondeu?" o agente consulta a fila e conta o que ela decidiu.
 - "Aprova o prazo por mim" o sistema **recusa**: aprovar é do gerente.
 
-As 17 ferramentas (`src/transporte/agente/ferramentas.py`) seguem o catálogo do desafio. **O papel é
+As 18 ferramentas (`src/transporte/agente/ferramentas.py`) seguem o catálogo do desafio. **O papel é
 conferido no código**, não só no prompt: se o modelo tentar aprovar uma proposta, a ferramenta recusa.
+
+### Dois usuários, duas telas
+
+Hackathon: **sem senha**. A tela de entrada (`/`) tem dois cartões; a escolha fica na aba, então dá para abrir
+os dois lado a lado (ou `agente.html?como=lucas` e `gerente.html?como=marina`).
+
+| Usuário | Papel (`politicas.csv`) | Tela |
+| --- | --- | --- |
+| Lucas Ferreira | `analista_logistica` | conversa com o agente, vê a melhor rota no mapa, acompanha o que a gerente respondeu |
+| Marina Duarte | `gerente` | fila de aprovação, placar, histórico e **financeiro** |
+
+Como o ciclo fecha, ao vivo (SSE por usuário):
+
+1. O agente monta a proposta e chama `solicitar_aprovacao`; o pedido cai na fila da Marina na hora.
+2. Ela **aprova, ajusta** (muda o prazo e aprova) **ou recusa**, com comentário.
+3. A decisão volta para a tela do Lucas, para a conversa e para o agente (próxima resposta).
+4. Prazo aprovado **passa a valer dentro da demonstração**: o painel mostra e o agente usa nas consultas. Nada vai ao ERP.
+5. Sempre que o agente **troca rotas**, a Marina recebe um alerta financeiro: quanto o frete sobe ou cai,
+   quanto de atraso se evita e o saldo, envio a envio. `acionar_pessoa("financeiro")` também cai ali.
+
+As regras valem no servidor, não só na tela (`src/transporte/estado.py`, `tests/test_estado.py`): só o gerente decide,
+nunca a própria proposta, no máximo 12 aprovações por cenário (R$ 15 cada pedido), prazo inteiro e de no mínimo 2 dias úteis.
+O estado fica em `data/processed/estado.db` (gravável, ignorado pelo git); a base do desafio segue só de leitura.
+O botão "Reiniciar demonstração" na tela da gerente zera tudo para repetir a apresentação.
 
 ### Base de dados e geografia real
 
@@ -108,10 +134,11 @@ data/ref/            municípios do IBGE (coordenadas reais)
 data/processed/      saídas da parte 1 e a base SQLite (transporte.db, gerada)
 src/transporte/      calendario, portais, entregas, desempenho, concorrentes, propostas
 src/transporte/agente/  ferramentas, roteamento, llm (proxy), loop (eventos), simulado, prompt
-servidor.py          servidor do agente (conversa por SSE) e dos arquivos do painel
+servidor.py          servidor: conversa por SSE, eventos por usuário, aprovações, arquivos do painel
+src/transporte/estado.py   usuários, fila de aprovação, alertas financeiros, tempo real (estado.db)
 src/transporte/base.py, geo.py   base SQLite e geografia (coordenadas, distâncias)
 scripts/             01_processar.py, 02_base_de_dados.py
-dashboard/           index.html, styles.css, app.js, data.js (gerado), ufs.js (malha dos estados)
+dashboard/           login.html, agente.html (analista), gerente.html, index.html (painel), usuario.js, *.css, data.js (gerado)
 tests/               testes do calendário e dos dados reais
 ```
 

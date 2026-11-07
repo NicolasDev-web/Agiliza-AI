@@ -156,6 +156,8 @@ def _rota(sessao, uf, pergunta) -> Iterator[dict]:
     if barrados:
         texto += f"\nDeixei {len(barrados)} de fora: {barrados[0]['motivo']}"
     texto += "\n\nEssa parte é minha, faço sem aprovação. Mudar a transportadora padrão da região já seria proposta para a Marina."
+    if feito.get("gerente_avisado"):
+        texto += "\nA Marina já recebeu o alerta financeiro: frete, atraso evitado e saldo dessas trocas."
     yield _fim(sessao, texto)
 
 
@@ -209,6 +211,23 @@ def _prazo(sessao, uf, pergunta) -> Iterator[dict]:
     yield _fim(sessao, texto)
 
 
+def _status_aprovacoes(sessao) -> Iterator[dict]:
+    yield from _rodar(sessao, "consultar_aprovacoes", {})
+    r = sessao._ultimo
+    pedidos = r.get("pedidos", [])
+    if not pedidos:
+        yield _fim(sessao, "Ainda não mandei nenhum pedido para a Marina nesta conversa. Quer que eu monte um?")
+        return
+    nomes = {"pendente": "⏳ aguardando a Marina", "aprovada": "✅ aprovado", "ajustada": "✅ aprovado com ajuste", "recusada": "❌ recusado"}
+    linhas = []
+    for p in pedidos[:5]:
+        extra = f" (valor final: {p['valor_final']:g})" if p.get("valor_final") is not None else ""
+        com = f"\n   Ela escreveu: \"{p['comentario_do_gerente']}\"" if p.get("comentario_do_gerente") else ""
+        linhas.append(f"{nomes.get(p['situacao'], p['situacao'])}{extra}: {p['resumo']}{com}")
+    yield _fim(sessao, "Como estão os pedidos para a Marina:\n\n" + "\n".join(linhas) +
+               f"\n\nO cenário permite {r.get('limite')} aprovações; já foram {r.get('aprovadas_no_cenario')}.")
+
+
 def _aprovar(sessao, uf) -> Iterator[dict]:
     """Pedem para o agente aprovar algo: não é dele. Mostra a recusa e leva ao gerente."""
     yield from _rodar(sessao, "aprovar_proposta", {"proposta_id": "pendente", "decisao": "aprovar"})
@@ -243,7 +262,9 @@ def responder_sem_ia(sessao, pergunta: str) -> Iterator[dict]:
     uf = uf or _uf_na_pergunta(pergunta)
     transp = _transportadora_na_pergunta(pergunta)
     sessao._prefixo_pedido = prefixo
-    if any(k in s for k in ["aprova", "autoriza", "pode mudar", "muda o prazo", "mude o prazo"]):
+    if any(k in s for k in ["ja respondeu", "marina respondeu", "resposta da marina", "aprovacoes", "aprovou", "recusou", "decidiu"]):
+        yield from _status_aprovacoes(sessao)
+    elif any(k in s for k in ["aprova", "autoriza", "pode mudar", "muda o prazo", "mude o prazo"]):
         yield from _aprovar(sessao, uf)
     elif any(k in s for k in ["problema", "reclama", "chamado", "extravio", "avaria", "resolvemos", "dor", "pior"]):
         yield from _problemas(sessao, uf)

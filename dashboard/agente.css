@@ -67,3 +67,15 @@ body.pagina-agente { background: var(--papel); }
 .placar b { display: block; font-size: 24px; font-weight: 450; color: var(--cobalto); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .placar span { font-size: 12px; color: var(--tinta-2); }
 @media (max-width: 960px) { .ag-grade, .duas { grid-template-columns: 1fr; } .fone { height: 70vh; } }
+
+/* pedidos do analista: só acompanha, quem decide é a gerente */
+.aprov.aprovada, .aprov.ajustada { background: #f0faf5; border-color: #9ad6b9; }
+.aprov.recusada { background: #fdf1f0; border-color: #e8aaa4; }
+.aprov-valor { font-family: var(--mono); font-size: 12.5px; color: var(--cobalto); }
+.aprov-com { font-size: 12.5px; color: var(--tinta-2); font-style: italic; }
+.aprov .estado { display: flex; align-items: center; gap: 8px; }
+.aprov .estado i { width: 9px; height: 9px; background: var(--perda); display: inline-block; }
+.aprov .estado.aprovada i, .aprov .estado.ajustada i { background: var(--bom); }
+.aprov .estado.recusada i { background: #b3261e; }
+.aprov .estado.pendente i { animation: pulsa 1.2s infinite; }
+@keyframes pulsa { 50% { opacity: .25; } }

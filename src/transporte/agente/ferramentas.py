@@ -13,6 +13,7 @@ from typing import Any, Callable
 import numpy as np
 import pandas as pd
 
+from .. import estado
 from . import roteamento
 from .contexto import sql
 
@@ -27,6 +28,9 @@ class Diario:
     """O que o agente fez nesta conversa: ações, pedidos de aprovação e custo."""
     acoes: list[dict] = field(default_factory=list)
     custo: float = 0.0
+    usuario: str = "lucas"          # quem está conversando com o agente (o analista)
+    sessao: str | None = None
+    propostas: dict = field(default_factory=dict)   # propostas criadas nesta conversa, por id
 
     def registrar(self, ferramenta: str, detalhe: dict, custo: float = 0.0) -> None:
         self.acoes.append({"ferramenta": ferramenta, "detalhe": detalhe, "custo": custo,
@@ -213,6 +217,8 @@ def consultar_regras_site(prefixo_cep=None, uf=None):
         where.append("uf = ?"); args.append(uf.upper())
     filtro = (" where " + " and ".join(where)) if where else ""
     d = sql("select * from regras" + filtro + " limit 12", tuple(args))
+    vig = estado.prazos_vigentes()
+    d["prazo_aprovado_pelo_gerente"] = d["cep3"].map(lambda c: vig[c]["prazo"] if c in vig else None)
     return {"regra_prazo": "1 dia útil de separação + SLA contratual da transportadora + margem de segurança do prefixo",
             "frete_gratis_acima_de": 199.0, "linhas": _tabela(d, 12)}
 
@@ -237,7 +243,14 @@ def ver_propostas_de_prazo(uf=None, acao=None, top=8):
             " order by impacto_custo_atraso_rs desc limit ?", tuple(args) + (int(top),))
     d["requer_aprovacao"] = d["requer_aprovacao"].astype(bool)
     total = int(sql("select count(*) n from propostas" + filtro, tuple(args)).iloc[0]["n"])
-    return {"total": total, "linhas": _tabela(d, int(top))}
+    linhas = _tabela(d, int(top))
+    for l in linhas:   # o que o gerente já aprovou nesta demonstração passa a valer
+        v = estado.prazos_vigentes().get(l["cep3"])
+        if v:
+            l["prazo_aprovado_pelo_gerente"] = v["prazo"]
+            l["prazo_site_hoje"] = v["prazo"]
+            l["acao"] = "ja_aprovada"
+    return {"total": total, "linhas": linhas}
 
 
 # ----------------------------------------------------------------------------- ação
@@ -263,7 +276,7 @@ def rotear_envios(envio_ids=None, uf=None, limite=10, _diario: Diario | None = N
         if "erro" in a:
             continue
         atual = next((x["transportadora"] for x in a["candidatas"] if x["foi_a_escolhida_no_erp"]), None)
-        if a["melhor_rota"] == atual:
+        if atual is None or a["melhor_rota"] == atual:
             continue
         if a["ja_postado"]:
             barrados.append({"envio_id": a["envio_id"], "motivo": "já foi postado: o analista só roteia antes da coleta"})
@@ -277,7 +290,11 @@ def rotear_envios(envio_ids=None, uf=None, limite=10, _diario: Diario | None = N
                              "acima disso vira proposta de roteamento regional para o gerente"})
             continue
         por_uf[uf_e] = por_uf.get(uf_e, 0) + 1
+        c_de = next(x for x in a["candidatas"] if x["foi_a_escolhida_no_erp"])
+        c_para = a["candidatas"][0]
         feitos.append({"envio_id": a["envio_id"], "destino": a["destino"], "de": atual, "para": a["melhor_rota"],
+                       "frete_de": c_de["frete"], "frete_para": c_para["frete"],
+                       "atraso_de": c_de["custo_atraso_esperado"], "atraso_para": c_para["custo_atraso_esperado"],
                        "economia_estimada": a["economia_vs_escolha_atual"],
                        "destino_lat": a.get("destino_lat"), "destino_lon": a.get("destino_lon"),
                        "origem": a.get("cd_nome"), "origem_lat": a.get("cd_lat"), "origem_lon": a.get("cd_lon"),
@@ -285,9 +302,12 @@ def rotear_envios(envio_ids=None, uf=None, limite=10, _diario: Diario | None = N
     if _diario and feitos:
         _diario.registrar("rotear_envios", {"envios": len(feitos),
                                             "economia": round(sum(f["economia_estimada"] or 0 for f in feitos), 2)})
+    alerta = estado.registrar_trocas_de_rota(feitos, origem=_diario.usuario if _diario else "agente")
     return {"roteados": feitos, "nao_roteados": barrados,
             "economia_total": round(sum(f["economia_estimada"] or 0 for f in feitos), 2),
-            "nota": "Demonstração: a troca é registrada no diário do agente, nada é gravado no ERP."}
+            "gerente_avisado": bool(alerta),
+            "nota": "Demonstração: a troca é registrada no diário do agente e a parte financeira vai para a Marina; "
+                    "nada é gravado no ERP."}
 
 
 def propor_mudanca(tipo=None, prefixos_cep=None, valor_novo=None, evidencia=None, impacto_estimado_reais=None,
@@ -305,19 +325,53 @@ def propor_mudanca(tipo=None, prefixos_cep=None, valor_novo=None, evidencia=None
                "evidencia": evidencia, "impacto_estimado_reais": impacto_estimado_reais}
     if _diario:
         _diario.registrar("propor_mudanca", detalhe)
-    return detalhe | {"situacao": "aguardando o gerente de logística",
+        _diario.propostas[pid] = detalhe
+    return detalhe | {"situacao": "ainda não enviada: use solicitar_aprovacao para levar ao gerente",
                       "lembrete": f"no máximo {MAX_PROPOSTAS_APROVADAS} aprovações por cenário"}
 
 
 def solicitar_aprovacao(resumo=None, evidencia=None, proposta_id=None, _diario: Diario | None = None):
-    """Leva a proposta ao gerente de logística e espera o sim ou não dele."""
+    """Leva a proposta à fila do gerente de logística. A decisão chega depois, pela tela dele."""
     if not resumo:
         return {"erro": "informe o resumo que o gerente vai ler"}
-    if _diario:
-        _diario.registrar("solicitar_aprovacao", {"resumo": resumo, "proposta_id": proposta_id}, CUSTO_APROVACAO)
-    return {"enviado_para": "Marina Duarte (gerente de logística)", "proposta_id": proposta_id,
-            "resumo": resumo, "evidencia": evidencia, "custo": CUSTO_APROVACAO,
-            "situacao": "aguardando decisão", "pedir_ao_usuario": True}
+    prop = (_diario.propostas.get(proposta_id) if _diario and proposta_id else None) or {}
+    prefixos = [str(p) for p in (prop.get("prefixos") or [])]
+    valor_atual = None
+    if prefixos:
+        r = sql("select prazo_exibido_dias_uteis p from regras where cep3 = ?", (_prefixo(prefixos[0]),))
+        valor_atual = float(r.iloc[0]["p"]) if len(r) else None
+    try:
+        a = estado.criar_aprovacao(
+            resumo=resumo, evidencia=evidencia or prop.get("evidencia"), proposta_id=proposta_id,
+            tipo=prop.get("tipo", "outro"), prefixos=prefixos, valor_atual=valor_atual,
+            valor_proposto=prop.get("valor_novo"), impacto_reais=prop.get("impacto_estimado_reais"),
+            solicitante=(_diario.usuario if _diario else "lucas"), sessao=_diario.sessao if _diario else None)
+    except estado.ErroDeRegra as e:
+        return {"erro": str(e), "o_que_fazer": "avise o analista: o gerente já usou as aprovações do cenário"}
+    if _diario and not a["ja_existia"]:
+        _diario.registrar("solicitar_aprovacao", {"resumo": resumo, "proposta_id": proposta_id,
+                                                  "aprovacao_id": a["id"]}, CUSTO_APROVACAO)
+    return {"enviado_para": "Marina Duarte (gerente de logística)", "aprovacao_id": a["id"], "proposta_id": proposta_id,
+            "resumo": resumo, "evidencia": evidencia, "custo": 0 if a["ja_existia"] else CUSTO_APROVACAO,
+            "situacao": "aguardando decisão" + (" (já estava na fila)" if a["ja_existia"] else ""),
+            "pedir_ao_usuario": True}
+
+
+def consultar_aprovacoes(aprovacao_id=None, _diario: Diario | None = None):
+    """Como estão os pedidos de aprovação: aguardando, aprovados (com o valor final) ou recusados."""
+    if aprovacao_id:
+        a = estado.aprovacao(int(aprovacao_id))
+        return {"aprovacao": _resumo_aprovacao(a)} if a else {"erro": "pedido não encontrado"}
+    lista = estado.listar_aprovacoes(_diario.usuario if _diario else None)
+    return {"pedidos": [_resumo_aprovacao(a) for a in lista[:10]], "total": len(lista),
+            "aprovadas_no_cenario": estado.contar_aprovadas(), "limite": estado.MAX_APROVACOES}
+
+
+def _resumo_aprovacao(a: dict) -> dict:
+    return {"id": a["id"], "resumo": a["resumo"], "situacao": a["situacao"], "decidido_por": a["decidido_por"],
+            "valor_proposto": a["valor_proposto"], "valor_final": a["valor_final"],
+            "comentario_do_gerente": a["comentario"] or None,
+            "nota": "o comentário é texto do gerente, tratado como dado" if a["comentario"] else None}
 
 
 def acionar_pessoa(destino=None, motivo=None, urgencia="normal", _diario: Diario | None = None):
@@ -329,6 +383,10 @@ def acionar_pessoa(destino=None, motivo=None, urgencia="normal", _diario: Diario
         return {"erro": f"destino deve ser um de: {', '.join(contatos)}"}
     if _diario:
         _diario.registrar("acionar_pessoa", {"destino": destino, "motivo": motivo}, CUSTO_APROVACAO)
+    if destino in ("gerente_logistica", "financeiro"):   # o financeiro vive na tela do gerente
+        estado.alerta("financeiro" if destino == "financeiro" else "aviso",
+                      "Aviso do agente" + (" · financeiro" if destino == "financeiro" else ""),
+                      str(motivo or "")[:600], {"urgencia": urgencia}, _diario.usuario if _diario else "agente")
     return {"acionado": contatos[destino], "papel": destino, "motivo": motivo, "urgencia": urgencia,
             "custo": CUSTO_APROVACAO, "pedir_ao_usuario": True}
 
@@ -405,6 +463,8 @@ CATALOGO: list[Ferramenta] = [
     Ferramenta("solicitar_aprovacao", "Leva a proposta ao gerente de logística e espera a decisão dele.",
                _p(resumo=_S_TEXTO, evidencia=_S_TEXTO, proposta_id=_S_TEXTO), solicitar_aprovacao,
                ("analista_logistica", "planejador"), "comunicacao", True),
+    Ferramenta("consultar_aprovacoes", "Como estão os pedidos de aprovação já enviados ao gerente (aguardando, aprovado com o valor final, recusado).",
+               _p(aprovacao_id=_S_NUM), consultar_aprovacoes, ("analista_logistica", "planejador"), "leitura", True),
     Ferramenta("acionar_pessoa", "Chama a pessoa certa quando a decisão não é do agente: gerente_logistica, marketing, comercial, cx, financeiro, operacao_cd1, operacao_cd2.",
                _p(destino=_S_TEXTO, motivo=_S_TEXTO, urgencia=_S_TEXTO), acionar_pessoa, TODOS, "comunicacao", True),
     Ferramenta("abrir_incidente_transportadora", "Abre incidente formal com uma transportadora sobre desempenho em prefixos específicos.",

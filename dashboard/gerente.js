@@ -1,0 +1,137 @@
+/* Tela da gerente: fila de aprovação, placar, histórico e alertas financeiros, tudo em tempo real. */
+(async function () {
+  "use strict";
+  const $ = (s) => document.querySelector(s);
+  function h(tag, attrs, ...filhos) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") el.className = v;
+      else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else if (v !== false && v != null) el.setAttribute(k, v);
+    }
+    filhos.flat().forEach((f) => { if (f != null) el.append(f.nodeType ? f : document.createTextNode(String(f))); });
+    return el;
+  }
+  const brl = (x) => (x == null ? "–" : "R$ " + Number(x).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  const brl0 = (x) => (x == null ? "–" : "R$ " + Number(x).toLocaleString("pt-BR", { maximumFractionDigits: 0 }));
+  const dias = (x) => (x == null ? "–" : `${Number(x).toLocaleString("pt-BR")} dias úteis`);
+  const quando = (s) => (s || "").slice(5, 16).replace("-", "/").replace(" ", " · ");
+  const NOMES = { lucas: "Lucas Ferreira", marina: "Marina Duarte" };
+  const TIPOS = { prazo_exibido: "Prazo exibido no site", frete_cobrado: "Frete cobrado", roteamento_padrao: "Transportadora padrão da região", outro: "Pedido do agente" };
+
+  const eu = await window.Transporte.exigir("gerente");
+  const q = "usuario=" + encodeURIComponent(eu.id);
+  let novos = new Set();
+
+  async function api(caminho, metodo, corpo) {
+    const sep = caminho.includes("?") ? "&" : "?";
+    const r = await fetch(caminho + sep + q, { method: metodo || "GET", headers: { "Content-Type": "application/json" }, body: corpo ? JSON.stringify(corpo) : undefined });
+    const d = await r.json(); if (!r.ok) throw new Error(d.erro || "erro"); return d;
+  }
+
+  /* ---------- placar ---------- */
+  function placar(p) {
+    if (!p) return;
+    const usado = p.aprovadas / p.limite * 100;
+    $("#placar").replaceChildren(
+      h("div", { class: p.pendentes ? "alerta" : "" }, h("b", {}, p.pendentes), h("span", {}, "pedidos esperando você")),
+      h("div", {}, h("b", {}, `${p.restantes} de ${p.limite}`), h("span", {}, "aprovações que ainda cabem no cenário"), h("div", { class: "barra-limite" }, h("i", { style: `width:${usado}%` }))),
+      h("div", {}, h("b", {}, brl0(p.custo_pedidos)), h("span", {}, "custo de pedir aprovação (R$ 15 cada)")),
+      h("div", {}, h("b", {}, brl0(p.economia_prazos + p.economia_rotas)), h("span", {}, `economia estimada: ${brl0(p.economia_prazos)} em prazos e ${brl0(p.economia_rotas)} em ${p.rotas_trocadas} rotas`)),
+      h("div", { class: p.alertas_sem_ciencia ? "alerta" : "" }, h("b", {}, p.alertas_sem_ciencia), h("span", {}, "alertas financeiros sem ciência")));
+  }
+
+  /* ---------- pedido ---------- */
+  function cartaoPedido(a) {
+    const ajustavel = a.valor_proposto != null;
+    const coment = h("textarea", { placeholder: "Comentário (opcional): aparece para o analista e para o agente", "aria-label": "Comentário" });
+    const valor = h("input", { type: "number", min: "2", step: "1", value: a.valor_proposto ?? "", "aria-label": "Novo valor em dias úteis" });
+    const caixaAjuste = h("div", { class: "pedido-botoes", hidden: true }, h("span", { class: "rotulo-ctl" }, "Novo prazo"), valor, h("span", {}, "dias úteis"),
+      h("button", { type: "button", class: "botao botao-cheio pequeno", onclick: () => decidir("ajustar") }, "Aprovar com este valor"));
+    const erro = h("p", { class: "pedido-erro", hidden: true });
+
+    async function decidir(decisao) {
+      erro.hidden = true;
+      try {
+        const r = await api(`/api/aprovacoes/${a.id}/decidir`, "POST", { decisao, valor: decisao === "ajustar" ? valor.value : undefined, comentario: coment.value });
+        placar(r.placar); carregar();
+      } catch (e) { erro.textContent = e.message; erro.hidden = false; }
+    }
+    const btn = (t, ico, cls, fn, desligado) => h("button", { type: "button", class: "botao " + cls, onclick: fn, disabled: desligado ? "" : false },
+      h("span", { class: "botao-icone", "aria-hidden": "true" }, ico), t);
+
+    const valores = a.valor_proposto != null
+      ? h("div", { class: "pedido-valores" }, h("small", {}, "hoje"), h("b", {}, a.valor_atual != null ? dias(a.valor_atual) : "–"), h("span", { class: "seta" }, "→"), h("small", {}, "proposto"), h("b", {}, dias(a.valor_proposto)))
+      : null;
+    return h("article", { class: "pedido" + (novos.has(a.id) ? " novo" : "") },
+      h("div", { class: "pedido-topo" }, h("span", {}, `#${a.id} · ${TIPOS[a.tipo] || a.tipo}${a.prefixos.length ? " · prefixo " + a.prefixos.join(", ") : ""}`),
+        h("span", {}, `${NOMES[a.solicitante] || a.solicitante} via agente · ${quando(a.criado_em)}`)),
+      h("p", { class: "pedido-resumo" }, a.resumo), valores,
+      a.evidencia ? h("p", { class: "pedido-evid" }, h("b", {}, "Evidência: "), a.evidencia) : h("p", { class: "pedido-evid" }, "Sem evidência anexada: peça ao agente antes de aprovar."),
+      a.impacto_reais != null ? h("p", { class: "pedido-impacto" }, `Evita cerca de ${brl0(a.impacto_reais)} de custo com atraso no período`) : null,
+      coment, caixaAjuste,
+      h("div", { class: "pedido-botoes" },
+        btn("Aprovar", "✓", "botao-cheio", () => decidir("aprovar")),
+        btn("Ajustar", "~", "botao-cobalto", () => { caixaAjuste.hidden = !caixaAjuste.hidden; valor.focus(); }, !ajustavel),
+        btn("Recusar", "×", "botao-cobalto", () => decidir("recusar"))),
+      erro);
+  }
+
+  function lista(aprovacoes) {
+    const pend = aprovacoes.filter((a) => a.situacao === "pendente");
+    const feitas = aprovacoes.filter((a) => a.situacao !== "pendente");
+    $("#n-pendentes").replaceChildren(pend.length ? h("em", {}, pend.length) : "");
+    $("#fila").replaceChildren(...(pend.length ? pend.map(cartaoPedido) : [h("p", { class: "vazio" }, "Nada esperando. Quando o agente propuser uma mudança, ela aparece aqui na hora.")]));
+    $("#n-decididos").textContent = feitas.length ? String(feitas.length) : "";
+    const NOME = { aprovada: "aprovada", ajustada: "aprovada com ajuste", recusada: "recusada" };
+    $("#historico").replaceChildren(...(feitas.length ? feitas.map((a) => h("div", { class: "historico-lin" },
+      h("div", {}, h("span", { class: "etiqueta " + a.situacao }, NOME[a.situacao]), " ", a.resumo),
+      h("small", {}, `${quando(a.decidido_em)} · ${a.valor_final != null ? "valor final " + dias(a.valor_final) + " · " : ""}pedido por ${NOMES[a.solicitante] || a.solicitante}${a.comentario ? " · “" + a.comentario + "”" : ""}`)))
+      : [h("p", { class: "vazio" }, "As decisões vão ficando registradas aqui.")]));
+    novos = new Set();
+  }
+
+  /* ---------- financeiro ---------- */
+  function cartaoAlerta(a) {
+    const d = a.detalhe || {};
+    const partes = [h("div", { class: "quando" }, `${quando(a.quando)} · ${a.categoria === "troca_de_rota" ? "troca de rota" : a.categoria}`), h("h3", {}, a.titulo), h("p", {}, a.texto)];
+    if (d.trocas && d.trocas.length) {
+      const linhas = d.trocas.slice(0, 6).map((t) => {
+        const df = t.frete_para - t.frete_de;
+        return h("tr", {}, h("td", {}, t.envio_id), h("td", {}, t.destino), h("td", {}, `${t.de} → ${t.para}`),
+          h("td", { class: df > 0 ? "pos" : "neg" }, (df > 0 ? "+" : "") + brl(df)), h("td", { class: "neg" }, brl(t.economia_estimada)));
+      });
+      partes.push(h("table", { class: "mini-tabela" }, h("thead", {}, h("tr", {}, ...["Envio", "Destino", "Rota", "Frete", "Saldo"].map((x) => h("th", {}, x)))), h("tbody", {}, linhas)));
+      if (d.trocas.length > 6) partes.push(h("p", { class: "quando" }, `e mais ${d.trocas.length - 6} envios`));
+      partes.push(h("p", { class: "quando" }, `Frete ${d.variacao_frete > 0 ? "sobe" : "cai"} ${brl(Math.abs(d.variacao_frete))} · atraso evitado ${brl(d.atraso_evitado)} · saldo ${brl(d.saldo)}`));
+    }
+    if (!a.ciente) partes.push(h("div", { class: "pedido-botoes" }, h("button", { type: "button", class: "botao botao-cobalto pequeno", onclick: async () => { const r = await api(`/api/alertas/${a.id}/ciente`, "POST", {}); placar(r.placar); carregarAlertas(); } }, "Ciente")));
+    return h("article", { class: "alerta-fin" + (a.ciente ? " ciente" : "") }, ...partes);
+  }
+  async function carregarAlertas() {
+    const r = await api("/api/alertas"); placar(r.placar);
+    const sem = r.alertas.filter((a) => !a.ciente).length;
+    $("#n-alertas").replaceChildren(sem ? h("em", {}, sem) : "");
+    $("#alertas").replaceChildren(...(r.alertas.length ? r.alertas.map(cartaoAlerta) : [h("p", { class: "vazio" }, "Nenhuma troca de rota ainda.")]));
+  }
+  async function carregar() {
+    const r = await api("/api/aprovacoes"); lista(r.aprovacoes); placar(r.placar); carregarAlertas();
+  }
+
+  /* ---------- tempo real ---------- */
+  function conectar() {
+    const fonte = new EventSource("/api/eventos?" + q);
+    const marca = (ok, t) => { $("#conexao").className = "ag-modo " + (ok ? "ia" : "simulado"); $("#conexao span").textContent = t; };
+    fonte.onopen = () => marca(true, "ao vivo: os pedidos chegam sozinhos");
+    fonte.onerror = () => marca(false, "reconectando…");
+    fonte.onmessage = (m) => {
+      let e; try { e = JSON.parse(m.data); } catch (x) { return; }
+      if (e.tipo === "pedido_novo") { novos.add(e.aprovacao.id); carregar(); document.title = "(1) Gerente de logística · Transporte"; setTimeout(() => (document.title = "Gerente de logística · Transporte"), 4000); }
+      else if (["alerta", "decisao_registrada", "reiniciado"].includes(e.tipo)) carregar();
+    };
+  }
+
+  $("#reiniciar").addEventListener("click", async () => { if (confirm("Zerar pedidos, decisões, prazos aprovados e alertas?")) { await api("/api/demo/reiniciar", "POST", {}); carregar(); } });
+  await carregar().catch((e) => { $("#fila").replaceChildren(h("p", { class: "vazio" }, "Não consegui falar com o servidor: " + e.message)); });
+  conectar();
+})();

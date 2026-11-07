@@ -1,5 +1,5 @@
 /* Agente em tempo real: recebe os eventos do servidor (SSE) e desenha o trabalho na hora. */
-(function () {
+(async function () {
   "use strict";
   const $ = (s) => document.querySelector(s);
   function h(tag, attrs, ...filhos) {
@@ -15,6 +15,8 @@
   const hora = () => new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   const brl = (x) => (x == null ? "–" : "R$ " + Number(x).toLocaleString("pt-BR", { maximumFractionDigits: 2 }));
   const pct = (x) => (x == null ? "–" : Math.round(x * 100) + "%");
+  const eu = await window.Transporte.exigir("analista_logistica");
+  const q = "usuario=" + encodeURIComponent(eu.id);
   const sid = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())).slice(0, 8);
   $("#sessao-id").textContent = "sessão " + sid;
 
@@ -51,16 +53,21 @@
   }).catch(() => { $("#modo span").textContent = "servidor fora do ar: rode python servidor.py"; });
 
   /* sugestões */
-  ["Onde resolvemos mais problemas?", "Qual a melhor rota para os envios novos de SP?", "Como está o prazo de Belém?", "Aprova o prazo de Belém por mim", "Como está a TransNorte?"]
+  ["Onde resolvemos mais problemas?", "Qual a melhor rota para os envios novos de SP?", "Qual prazo do site precisa mudar?", "A Marina já respondeu?", "Aprova o prazo de Belém por mim"]
     .forEach((t) => $("#sugestoes").append(h("button", { type: "button", onclick: () => perguntar(t) }, t)));
   bolha("sis", "Conversa com o agente de logística · 02/11/2026");
-  bolha("ag", "Oi! Eu leio os portais, meço quem entrega no prazo e proponho o prazo do site. O que você quer resolver hoje?");
+  bolha("ag", `Oi, ${eu.nome.split(" ")[0]}! Eu leio os portais, meço quem entrega no prazo e proponho o prazo do site. O que você quer resolver hoje?`);
 
   /* ---------- mapa da rota (coordenadas reais dos municípios, IBGE) ---------- */
-  const mapa = L.map("mapa-rota", { zoomSnap: 0.25, scrollWheelZoom: false, attributionControl: false, zoomControl: false });
-  const base = L.geoJSON(window.UFS, { style: { fillColor: "#e3e4ef", fillOpacity: 1, color: "#fff", weight: 1 }, interactive: false }).addTo(mapa);
-  mapa.fitBounds(base.getBounds(), { padding: [4, 4] });
-  const camadaRota = L.layerGroup().addTo(mapa);
+  /* sem o Leaflet (CDN fora do ar) o resto da tela continua funcionando */
+  const temMapa = typeof L !== "undefined";
+  let mapa = null, camadaRota = null;
+  if (temMapa) {
+    mapa = L.map("mapa-rota", { zoomSnap: 0.25, scrollWheelZoom: false, attributionControl: false, zoomControl: false });
+    const base = L.geoJSON(window.UFS, { style: { fillColor: "#e3e4ef", fillOpacity: 1, color: "#fff", weight: 1 }, interactive: false }).addTo(mapa);
+    mapa.fitBounds(base.getBounds(), { padding: [4, 4] });
+    camadaRota = L.layerGroup().addTo(mapa);
+  } else { $("#mapa-rota").textContent = "Mapa indisponível: sem acesso ao Leaflet."; }
   const km = (x) => (x == null ? "" : Math.round(x).toLocaleString("pt-BR") + " km");
 
   function trecho(o, d, cor, peso, rotuloO, rotuloD, tracejado) {
@@ -70,6 +77,7 @@
   }
 
   function desenharRota(r) {
+    if (!temMapa) return;
     camadaRota.clearLayers();
     if (r.cd_lat == null) return;
     const o = [r.cd_lat, r.cd_lon], d = [r.destino_lat, r.destino_lon];
@@ -83,6 +91,7 @@
     leg.append(h("small", { class: "vazio" }, "Linha reta entre o CD e a cidade (coordenadas do IBGE)."));
   }
   function desenharLote(r) {
+    if (!temMapa) return;
     const lista = (r.roteados || []).filter((x) => x.destino_lat != null);
     if (!lista.length) return;
     camadaRota.clearLayers();
@@ -99,20 +108,34 @@
     $("#rota-sub").textContent = "lote";
   }
 
-  /* ---------- fila de aprovação ---------- */
-  function pedidoDeAprovacao(res) {
-    const fila = $("#fila"); if (fila.querySelector(".vazio")) fila.replaceChildren();
-    const estado = h("div", { class: "estado" }, "aguardando a Marina Duarte");
-    const decidir = (t) => {
-      estado.textContent = `${t}: demonstração, nada foi alterado no site.`;
-      bolha("sis", `Marina respondeu: ${t} (demonstração)`);
-    };
-    fila.prepend(h("div", { class: "aprov" },
-      h("p", {}, h("b", {}, "Para: "), res.enviado_para || "gerente de logística"), h("p", {}, res.resumo || ""),
-      h("div", { class: "botoes" },
-        ...["Aprovar", "Ajustar", "Recusar"].map((t, i) => h("button", { class: "botao " + (i === 0 ? "botao-cheio" : "botao-cobalto"), onclick: () => decidir(t) }, h("span", { class: "botao-icone" }, ["✓", "~", "×"][i]), t))),
-      estado));
+  /* ---------- fila de aprovação: o estado vem do servidor, a decisão é da gerente ---------- */
+  const ROTULO_SIT = { pendente: "aguardando a Marina", aprovada: "aprovado pela Marina", ajustada: "aprovado com ajuste", recusada: "recusado pela Marina" };
+  const dias = (x) => (x == null ? "" : `${Number(x).toLocaleString("pt-BR")} dias úteis`);
+  function renderFila(lista) {
+    const fila = $("#fila");
+    if (!lista.length) { fila.replaceChildren(h("p", { class: "vazio" }, "Quando o agente precisar de um OK, o pedido aparece aqui com a resposta da Marina.")); return; }
+    fila.replaceChildren(...lista.map((a) => h("div", { class: "aprov " + a.situacao },
+      h("p", {}, h("b", {}, `#${a.id} `), a.resumo),
+      a.valor_proposto != null ? h("p", { class: "aprov-valor" }, `${dias(a.valor_atual) || "–"} → ${dias(a.situacao === "pendente" || a.situacao === "recusada" ? a.valor_proposto : a.valor_final)}`) : null,
+      h("div", { class: "estado " + a.situacao }, h("i"), ROTULO_SIT[a.situacao] || a.situacao),
+      a.comentario ? h("p", { class: "aprov-com" }, `Marina: “${a.comentario}”`) : null)));
   }
+  async function carregarFila() {
+    try { const r = await fetch("/api/aprovacoes?" + q); const d = await r.json(); if (r.ok) renderFila(d.aprovacoes); } catch (e) { /* servidor fora */ }
+  }
+  carregarFila();
+  const canal = new EventSource("/api/eventos?" + q);
+  canal.onmessage = (m) => {
+    let e; try { e = JSON.parse(m.data); } catch (x) { return; }
+    if (e.tipo === "pedido_enviado") carregarFila();
+    if (e.tipo === "decisao") {
+      const a = e.aprovacao; carregarFila();
+      const verbo = { aprovada: "aprovou", ajustada: "aprovou com ajuste", recusada: "recusou" }[a.situacao];
+      bolha("ag", `*${e.por}* ${verbo} o pedido #${a.id}: ${a.resumo}` + (a.valor_final != null ? `\nValor final: *${dias(a.valor_final)}*.` : "") + (a.comentario ? `\nEla escreveu: “${a.comentario}”` : "") +
+        (a.situacao === "recusada" ? "\nNada muda no site." : "\nO prazo novo já vale aqui na demonstração: o painel e minhas próximas respostas usam ele."));
+    }
+    if (e.tipo === "reiniciado") carregarFila();
+  };
 
   /* ---------- resumo curto do que voltou de cada ferramenta ---------- */
   function resumoResultado(nome, r) {
@@ -122,7 +145,9 @@
     if (r.melhor_rota) return `melhor rota: ${r.melhor_rota}${r.economia_vs_escolha_atual ? " · economia " + brl(r.economia_vs_escolha_atual) : ""}`;
     if (r.roteados) return `${r.roteados.length} envios trocados · ${brl(r.economia_total)}`;
     if (r.envios_avaliados != null) return `${r.envios_avaliados} avaliados · ${r.envios_que_valem_trocar} valem trocar`;
-    if (r.proposta_id) return `${r.proposta_id} criada, aguardando o gerente`;
+    if (r.proposta_id) return `${r.proposta_id} criada (ainda não enviada à Marina)`;
+    if (r.aprovacao_id) return `pedido #${r.aprovacao_id} na fila da Marina · custo ${brl(r.custo)}`;
+    if (r.pedidos) return `${r.pedidos.length} pedidos · ${r.aprovadas_no_cenario} aprovados no cenário`;
     if (r.enviado_para) return `enviado para ${r.enviado_para} · custo ${brl(r.custo)}`;
     if (r.acionado) return `${r.acionado} acionado(a) · custo ${brl(r.custo)}`;
     return "pronto";
@@ -153,7 +178,8 @@
         if (e.nome === "escolher_melhor_rota" && r.melhor_rota) desenharRota(r);
         else if (e.nome === "escolher_melhor_rota" && r.detalhe && r.detalhe[0]) desenharRota(r.detalhe[0]);
         if (e.nome === "rotear_envios") desenharLote(r);
-        if (r.pedir_ao_usuario || r.enviado_para) pedidoDeAprovacao(r.enviado_para ? r : { ...r, enviado_para: r.acionado, resumo: r.motivo });
+        if (r.aprovacao_id) { carregarFila(); bolha("sis", `Pedido #${r.aprovacao_id} enviado para a Marina Duarte`); }
+        if (e.nome === "rotear_envios" && r.gerente_avisado) bolha("sis", "Alerta financeiro das trocas enviado para a Marina");
         break;
       }
       case "resposta":
@@ -170,7 +196,7 @@
   function perguntar(texto) {
     texto = (texto || "").trim(); if (!texto || ocupado) return;
     ocupado = true; botao.disabled = true; campo.value = ""; bolha("eu", texto);
-    fonte = new EventSource(`/api/conversa?sessao=${sid}&pergunta=${encodeURIComponent(texto)}`);
+    fonte = new EventSource(`/api/conversa?${q}&sessao=${sid}&pergunta=${encodeURIComponent(texto)}`);
     fonte.onmessage = (m) => { try { tratar(JSON.parse(m.data)); } catch (err) { console.error(err); } };
     fonte.onerror = () => { if (ocupado) { tratar({ tipo: "erro", texto: "Perdi a conexão com o servidor." }); tratar({ tipo: "fim" }); } };
   }
