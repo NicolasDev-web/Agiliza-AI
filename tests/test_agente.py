@@ -55,22 +55,23 @@ def test_melhor_rota_ordena_pelo_custo_total():
 
 def test_roteamento_respeita_limite_de_40_por_cento_por_estado():
     r = F.executar("rotear_envios", {"uf": "SP", "limite": 60})
-    from transporte.agente.contexto import ctx
-    novos = len(ctx().envios[(ctx().envios["uf"] == "SP") & (ctx().envios["data_postagem"].isna())])
+    from transporte.agente.contexto import sql
+    novos = int(sql("select count(*) n from envios where uf = 'SP' and data_postagem is null").iloc[0]["n"])
     assert len(r["roteados"]) <= max(1, int(novos * F.LIMITE_DESVIO_UF_DIA))
 
 
 def test_nao_roteia_envio_ja_postado():
-    from transporte.agente.contexto import ctx
-    postado = ctx().envios[ctx().envios["data_postagem"].notna()].iloc[0]["envio_id"]
+    from transporte.agente.contexto import sql
+    postado = sql("select envio_id from envios where data_postagem is not null limit 1").iloc[0]["envio_id"]
     r = F.executar("rotear_envios", {"envio_ids": [postado]})
     assert r["roteados"] == []
 
 
 def test_texto_de_portal_vem_marcado_como_dado():
-    from transporte.agente.contexto import ctx
-    m = ctx().medidas
-    for rastreio in (m[m["status"] == "entregue"].iloc[0]["rastreio"], m[m["status"] == "sem_dados_portal"].dropna(subset=["rastreio"]).iloc[0]["rastreio"]):
+    from transporte.agente.contexto import sql
+    com = sql("select rastreio from envios where status = 'entregue' limit 1").iloc[0]["rastreio"]
+    sem = sql("select rastreio from envios where status = 'sem_dados_portal' and rastreio is not null limit 1").iloc[0]["rastreio"]
+    for rastreio in (com, sem):
         r = F.executar("consultar_portal", {"codigo_rastreio": rastreio})
         assert "dado" in r.get("aviso", "")
 
@@ -139,3 +140,39 @@ def test_api_fora_do_ar_cai_para_o_roteiro_local():
     ev = _eventos(s, "Onde resolvemos mais problemas?")
     assert any(e["tipo"] == "aviso" and "não respondeu" in e["texto"] for e in ev)
     assert ev[-1]["tipo"] == "resposta"
+
+
+# ------------------------------------------------------------------ base de dados e geografia
+def test_base_sqlite_tem_as_tabelas_e_indices():
+    from transporte.agente.contexto import sql
+    tabelas = set(sql("select name from sqlite_master where type = 'table'")["name"])
+    assert {"envios", "eventos", "cotacoes", "propostas", "cidades", "chamados"} <= tabelas
+    idx = set(sql("select name from sqlite_master where type = 'index'")["name"])
+    assert {"ix_env_id", "ix_cot_envio"} <= idx
+
+
+def test_base_so_deixa_ler():
+    from transporte import base
+    with pytest.raises(Exception):
+        base.conexao().execute("delete from envios")
+
+
+def test_todas_as_cidades_dos_pedidos_tem_coordenada_real():
+    from transporte.agente.contexto import sql
+    c = sql("select * from cidades")
+    assert len(c) == 127 and c["latitude"].notna().all()
+    assert c["latitude"].between(-34, 6).all() and c["longitude"].between(-74, -34).all()
+
+
+def test_distancia_cd_cidade_e_coerente():
+    from transporte import geo
+    fortaleza, recife = geo.coordenada("Fortaleza", "CE"), geo.coordenada("Recife", "PE")
+    assert 620 < geo.haversine_km(*fortaleza, *recife) < 640  # ~630 km em linha reta
+
+
+def test_avaliar_traz_trajeto_com_origem_destino_e_distancia():
+    envio = roteamento.envios_para_rotear(limite=1).iloc[0]["envio_id"]
+    r = roteamento.avaliar(envio)
+    for k in ("cd_lat", "cd_lon", "destino_lat", "destino_lon", "distancia_km", "cd_nome"):
+        assert r.get(k) is not None
+    assert r["distancia_km"] > 0

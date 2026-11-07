@@ -60,6 +60,18 @@ pedido de aprovação que chega para o gerente. Exemplos:
 As 17 ferramentas (`src/transporte/agente/ferramentas.py`) seguem o catálogo do desafio. **O papel é
 conferido no código**, não só no prompt: se o modelo tentar aprovar uma proposta, a ferramenta recusa.
 
+### Base de dados e geografia real
+
+Os dados ficam numa base **SQLite** (`data/processed/transporte.db`, 17 tabelas com índice, construída
+em ~3 s por `python scripts/02_base_de_dados.py`; o servidor monta sozinho se faltar). O agente consulta
+com SQL e só o **resumo** chega ao modelo, então o gasto de tokens é mínimo. O servidor sobe em menos de
+meio segundo e a base é aberta só para leitura.
+
+As coordenadas das cidades vêm dos **municípios do IBGE** (`data/ref/`, dados reais). Os 127 destinos casam
+todos. Com elas o mapa da rota vai do CD até a **cidade** do pedido, com a distância em linha reta, e o
+painel mostra cada prefixo de CEP como um ponto na sua cidade. Pedidos, prazos e transportadoras seguem
+**fictícios**, e a interface avisa a origem de cada coisa.
+
 ### Com a IA do evento
 
 Copie `.env.example` para `.env` e ponha o token. O agente fala com o proxy no formato OpenAI
@@ -92,11 +104,13 @@ publique o token**.
 
 ```
 data/raw/            dados fictícios do desafio (CSV) e os dicionários
-data/processed/      saídas da parte 1 (tabelas por transportadora, UF, prefixo e propostas)
+data/ref/            municípios do IBGE (coordenadas reais)
+data/processed/      saídas da parte 1 e a base SQLite (transporte.db, gerada)
 src/transporte/      calendario, portais, entregas, desempenho, concorrentes, propostas
 src/transporte/agente/  ferramentas, roteamento, llm (proxy), loop (eventos), simulado, prompt
 servidor.py          servidor do agente (conversa por SSE) e dos arquivos do painel
-scripts/             01_processar.py
+src/transporte/base.py, geo.py   base SQLite e geografia (coordenadas, distâncias)
+scripts/             01_processar.py, 02_base_de_dados.py
 dashboard/           index.html, styles.css, app.js, data.js (gerado), ufs.js (malha dos estados)
 tests/               testes do calendário e dos dados reais
 ```
@@ -108,7 +122,8 @@ Os números exatos estão em `data/processed/qualidade_dados.json` e no painel.
 
 ## Limites desta parte
 
-- O mapa é por estado. Os dados não trazem a malha dos prefixos de CEP; a tabela cobre os 148 prefixos.
+- O fundo do mapa é por estado (não há malha de prefixos de CEP); os prefixos aparecem como pontos nas cidades.
+- A distância é em linha reta, não por estrada.
 - O impacto em R$ conta só o custo de atraso. O efeito de mostrar um prazo menor sobre a conversão
   (`checkout_conversao.csv`) fica para a próxima parte.
 - Feriados estaduais ainda não entram na conta do prazo real das transportadoras.

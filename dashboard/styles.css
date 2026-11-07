@@ -122,7 +122,7 @@ select.seletor { font-family: var(--mono); font-size: 12px; padding: 7px 10px; b
 .mapa-caixa { position: relative; }
 .mapa { height: min(68vh, 640px); min-height: 420px; border-radius: var(--raio); background: var(--papel-claro); border: 1px solid var(--linha); }
 .leaflet-container { font-family: var(--sans); background: var(--papel-claro); }
-.legenda { position: absolute; left: 14px; bottom: 14px; z-index: 500; background: rgba(255,255,255,.94); border: 1px solid var(--linha);
+.legenda { position: absolute; right: 14px; top: 14px; z-index: 500; background: rgba(255,255,255,.94); border: 1px solid var(--linha);
   border-radius: var(--raio); padding: 10px 12px; font-family: var(--mono); font-size: 11px; color: var(--tinta-2); }
 .legenda-titulo { margin-bottom: 6px; color: var(--tinta); }
 .legenda-linha { display: flex; align-items: center; gap: 8px; line-height: 1.7; }

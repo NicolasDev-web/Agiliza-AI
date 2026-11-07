@@ -56,48 +56,46 @@
   bolha("sis", "Conversa com o agente de logística · 02/11/2026");
   bolha("ag", "Oi! Eu leio os portais, meço quem entrega no prazo e proponho o prazo do site. O que você quer resolver hoje?");
 
-  /* ---------- mapa da rota ---------- */
-  const CD = { CD1: { nome: "CD Fortaleza", p: [-3.77, -38.52] }, CD2: { nome: "CD Extrema", p: [-22.85, -46.32] } };
-  const centro = {};
-  window.UFS.features.forEach((f) => {
-    let xs = [], ys = [];
-    f.geometry.coordinates.forEach((poly) => poly[0].forEach(([x, y]) => { xs.push(x); ys.push(y); }));
-    centro[f.properties.uf] = [(Math.min(...ys) + Math.max(...ys)) / 2, (Math.min(...xs) + Math.max(...xs)) / 2];
-  });
+  /* ---------- mapa da rota (coordenadas reais dos municípios, IBGE) ---------- */
   const mapa = L.map("mapa-rota", { zoomSnap: 0.25, scrollWheelZoom: false, attributionControl: false, zoomControl: false });
   const base = L.geoJSON(window.UFS, { style: { fillColor: "#e3e4ef", fillOpacity: 1, color: "#fff", weight: 1 }, interactive: false }).addTo(mapa);
   mapa.fitBounds(base.getBounds(), { padding: [4, 4] });
   const camadaRota = L.layerGroup().addTo(mapa);
-  const cdDoEstado = (uf) => (["SP", "RJ", "MG", "ES", "PR", "SC", "RS", "MS", "MT", "GO", "DF"].includes(uf) ? "CD2" : "CD1");
+  const km = (x) => (x == null ? "" : Math.round(x).toLocaleString("pt-BR") + " km");
+
+  function trecho(o, d, cor, peso, rotuloO, rotuloD, tracejado) {
+    L.polyline([o, d], { color: cor, weight: peso, dashArray: tracejado ? "6 6" : null, opacity: 0.85 }).addTo(camadaRota);
+    if (rotuloO) L.circleMarker(o, { radius: 7, color: "#fff", weight: 2, fillColor: "#1f2599", fillOpacity: 1 }).bindTooltip(rotuloO, { permanent: true, direction: "right" }).addTo(camadaRota);
+    if (rotuloD) L.circleMarker(d, { radius: 7, color: "#fff", weight: 2, fillColor: "#e8631e", fillOpacity: 1 }).bindTooltip(rotuloD, { permanent: true, direction: "left" }).addTo(camadaRota);
+  }
 
   function desenharRota(r) {
     camadaRota.clearLayers();
-    const uf = (r.destino || "").split("/").pop(), cd = CD[cdDoEstado(uf)], fim = centro[uf];
-    if (!fim) return;
-    L.polyline([cd.p, fim], { color: "#2f37c4", weight: 3, dashArray: "6 6" }).addTo(camadaRota);
-    L.circleMarker(cd.p, { radius: 7, color: "#fff", weight: 2, fillColor: "#1f2599", fillOpacity: 1 }).bindTooltip(cd.nome, { permanent: true, direction: "right" }).addTo(camadaRota);
-    L.circleMarker(fim, { radius: 7, color: "#fff", weight: 2, fillColor: "#e8631e", fillOpacity: 1 }).bindTooltip(r.destino, { permanent: true, direction: "left" }).addTo(camadaRota);
-    mapa.fitBounds(L.latLngBounds([cd.p, fim]).pad(0.5), { maxZoom: 6 });
-    $("#rota-sub").textContent = r.envio_id || "";
+    if (r.cd_lat == null) return;
+    const o = [r.cd_lat, r.cd_lon], d = [r.destino_lat, r.destino_lon];
+    trecho(o, d, "#2f37c4", 3, r.cd_nome, `${r.destino} · ${km(r.distancia_km)}`, true);
+    mapa.fitBounds(L.latLngBounds([o, d]).pad(0.5), { maxZoom: 7 });
+    $("#rota-sub").textContent = `${r.envio_id} · ${km(r.distancia_km)}`;
     const leg = $("#rota-leg"); leg.replaceChildren();
     (r.candidatas || []).slice(0, 5).forEach((c) => leg.append(h("div", { class: "cand" + (c.transportadora === r.melhor_rota ? " melhor" : "") },
       h("span", {}, (c.transportadora === r.melhor_rota ? "✓ " : "") + c.transportadora), h("span", {}, brl(c.custo_total_esperado)),
       h("small", {}, `frete ${brl(c.frete)} · ${pct(c.entregas_no_prazo)} no prazo · histórico: ${c.base_do_historico}`))));
-    leg.append(h("small", { class: "vazio" }, "Rota desenhada até o centro do estado de destino."));
+    leg.append(h("small", { class: "vazio" }, "Linha reta entre o CD e a cidade (coordenadas do IBGE)."));
   }
   function desenharLote(r) {
-    const primeiro = (r.roteados || [])[0];
-    if (!primeiro) return;
+    const lista = (r.roteados || []).filter((x) => x.destino_lat != null);
+    if (!lista.length) return;
     camadaRota.clearLayers();
-    const porUf = {};
-    (r.roteados || []).forEach((x) => { const u = x.destino.split("/").pop(); porUf[u] = (porUf[u] || 0) + 1; });
-    Object.entries(porUf).forEach(([uf, n]) => {
-      const fim = centro[uf], cd = CD[cdDoEstado(uf)]; if (!fim) return;
-      L.polyline([cd.p, fim], { color: "#2f37c4", weight: 2 + n, opacity: 0.8 }).addTo(camadaRota);
-      L.circleMarker(fim, { radius: 6 + n, color: "#fff", weight: 2, fillColor: "#e8631e", fillOpacity: 1 }).bindTooltip(`${uf}: ${n} trocas`, { permanent: true }).addTo(camadaRota);
+    const pts = [];
+    lista.forEach((x) => {
+      const o = [x.origem_lat, x.origem_lon], d = [x.destino_lat, x.destino_lon];
+      trecho(o, d, "#2f37c4", 2, null, null, false);
+      L.circleMarker(d, { radius: 6, color: "#fff", weight: 2, fillColor: "#e8631e", fillOpacity: 1 }).bindTooltip(`${x.destino}: ${x.de} → ${x.para}`).addTo(camadaRota);
+      pts.push(o, d);
     });
+    mapa.fitBounds(L.latLngBounds(pts).pad(0.2), { maxZoom: 7 });
     const leg = $("#rota-leg"); leg.replaceChildren(h("b", {}, `${r.roteados.length} envios trocados · economia ${brl(r.economia_total)}`));
-    r.roteados.slice(0, 5).forEach((x) => leg.append(h("div", { class: "cand" }, h("span", {}, `${x.envio_id} ${x.destino}`), h("span", {}, brl(x.economia_estimada)), h("small", {}, `${x.de} → ${x.para}`))));
+    r.roteados.slice(0, 5).forEach((x) => leg.append(h("div", { class: "cand" }, h("span", {}, `${x.envio_id} ${x.destino}`), h("span", {}, brl(x.economia_estimada)), h("small", {}, `${x.de} → ${x.para}${x.distancia_km ? " · " + km(x.distancia_km) : ""}`))));
     $("#rota-sub").textContent = "lote";
   }
 

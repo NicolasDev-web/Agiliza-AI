@@ -3,49 +3,69 @@
 A promessa ao cliente já foi feita no checkout. Então a escolha certa é a transportadora que
 custa menos somando o frete com o custo esperado de chegar atrasado, usando o histórico real
 de entregas daquela transportadora naquela região.
+
+A rota também mostra o caminho real: do CD de origem até a cidade do pedido, com a distância.
 """
 from __future__ import annotations
+
+import functools
 
 import numpy as np
 import pandas as pd
 
+from .. import geo
 from ..propostas import custo_esperado_atraso
-from .contexto import ctx
+from .contexto import sql
 
 
-def _historico(c, transportadora: str, uf: str, cep3: str) -> tuple[np.ndarray, str]:
-    """Dias úteis que a transportadora levou nessa região. Usa o prefixo; se for pouco, a UF."""
-    ent = c.medidas[(c.medidas["status"] == "entregue") & (c.medidas["transportadora"] == transportadora)]
-    no_prefixo = ent.loc[ent["cep3"] == cep3, "prazo_real_du"].dropna().to_numpy()
-    if len(no_prefixo) >= 20:
-        return no_prefixo, f"prefixo {cep3}"
-    na_uf = ent.loc[ent["uf"] == uf, "prazo_real_du"].dropna().to_numpy()
-    if len(na_uf) >= 20:
-        return na_uf, f"estado {uf}"
-    return ent["prazo_real_du"].dropna().to_numpy(), "todas as regiões"
+@functools.lru_cache(maxsize=4096)
+def _historico(transportadora: str, uf: str, cep3: str) -> tuple[tuple, str]:
+    """Dias úteis que a transportadora levou nessa região. Usa o prefixo; se for pouco, o estado."""
+    base = "select prazo_real_du from envios where status = 'entregue' and transportadora = ?"
+    por_prefixo = sql(base + " and cep3 = ?", (transportadora, cep3))["prazo_real_du"].dropna()
+    if len(por_prefixo) >= 20:
+        return tuple(por_prefixo), f"prefixo {cep3}"
+    por_uf = sql(base + " and uf = ?", (transportadora, uf))["prazo_real_du"].dropna()
+    if len(por_uf) >= 20:
+        return tuple(por_uf), f"estado {uf}"
+    todos = sql(base, (transportadora,))["prazo_real_du"].dropna()
+    return tuple(todos), "todas as regiões"
+
+
+def _trajeto(e: pd.Series) -> dict:
+    """Origem, destino e distância em linha reta, com coordenadas reais dos municípios."""
+    cd = e["cd_origem"]
+    cidade_cd, uf_cd = geo.CDS[cd]
+    origem = geo.coordenada(cidade_cd, uf_cd)
+    destino = geo.coordenada(e["cidade"], e["uf"])
+    if not origem or not destino:
+        return {}
+    return {"cd_nome": f"CD {cidade_cd}", "cd_lat": origem[0], "cd_lon": origem[1],
+            "destino_lat": destino[0], "destino_lon": destino[1],
+            "distancia_km": round(geo.haversine_km(*origem, *destino))}
 
 
 def avaliar(envio_id: str) -> dict:
     """Compara as transportadoras que atendem o envio e devolve o ranking com o motivo."""
-    c = ctx()
-    env = c.envios[c.envios["envio_id"] == envio_id]
+    env = sql("select * from envios where envio_id = ?", (envio_id,))
     if env.empty:
         return {"erro": f"envio {envio_id} não encontrado"}
     e = env.iloc[0]
-    cot = c.cotacoes[c.cotacoes["envio_id"] == envio_id]
+    cot = sql("select * from cotacoes where envio_id = ?", (envio_id,))
     if cot.empty:
         return {"erro": f"sem cotação para o envio {envio_id}"}
 
-    padrao = c.regras.loc[c.regras["cep3"] == e["cep3"], "transportadora_padrao"]
-    padrao = padrao.iloc[0] if len(padrao) else None
+    padrao = sql("select transportadora_padrao from regras where cep3 = ?", (e["cep3"],))
+    padrao = padrao.iloc[0]["transportadora_padrao"] if len(padrao) else None
     prazo_prometido = float(e["prazo_exibido_dias_uteis"])
     valor = float(e["valor_pedido"])
 
     linhas = []
     for _, q in cot.iterrows():
-        hist, base = _historico(c, q["transportadora"], e["uf"], e["cep3"])
+        hist, base = _historico(q["transportadora"], e["uf"], e["cep3"])
         if len(hist) == 0:
             continue
+        hist = np.asarray(hist, dtype=float)
         atrasos = np.maximum(hist - prazo_prometido, 0)
         custo_atraso = float(np.mean(custo_esperado_atraso(np.full(len(hist), valor), atrasos)))
         linhas.append({
@@ -64,7 +84,8 @@ def avaliar(envio_id: str) -> dict:
     if not linhas:
         return {"erro": f"sem histórico para avaliar o envio {envio_id}"}
     linhas.sort(key=lambda x: x["custo_total_esperado"])
-    melhor, atual = linhas[0], next((x for x in linhas if x["foi_a_escolhida_no_erp"]), None)
+    melhor = linhas[0]
+    atual = next((x for x in linhas if x["foi_a_escolhida_no_erp"]), None)
     economia = round(atual["custo_total_esperado"] - melhor["custo_total_esperado"], 2) if atual else None
     return {
         "envio_id": envio_id,
@@ -73,22 +94,22 @@ def avaliar(envio_id: str) -> dict:
         "peso_g": int(e["peso_g"]),
         "valor_pedido": round(valor, 2),
         "prazo_prometido_ao_cliente": prazo_prometido,
-        "data_prometida": str(e["data_prometida"].date()),
+        "data_prometida": str(e["data_prometida"])[:10],
         "transportadora_padrao_da_regiao": padrao,
         "ja_postado": bool(pd.notna(e["data_postagem"])),
         "melhor_rota": melhor["transportadora"],
         "economia_vs_escolha_atual": economia,
+        **_trajeto(e),
         "candidatas": linhas,
     }
 
 
 def envios_para_rotear(uf: str | None = None, limite: int = 20) -> pd.DataFrame:
     """Envios novos que ainda não foram postados: são os que o analista pode rotear."""
-    c = ctx()
-    nao_postados = c.envios[c.envios["data_postagem"].isna()]
     if uf:
-        nao_postados = nao_postados[nao_postados["uf"] == uf.upper()]
-    return nao_postados.sort_values("data_pedido", ascending=False).head(limite)
+        return sql("select * from envios where data_postagem is null and uf = ? order by data_pedido desc limit ?",
+                   (uf.upper(), int(limite)))
+    return sql("select * from envios where data_postagem is null order by data_pedido desc limit ?", (int(limite),))
 
 
 def lote(uf: str | None = None, limite: int = 12) -> dict:
@@ -96,6 +117,7 @@ def lote(uf: str | None = None, limite: int = 12) -> dict:
     alvos = envios_para_rotear(uf, limite)
     avaliados = [avaliar(i) for i in alvos["envio_id"]]
     bons = [a for a in avaliados if "erro" not in a]
+
     def muda(a):
         atual = next((x["transportadora"] for x in a["candidatas"] if x["foi_a_escolhida_no_erp"]), None)
         return a["melhor_rota"] != atual and (a["economia_vs_escolha_atual"] or 0) > 0.5

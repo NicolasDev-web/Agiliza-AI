@@ -19,7 +19,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from transporte import desempenho, entregas, portais, propostas  # noqa: E402
+from transporte import desempenho, entregas, geo, portais, propostas  # noqa: E402
 from transporte.config import DASHBOARD, DATA_REFERENCIA, PROCESSED  # noqa: E402
 
 
@@ -51,6 +51,9 @@ def main() -> None:
     prefixos = desempenho.por_prefixo(d)
     ufs = desempenho.por_uf(d)
     props = propostas.gerar(d)
+    cid = geo.tabela_cidades(props.rename(columns={"cidade_referencia": "cidade"}))
+    props = props.merge(cid[["cidade", "uf", "latitude", "longitude"]].rename(columns={"cidade": "cidade_referencia"}),
+                        on=["cidade_referencia", "uf"], how="left")
 
     d.drop(columns=["rastreio"]).to_csv(PROCESSED / "envios_medidos.csv", index=False)
     transp.to_csv(PROCESSED / "desempenho_transportadora.csv", index=False)
@@ -81,6 +84,7 @@ def main() -> None:
     dados = {
         "meta": {
             "gerado_em": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "fonte_geografia": "municípios do IBGE (reais); pedidos, prazos e transportadoras são fictícios do desafio",
             "data_referencia": DATA_REFERENCIA,
             "envios_medidos": int(len(m)),
             "periodo": [str(d.loc[d["medido"], "dia_pedido"].min().date()), str(d.loc[d["medido"], "dia_pedido"].max().date())],

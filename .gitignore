@@ -7,3 +7,5 @@ data/processed/*.parquet
 
 # regenerável com scripts/01_processar.py
 data/processed/envios_medidos.csv
+data/processed/transporte.db
+data/processed/*.tmp

@@ -23,10 +23,10 @@ def _sem_acento(t: str) -> str:
 
 def _lugar_na_pergunta(t: str) -> tuple[str | None, str | None]:
     """Acha uma cidade do painel na frase e devolve (uf, prefixo)."""
-    from .contexto import ctx
+    from .contexto import tabela
     s = _sem_acento(t)
     achado = (None, None)
-    for r in ctx().regras.itertuples():
+    for r in tabela("regras").itertuples():
         nome = _sem_acento(r.cidade_referencia)
         if len(nome) >= 5 and nome in s:
             achado = (r.uf, r.cep3)

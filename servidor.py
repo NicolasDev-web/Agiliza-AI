@@ -107,9 +107,9 @@ def main() -> None:
     args = p.parse_args()
     c = Cliente()
     modo = f"IA do evento ({c.modelo})" if c.configurado else "roteiro local (sem token no .env)"
-    print("Carregando os dados...", flush=True)
-    from transporte.agente.contexto import ctx
-    ctx()
+    print("Abrindo a base de dados...", flush=True)
+    from transporte.agente.contexto import aquecer
+    aquecer()
     print(f"Agente de logística em http://localhost:{args.porta}  |  modo: {modo}", flush=True)
     ThreadingHTTPServer(("0.0.0.0", args.porta), Handler).serve_forever()
 

@@ -147,6 +147,20 @@
   }).addTo(mapa);
   mapa.fitBounds(camadaGeo.getBounds(), { padding: [8, 8] });
 
+  /* pontos reais: cada prefixo de CEP na cidade de referência (coordenadas dos municípios do IBGE) */
+  const pontos = L.layerGroup().addTo(mapa);
+  function corPonto(p) {
+    const v = p.cumprimento_hoje;
+    return v == null ? NEUTRO : v < 0.6 ? "#e8631e" : v < 0.75 ? "#ee8a52" : v < META ? "#f3ae85" : "#1f2599";
+  }
+  D.prefixos.filter((p) => p.latitude != null).forEach((p) => {
+    L.circleMarker([p.latitude, p.longitude], { radius: Math.max(4, Math.min(11, Math.sqrt(p.envios_medidos) / 2)), color: "#fff", weight: 1.5,
+      fillColor: corPonto(p), fillOpacity: 0.95 })
+      .bindTooltip(`${p.cep3} ${p.cidade_referencia}/${p.uf}: ${p.cumprimento_hoje == null ? "sem dados" : Math.round(p.cumprimento_hoje * 100) + "% no prazo"} · ${p.transportadora}`, { className: "dica" })
+      .on("click", () => { selecionarUF(p.uf); irParaProposta(p.cep3); })
+      .addTo(pontos);
+  });
+
   function valorTexto(uf) {
     const c = camadas[estado.camada], v = c.valor(uf);
     return v == null ? "sem dados" : c.texto(v);
@@ -161,7 +175,11 @@
     $("#legenda").replaceChildren(
       h("div", { class: "legenda-titulo" }, c.titulo + (estado.camada === "cumprimento" && estado.transp !== "todas" ? ` (${estado.transp})` : "")),
       ...c.classes.map(([t, cor]) => h("div", { class: "legenda-linha" }, h("i", { style: `background:${cor}` }), t)),
-      h("div", { class: "legenda-linha" }, h("i", { style: `background:${NEUTRO}` }), "sem dados")
+      h("div", { class: "legenda-linha" }, h("i", { style: `background:${NEUTRO}` }), "sem dados"),
+      h("div", { class: "legenda-titulo", style: "margin-top:8px" }, "Pontos: prefixos de CEP"),
+      h("div", { class: "legenda-linha" }, h("i", { style: "background:#e8631e;border-radius:50%" }), "abaixo de 60% no prazo"),
+      h("div", { class: "legenda-linha" }, h("i", { style: "background:#f3ae85;border-radius:50%" }), "60% até a meta"),
+      h("div", { class: "legenda-linha" }, h("i", { style: "background:#1f2599;border-radius:50%" }), "cumpre a meta (92%)")
     );
   }
 
