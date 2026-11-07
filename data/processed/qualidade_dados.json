@@ -8,12 +8,12 @@
   ],
   "data_prometida_confere_com_regra": 1.0,
   "status_dos_envios": {
-    "entregue": 24678,
-    "sem_dados_portal": 11827,
-    "em_aberto_no_prazo": 2250,
+    "entregue": 24815,
+    "sem_dados_portal": 11669,
+    "em_aberto_no_prazo": 2263,
     "sem_rastreio": 329,
-    "devolvido": 283,
-    "em_aberto_atrasado": 164,
-    "extraviado": 82
+    "devolvido": 287,
+    "em_aberto_atrasado": 167,
+    "extraviado": 83
   }
 }

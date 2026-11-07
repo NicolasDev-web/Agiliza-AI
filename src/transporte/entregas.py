@@ -6,7 +6,7 @@ import pandas as pd
 
 from . import calendario as cal
 from .config import DATA_REFERENCIA, RAW
-from .portais import carregar_eventos
+from .portais import carregar_eventos, normalizar_rastreio
 
 
 def normalizar_cep(serie: pd.Series) -> pd.Series:
@@ -23,7 +23,7 @@ def carregar_envios() -> pd.DataFrame:
     e["dia_pedido"] = e["data_pedido"].dt.normalize()
     e["data_prometida"] = pd.to_datetime(e["data_prometida"])
     e["data_postagem"] = pd.to_datetime(e["data_postagem"])
-    e["rastreio"] = e["codigo_rastreio"].str.strip().str.upper()
+    e["rastreio"] = normalizar_rastreio(e["codigo_rastreio"])
     return e
 
 

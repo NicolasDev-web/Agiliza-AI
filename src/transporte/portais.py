@@ -63,9 +63,17 @@ _VIALOG = {
 }
 
 
+def normalizar_rastreio(serie: pd.Series) -> pd.Series:
+    """Código de rastreio comparável entre ERP e portal: maiúsculo e sem espaço ou separador.
+
+    Alguns portais mandam 'TN4 761325774' enquanto o ERP guarda 'TN4761325774'."""
+    limpo = serie.astype("string").str.upper().str.replace(r"[^A-Z0-9]", "", regex=True)
+    return limpo.astype(object).where(limpo.notna(), None)   # código ausente continua ausente (envio sem rastreio)
+
+
 def _padrao(df: pd.DataFrame, transportadora: str, *, utc: bool = False) -> pd.DataFrame:
     df = df.copy()
-    df["rastreio"] = df["rastreio"].astype(str).str.strip().str.upper()
+    df["rastreio"] = normalizar_rastreio(df["rastreio"])
     df["transportadora"] = transportadora
     df["quando_eh_utc"] = utc
     return df[["rastreio", "transportadora", "quando", "quando_eh_utc", "tipo", "evento_original"]]

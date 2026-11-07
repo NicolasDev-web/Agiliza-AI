@@ -77,3 +77,17 @@ def test_proposta_de_aumento_melhora_o_cumprimento(medidas):
     aum = p[p["acao"] == "aumentar"]
     assert len(aum) > 0
     assert (aum["cumprimento_proposto"] >= aum["cumprimento_hoje"]).all()
+
+
+def test_rastreio_com_espaco_no_portal_casa_com_o_erp():
+    """O portal manda 'TN4 761325774' e o ERP guarda 'TN4761325774': sem normalizar, 158 envios ficavam sem medição."""
+    s = pd.Series(["TN4 761325774", " ej912383326br ", "AB-12.3", None])
+    n = portais.normalizar_rastreio(s)
+    assert n[0] == "TN4761325774" and n[1] == "EJ912383326BR" and n[2] == "AB123"
+    assert pd.isna(n[3])   # sem código continua sem código (o ERP usa isso para 'sem rastreio')
+
+
+def test_todo_rastreio_do_portal_tem_envio_no_erp_depois_de_normalizar(eventos):
+    erp = set(entregas.carregar_envios()["rastreio"].dropna())
+    fora = eventos[~eventos["rastreio"].isin(erp)]["rastreio"].nunique()
+    assert fora <= 230   # eram 388 antes (158 com espaço no meio); os 230 que sobram são de pedidos fora do ERP
