@@ -138,8 +138,10 @@ em cima se a IA está conectada. Abra `/api/saude` para ver os modelos que o pro
 **Sem token** (ou se a API cair no meio da demonstração) entra um roteiro local que usa as *mesmas*
 ferramentas e emite os *mesmos* eventos, e a interface avisa que não é IA. Assim a demo não quebra.
 
-> Esta parte foi testada com uma API de mentira no formato OpenAI (`tests/test_agente.py`), porque o
-> ambiente de desenvolvimento não alcançava o proxy do evento. Falta um teste com o token real.
+> Testado com o proxy do evento (modelo `gpt-5.6-luna`, com chamada de ferramentas) e, nos testes
+> automáticos (`tests/test_agente.py`), com uma API de mentira no formato OpenAI. Se a API falhar, a
+> conversa segue pelo roteiro local e a tela avisa. As respostas da IA variam de uma execução para outra,
+> e montar propostas leva de 25 a 40 s.
 
 ## Como rodar
 
@@ -198,3 +200,11 @@ Os números exatos estão em `data/processed/qualidade_dados.json` e no painel.
 - O impacto em R$ conta só o custo de atraso. O efeito de mostrar um prazo menor sobre a conversão
   (`checkout_conversao.csv`) fica para a próxima parte.
 - Feriados estaduais ainda não entram na conta do prazo real das transportadoras.
+- Códigos de rastreio são comparados sem espaço nem símbolo (o portal manda `TN4 761325774`, o ERP guarda
+  `TN4761325774`). Ainda sobram de 39 a 62 códigos por transportadora que aparecem no portal sem pedido no ERP.
+- O WhatsApp usa o WhatsApp Web (biblioteca Baileys), não a API oficial: use um número de teste.
+
+## Como foi feito
+
+O código foi escrito com apoio do **Claude Code** (Anthropic). Os commits feitos pela ferramenta aparecem com o
+autor "Claude". Dados, regras de negócio e decisões de produto vêm do desafio e do time.

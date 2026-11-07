@@ -5,7 +5,7 @@ O proxy do GoHacks responde no formato da OpenAI (/v1/chat/completions) ou no da
 
     AI_PROXY_URL=https://ai-proxy.gogroupbr.com
     AI_PROXY_TOKEN=...            (nunca comitado: fica no .env)
-    AI_PROXY_MODELO=gpt-4o-mini   (ou o nome que o proxy listar)
+    AI_PROXY_MODELO=gpt-5.6-luna   (ou o nome que o proxy listar)
     AI_PROXY_FORMATO=openai|anthropic
 """
 from __future__ import annotations
@@ -45,7 +45,7 @@ class Cliente:
         carregar_env()
         self.url = (url or os.getenv("AI_PROXY_URL") or "https://ai-proxy.gogroupbr.com").rstrip("/")
         self.token = token or os.getenv("AI_PROXY_TOKEN") or ""
-        self.modelo = modelo or os.getenv("AI_PROXY_MODELO") or "gpt-4o-mini"
+        self.modelo = modelo or os.getenv("AI_PROXY_MODELO") or "gpt-5.6-luna"
         self.formato = (formato or os.getenv("AI_PROXY_FORMATO") or "openai").lower()
         self.timeout = timeout
 
