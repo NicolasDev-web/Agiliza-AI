@@ -72,7 +72,7 @@ conferido no código**, não só no prompt: se o modelo tentar aprovar uma propo
 | Lucas Ferreira | `analista_logistica` | lucas.ferreira@agiliza.ai | Agiliza@Lucas26 |
 | Marina Duarte | `gerente` | marina.duarte@agiliza.ai | Agiliza@Marina26 |
 
-Cookie é por navegador: para ver as duas ao mesmo tempo, use uma janela normal e uma anônima.
+Cada **aba** tem a sua própria sessão (`dashboard/sessao-aba.js`): dá para entrar como o Lucas numa aba e como a Marina em outra, no mesmo navegador. Abas abertas por link (sem passar pelo login) usam o cookie do último que entrou.
 
 - **Analista** (`analista.html`): só o essencial. A melhor rota no mapa, os pedidos dele para a Marina com o status ao vivo e o WhatsApp que ele recebeu. "Agente trabalhando" mostra a linha do tempo completa (modo apresentação).
 - **Gerente** (`gerente.html`): três números, a fila de decisões (frase grande, prazo de hoje e proposto, números recolhidos), o histórico e o financeiro das rotas trocadas, recolhido numa linha.

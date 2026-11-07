@@ -119,6 +119,10 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- tudo abaixo exige login; o usuário e o papel vêm da sessão no servidor, nunca do navegador
     def _token(self) -> str | None:
+        """Quem está falando: o token da ABA (cabeçalho ou ?s=) vale mais que o cookie, que é um só para o navegador todo."""
+        da_aba = self.headers.get("X-Sessao") or (parse_qs(urlparse(self.path).query).get("s") or [None])[0]
+        if da_aba:
+            return da_aba
         for parte in (self.headers.get("Cookie") or "").split(";"):
             nome, _, valor = parte.strip().partition("=")
             if nome == COOKIE:
@@ -143,7 +147,7 @@ class Handler(BaseHTTPRequestHandler):
                     token, u = estado.entrar(corpo.get("email", ""), corpo.get("senha", ""))
                 except estado.ErroDeRegra as e:
                     return self._json({"erro": str(e)}, 401)
-                return self._json({"usuario": u}, 200, {"Set-Cookie": f"{COOKIE}={token}; HttpOnly; Path=/; SameSite=Lax; Max-Age={estado.SESSAO_HORAS * 3600}"})
+                return self._json({"usuario": u, "token": token}, 200, {"Set-Cookie": f"{COOKIE}={token}; HttpOnly; Path=/; SameSite=Lax; Max-Age={estado.SESSAO_HORAS * 3600}"})
             if caminho == "/api/sair" and metodo == "POST":
                 estado.sair(self._token())
                 return self._json({"ok": True}, 200, {"Set-Cookie": f"{COOKIE}=; HttpOnly; Path=/; Max-Age=0"})

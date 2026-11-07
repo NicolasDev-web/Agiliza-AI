@@ -88,7 +88,7 @@
     const sit = { enviada: "enviada ao seu WhatsApp", pendente: "vai ao seu WhatsApp assim que a Marina conectar", previa: "prévia: WhatsApp ainda não conectado", falhou: "o WhatsApp falhou; veja aqui" }[m.situacao] || m.situacao;
     $("#canal").textContent = m.situacao === "enviada" ? "enviada" : "prévia";
     $("#zap").replaceChildren(h("div", { class: "zap-bolha" },
-      h("img", { src: m.imagem, alt: "Cartão da decisão", loading: "lazy" }),
+      h("img", { src: (window.Agiliza && Agiliza.comSessao ? Agiliza.comSessao(m.imagem) : m.imagem), alt: "Cartão da decisão", loading: "lazy" }),
       h("div", { class: "zap-texto" }, ...m.texto.split(/(\*[^*\n]+\*)/g).map((p) => (/^\*[^*\n]+\*$/.test(p) ? h("b", {}, p.slice(1, -1)) : p))),
       h("span", { class: "zap-hora" }, hora(m.quando) + " ✓✓")),
       h("p", { class: "rota-pe" }, `${sit}${m.destino ? " · " + m.destino : ""}`));

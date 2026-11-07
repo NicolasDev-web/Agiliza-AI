@@ -46,13 +46,14 @@
     </section>
   </main>
 
+  <script src="sessao-aba.js"></script>
   <script>
     (function () {
       const $ = (s) => document.querySelector(s);
       const CASAS = { analista_logistica: "analista.html", gerente: "gerente.html" };
 
       /* quem já está logado vai direto para a sua tela */
-      fetch("/api/eu").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.usuario) location.replace(CASAS[d.usuario.papel]); }).catch(() => {});
+      sessionStorage.getItem("agiliza.token") && fetch("/api/eu").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.usuario) location.replace(CASAS[d.usuario.papel]); }).catch(() => {});
 
       $("#ver").addEventListener("click", () => {
         const c = $("#senha"), mostrar = c.type === "password";
