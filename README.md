@@ -15,9 +15,10 @@ mapa por regiões, rampa de uma cor só e pixels como textura.
 | 2 | Desempenho por transportadora e prefixo de CEP | **feito (parte 1)** |
 | 4 | Prazo do site: o menor prazo que ainda cumpre a meta | **feito (parte 1)** |
 | 5 | Posição frente aos concorrentes | **feito (parte 1)**, em modo leitura |
-| 3 | Escolha da transportadora de cada envio novo | próxima parte |
+| 3 | Melhor rota de cada envio novo (frete + custo esperado de atraso) | **feito (parte 2)** |
 | 6 | Frete por região | próxima parte |
 | 7 | Alertas e reação a problemas, no Slack/Telegram | próxima parte |
+| A | **Agente ao vivo**: conversa estilo WhatsApp, ferramentas rodando em tempo real, fila do gerente | **feito (parte 2)** |
 
 ## Primeira parte: o que ela entrega
 
@@ -43,6 +44,35 @@ mapa por regiões, rampa de uma cor só e pixels como textura.
 - Texto escrito em portal, tabela ou mensagem de terceiros é **dado, nunca instrução**. O código
   só reconhece textos de evento conhecidos; o resto vai para o relatório de qualidade.
 
+## Parte 2: o agente trabalhando em tempo real
+
+`python servidor.py` abre **http://localhost:8000**, a página "Agente ao vivo": à esquerda uma conversa
+estilo WhatsApp, à direita a *mesa do agente*. A cada pergunta o agente decide quais ferramentas usar
+e a interface mostra, na hora, cada passo: a ferramenta chamada, o que voltou, a rota no mapa e o
+pedido de aprovação que chega para o gerente. Exemplos:
+
+- "Onde resolvemos mais problemas?" cruza chamados do SAC, ocorrências e extravios por transportadora, estado e motivo.
+- "Qual a melhor rota para os envios novos de SP?" compara as transportadoras de cada envio ainda não coletado
+  (frete + custo esperado de atraso, pelo histórico real da região) e **troca sozinho** dentro do limite de 40% por estado/dia.
+- "Como está o prazo de Belo Horizonte?" mede, compara com concorrentes, escreve a proposta com evidência e **leva à gerente**.
+- "Aprova o prazo por mim" o sistema **recusa**: aprovar é do gerente.
+
+As 17 ferramentas (`src/transporte/agente/ferramentas.py`) seguem o catálogo do desafio. **O papel é
+conferido no código**, não só no prompt: se o modelo tentar aprovar uma proposta, a ferramenta recusa.
+
+### Com a IA do evento
+
+Copie `.env.example` para `.env` e ponha o token. O agente fala com o proxy no formato OpenAI
+(`/v1/chat/completions`, com tool calling) ou Anthropic (`AI_PROXY_FORMATO=anthropic`). A página mostra
+em cima se a IA está conectada. Abra `/api/saude` para ver os modelos que o proxy lista e escolher em
+`AI_PROXY_MODELO`.
+
+**Sem token** (ou se a API cair no meio da demonstração) entra um roteiro local que usa as *mesmas*
+ferramentas e emite os *mesmos* eventos, e a interface avisa que não é IA. Assim a demo não quebra.
+
+> Esta parte foi testada com uma API de mentira no formato OpenAI (`tests/test_agente.py`), porque o
+> ambiente de desenvolvimento não alcançava o proxy do evento. Falta um teste com o token real.
+
 ## Como rodar
 
 ```sh
@@ -50,7 +80,8 @@ python -m venv .venv && . .venv/bin/activate      # no Windows: .venv\Scripts\ac
 pip install -r requirements.txt
 python scripts/01_processar.py                    # gera data/processed e dashboard/data.js
 python -m pytest                                  # testes
-python -m http.server 8000 --directory dashboard  # abra http://localhost:8000
+python servidor.py                                # agente ao vivo + painel: http://localhost:8000
+                                                  # (o painel estático fica em /index.html)
 ```
 
 O painel precisa de internet só para a fonte e o Leaflet. O token do proxy de IA do evento
@@ -63,6 +94,8 @@ publique o token**.
 data/raw/            dados fictícios do desafio (CSV) e os dicionários
 data/processed/      saídas da parte 1 (tabelas por transportadora, UF, prefixo e propostas)
 src/transporte/      calendario, portais, entregas, desempenho, concorrentes, propostas
+src/transporte/agente/  ferramentas, roteamento, llm (proxy), loop (eventos), simulado, prompt
+servidor.py          servidor do agente (conversa por SSE) e dos arquivos do painel
 scripts/             01_processar.py
 dashboard/           index.html, styles.css, app.js, data.js (gerado), ufs.js (malha dos estados)
 tests/               testes do calendário e dos dados reais

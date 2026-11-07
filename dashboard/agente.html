@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agente de logística em tempo real</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='2' fill='%232f37c4'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%23fff'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="agente.css">
+</head>
+<body class="pagina-agente">
+  <header class="nav clara" id="topo">
+    <a class="marca" href="index.html" aria-label="Transporte, painel"><span class="marca-nome">Transporte</span><span class="marca-sub">prazo certo</span></a>
+    <nav class="nav-links" aria-label="Páginas">
+      <a href="index.html">Painel</a>
+      <a href="agente.html" class="nav-destaque">Agente ao vivo</a>
+    </nav>
+  </header>
+
+  <section class="ag-topo">
+    <div>
+      <p class="rotulo-ctl">Agente de logística · WhatsApp</p>
+      <h1>Pergunte. Veja o agente trabalhar.</h1>
+    </div>
+    <p class="ag-modo" id="modo"><i></i><span>conectando…</span></p>
+  </section>
+
+  <main class="ag-grade">
+    <section class="fone" aria-label="Conversa com o agente">
+      <div class="fone-topo">
+        <div class="fone-avatar" aria-hidden="true"></div>
+        <div><div class="fone-nome">Agente de Logística</div><div class="fone-sub" id="fone-sub">online</div></div>
+      </div>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <div class="sugestoes" id="sugestoes"></div>
+      <form class="envio" id="form">
+        <input id="pergunta" autocomplete="off" placeholder="Pergunte ao agente…" aria-label="Mensagem">
+        <button id="enviar" type="submit">Enviar</button>
+      </form>
+    </section>
+
+    <div class="mesa">
+      <section class="painel" aria-label="Placar da sessão">
+        <h2>Nesta conversa <span id="sessao-id"></span></h2>
+        <div class="placar">
+          <div><b id="p-ferr">0</b><span>ferramentas usadas</span></div>
+          <div><b id="p-acoes">0</b><span>ações feitas sozinho</span></div>
+          <div><b id="p-custo">R$ 0</b><span>custo de pedir ajuda</span></div>
+        </div>
+      </section>
+
+      <section class="painel" aria-label="O que o agente está fazendo">
+        <h2>O agente trabalhando <span id="t-estado">parado</span></h2>
+        <div class="linha-tempo" id="tempo"><p class="vazio">Faça uma pergunta e cada passo aparece aqui na hora.</p></div>
+      </section>
+
+      <div class="duas">
+        <section class="painel" aria-label="Melhor rota">
+          <h2>Melhor rota <span id="rota-sub"></span></h2>
+          <div id="mapa-rota"></div>
+          <div class="rota-leg" id="rota-leg"><span class="vazio">Peça a melhor rota de um envio.</span></div>
+        </section>
+        <section class="painel" aria-label="Aprovações">
+          <h2>Quem decide <span>fila do gerente</span></h2>
+          <div id="fila"><p class="vazio">Quando o agente precisar de um OK, o pedido aparece aqui.</p></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="ufs.js"></script>
+  <script src="agente.js"></script>
+</body>
+</html>
