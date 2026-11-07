@@ -1,0 +1,493 @@
+prefixo_cep5,prefixo_cep3,cidade,uf,localidade
+01052,010,São Paulo,SP,capital
+01056,010,São Paulo,SP,capital
+01064,010,São Paulo,SP,capital
+01086,010,São Paulo,SP,capital
+02011,020,São Paulo,SP,capital
+02025,020,São Paulo,SP,capital
+02053,020,São Paulo,SP,capital
+02063,020,São Paulo,SP,capital
+03032,030,São Paulo,SP,capital
+03039,030,São Paulo,SP,capital
+03062,030,São Paulo,SP,capital
+03078,030,São Paulo,SP,capital
+04021,040,São Paulo,SP,capital
+04043,040,São Paulo,SP,capital
+04054,040,São Paulo,SP,capital
+04071,040,São Paulo,SP,capital
+05003,050,São Paulo,SP,capital
+05025,050,São Paulo,SP,capital
+05036,050,São Paulo,SP,capital
+05044,050,São Paulo,SP,capital
+08001,080,São Paulo,SP,capital
+08003,080,São Paulo,SP,capital
+08029,080,São Paulo,SP,capital
+08075,080,São Paulo,SP,capital
+06037,060,Osasco,SP,metropolitana
+06071,060,Osasco,SP,metropolitana
+06079,060,Osasco,SP,metropolitana
+07000,070,Guarulhos,SP,metropolitana
+07040,070,Guarulhos,SP,metropolitana
+07096,070,Guarulhos,SP,metropolitana
+09002,090,Santo André,SP,metropolitana
+09004,090,Santo André,SP,metropolitana
+09075,090,Santo André,SP,metropolitana
+11039,110,Santos,SP,interior
+11069,110,Santos,SP,interior
+11088,110,Santos,SP,interior
+12234,122,São José dos Campos,SP,interior
+12240,122,São José dos Campos,SP,interior
+12297,122,São José dos Campos,SP,interior
+13012,130,Campinas,SP,interior
+13024,130,Campinas,SP,interior
+13098,130,Campinas,SP,interior
+13445,134,Piracicaba,SP,interior
+13467,134,Piracicaba,SP,interior
+13469,134,Piracicaba,SP,interior
+14005,140,Ribeirão Preto,SP,interior
+14014,140,Ribeirão Preto,SP,interior
+14017,140,Ribeirão Preto,SP,interior
+14447,144,Franca,SP,interior
+14474,144,Franca,SP,interior
+14477,144,Franca,SP,interior
+15027,150,São José do Rio Preto,SP,interior
+15030,150,São José do Rio Preto,SP,interior
+15083,150,São José do Rio Preto,SP,interior
+17039,170,Bauru,SP,interior
+17053,170,Bauru,SP,interior
+17098,170,Bauru,SP,interior
+18009,180,Sorocaba,SP,interior
+18048,180,Sorocaba,SP,interior
+18090,180,Sorocaba,SP,interior
+19011,190,Presidente Prudente,SP,interior
+19016,190,Presidente Prudente,SP,interior
+19036,190,Presidente Prudente,SP,interior
+20027,200,Rio de Janeiro,RJ,capital
+20058,200,Rio de Janeiro,RJ,capital
+20074,200,Rio de Janeiro,RJ,capital
+20084,200,Rio de Janeiro,RJ,capital
+21055,210,Rio de Janeiro,RJ,capital
+21072,210,Rio de Janeiro,RJ,capital
+21091,210,Rio de Janeiro,RJ,capital
+21098,210,Rio de Janeiro,RJ,capital
+22015,220,Rio de Janeiro,RJ,capital
+22029,220,Rio de Janeiro,RJ,capital
+22031,220,Rio de Janeiro,RJ,capital
+22072,220,Rio de Janeiro,RJ,capital
+23008,230,Rio de Janeiro,RJ,capital
+23042,230,Rio de Janeiro,RJ,capital
+23059,230,Rio de Janeiro,RJ,capital
+23063,230,Rio de Janeiro,RJ,capital
+24028,240,Niterói,RJ,metropolitana
+24032,240,Niterói,RJ,metropolitana
+24084,240,Niterói,RJ,metropolitana
+25015,250,Duque de Caxias,RJ,metropolitana
+25040,250,Duque de Caxias,RJ,metropolitana
+25041,250,Duque de Caxias,RJ,metropolitana
+25618,256,Petrópolis,RJ,interior
+25631,256,Petrópolis,RJ,interior
+25636,256,Petrópolis,RJ,interior
+26021,260,Nova Iguaçu,RJ,metropolitana
+26045,260,Nova Iguaçu,RJ,metropolitana
+26098,260,Nova Iguaçu,RJ,metropolitana
+27243,272,Volta Redonda,RJ,interior
+27251,272,Volta Redonda,RJ,interior
+27276,272,Volta Redonda,RJ,interior
+28006,280,Campos dos Goytacazes,RJ,interior
+28022,280,Campos dos Goytacazes,RJ,interior
+28035,280,Campos dos Goytacazes,RJ,interior
+28910,289,Cabo Frio,RJ,interior
+28917,289,Cabo Frio,RJ,interior
+28943,289,Cabo Frio,RJ,interior
+29001,290,Vitória,ES,capital
+29027,290,Vitória,ES,capital
+29029,290,Vitória,ES,capital
+29070,290,Vitória,ES,capital
+29131,291,Vila Velha,ES,metropolitana
+29138,291,Vila Velha,ES,metropolitana
+29148,291,Vila Velha,ES,metropolitana
+29212,292,Serra,ES,metropolitana
+29262,292,Serra,ES,metropolitana
+29286,292,Serra,ES,metropolitana
+29322,293,Cachoeiro de Itapemirim,ES,interior
+29335,293,Cachoeiro de Itapemirim,ES,interior
+29351,293,Cachoeiro de Itapemirim,ES,interior
+29916,299,Linhares,ES,interior
+29979,299,Linhares,ES,interior
+29988,299,Linhares,ES,interior
+30020,300,Belo Horizonte,MG,capital
+30030,300,Belo Horizonte,MG,capital
+30044,300,Belo Horizonte,MG,capital
+30072,300,Belo Horizonte,MG,capital
+30142,301,Belo Horizonte,MG,capital
+30144,301,Belo Horizonte,MG,capital
+30154,301,Belo Horizonte,MG,capital
+30172,301,Belo Horizonte,MG,capital
+31012,310,Belo Horizonte,MG,capital
+31024,310,Belo Horizonte,MG,capital
+31059,310,Belo Horizonte,MG,capital
+31082,310,Belo Horizonte,MG,capital
+32021,320,Contagem,MG,metropolitana
+32024,320,Contagem,MG,metropolitana
+32026,320,Contagem,MG,metropolitana
+32635,326,Betim,MG,metropolitana
+32658,326,Betim,MG,metropolitana
+32697,326,Betim,MG,metropolitana
+35013,350,Governador Valadares,MG,interior
+35053,350,Governador Valadares,MG,interior
+35059,350,Governador Valadares,MG,interior
+35102,351,Ipatinga,MG,interior
+35168,351,Ipatinga,MG,interior
+35197,351,Ipatinga,MG,interior
+35512,355,Divinópolis,MG,interior
+35544,355,Divinópolis,MG,interior
+35574,355,Divinópolis,MG,interior
+36004,360,Juiz de Fora,MG,interior
+36016,360,Juiz de Fora,MG,interior
+36065,360,Juiz de Fora,MG,interior
+37541,375,Pouso Alegre,MG,interior
+37555,375,Pouso Alegre,MG,interior
+37580,375,Pouso Alegre,MG,interior
+38011,380,Uberaba,MG,interior
+38013,380,Uberaba,MG,interior
+38067,380,Uberaba,MG,interior
+38403,384,Uberlândia,MG,interior
+38453,384,Uberlândia,MG,interior
+38499,384,Uberlândia,MG,interior
+39469,394,Montes Claros,MG,interior
+39473,394,Montes Claros,MG,interior
+39481,394,Montes Claros,MG,interior
+40023,400,Salvador,BA,capital
+40035,400,Salvador,BA,capital
+40090,400,Salvador,BA,capital
+40092,400,Salvador,BA,capital
+41014,410,Salvador,BA,capital
+41025,410,Salvador,BA,capital
+41033,410,Salvador,BA,capital
+41099,410,Salvador,BA,capital
+42044,420,Salvador,BA,capital
+42050,420,Salvador,BA,capital
+42052,420,Salvador,BA,capital
+42094,420,Salvador,BA,capital
+42717,427,Lauro de Freitas,BA,metropolitana
+42762,427,Lauro de Freitas,BA,metropolitana
+42778,427,Lauro de Freitas,BA,metropolitana
+42831,428,Camaçari,BA,metropolitana
+42881,428,Camaçari,BA,metropolitana
+42892,428,Camaçari,BA,metropolitana
+44037,440,Feira de Santana,BA,interior
+44038,440,Feira de Santana,BA,interior
+44067,440,Feira de Santana,BA,interior
+45023,450,Vitória da Conquista,BA,interior
+45028,450,Vitória da Conquista,BA,interior
+45082,450,Vitória da Conquista,BA,interior
+45518,455,Itabuna,BA,interior
+45585,455,Itabuna,BA,interior
+45594,455,Itabuna,BA,interior
+45621,456,Ilhéus,BA,interior
+45638,456,Ilhéus,BA,interior
+45679,456,Ilhéus,BA,interior
+47822,478,Barreiras,BA,interior
+47854,478,Barreiras,BA,interior
+47882,478,Barreiras,BA,interior
+48977,489,Juazeiro,BA,interior
+48979,489,Juazeiro,BA,interior
+48982,489,Juazeiro,BA,interior
+49000,490,Aracaju,SE,capital
+49006,490,Aracaju,SE,capital
+49025,490,Aracaju,SE,capital
+49055,490,Aracaju,SE,capital
+49585,495,Itabaiana,SE,interior
+49588,495,Itabaiana,SE,interior
+49597,495,Itabaiana,SE,interior
+50009,500,Recife,PE,capital
+50013,500,Recife,PE,capital
+50047,500,Recife,PE,capital
+50083,500,Recife,PE,capital
+51030,510,Recife,PE,capital
+51037,510,Recife,PE,capital
+51071,510,Recife,PE,capital
+51074,510,Recife,PE,capital
+52037,520,Recife,PE,capital
+52048,520,Recife,PE,capital
+52073,520,Recife,PE,capital
+52075,520,Recife,PE,capital
+53112,531,Olinda,PE,metropolitana
+53148,531,Olinda,PE,metropolitana
+53195,531,Olinda,PE,metropolitana
+54001,540,Jaboatão dos Guararapes,PE,metropolitana
+54002,540,Jaboatão dos Guararapes,PE,metropolitana
+54057,540,Jaboatão dos Guararapes,PE,metropolitana
+55024,550,Caruaru,PE,interior
+55041,550,Caruaru,PE,interior
+55059,550,Caruaru,PE,interior
+55308,553,Garanhuns,PE,interior
+55318,553,Garanhuns,PE,interior
+55326,553,Garanhuns,PE,interior
+55638,556,Vitória de Santo Antão,PE,interior
+55672,556,Vitória de Santo Antão,PE,interior
+55697,556,Vitória de Santo Antão,PE,interior
+56332,563,Petrolina,PE,interior
+56366,563,Petrolina,PE,interior
+56392,563,Petrolina,PE,interior
+57020,570,Maceió,AL,capital
+57042,570,Maceió,AL,capital
+57053,570,Maceió,AL,capital
+57074,570,Maceió,AL,capital
+57323,573,Arapiraca,AL,interior
+57358,573,Arapiraca,AL,interior
+57391,573,Arapiraca,AL,interior
+58030,580,João Pessoa,PB,capital
+58038,580,João Pessoa,PB,capital
+58053,580,João Pessoa,PB,capital
+58093,580,João Pessoa,PB,capital
+58406,584,Campina Grande,PB,interior
+58474,584,Campina Grande,PB,interior
+58491,584,Campina Grande,PB,interior
+58730,587,Patos,PB,interior
+58749,587,Patos,PB,interior
+58795,587,Patos,PB,interior
+59017,590,Natal,RN,capital
+59026,590,Natal,RN,capital
+59057,590,Natal,RN,capital
+59099,590,Natal,RN,capital
+59107,591,Parnamirim,RN,metropolitana
+59119,591,Parnamirim,RN,metropolitana
+59153,591,Parnamirim,RN,metropolitana
+59324,593,Caicó,RN,interior
+59361,593,Caicó,RN,interior
+59379,593,Caicó,RN,interior
+59653,596,Mossoró,RN,interior
+59656,596,Mossoró,RN,interior
+59681,596,Mossoró,RN,interior
+60004,600,Fortaleza,CE,capital
+60006,600,Fortaleza,CE,capital
+60011,600,Fortaleza,CE,capital
+60093,600,Fortaleza,CE,capital
+60321,603,Fortaleza,CE,capital
+60345,603,Fortaleza,CE,capital
+60370,603,Fortaleza,CE,capital
+60385,603,Fortaleza,CE,capital
+60838,608,Fortaleza,CE,capital
+60863,608,Fortaleza,CE,capital
+60876,608,Fortaleza,CE,capital
+60899,608,Fortaleza,CE,capital
+61631,616,Caucaia,CE,metropolitana
+61666,616,Caucaia,CE,metropolitana
+61680,616,Caucaia,CE,metropolitana
+61946,619,Maracanaú,CE,metropolitana
+61984,619,Maracanaú,CE,metropolitana
+61992,619,Maracanaú,CE,metropolitana
+62042,620,Sobral,CE,interior
+62075,620,Sobral,CE,interior
+62091,620,Sobral,CE,interior
+63004,630,Juazeiro do Norte,CE,interior
+63005,630,Juazeiro do Norte,CE,interior
+63043,630,Juazeiro do Norte,CE,interior
+63111,631,Crato,CE,interior
+63120,631,Crato,CE,interior
+63139,631,Crato,CE,interior
+63503,635,Iguatu,CE,interior
+63536,635,Iguatu,CE,interior
+63546,635,Iguatu,CE,interior
+63946,639,Quixadá,CE,interior
+63951,639,Quixadá,CE,interior
+63994,639,Quixadá,CE,interior
+64014,640,Teresina,PI,capital
+64026,640,Teresina,PI,capital
+64037,640,Teresina,PI,capital
+64054,640,Teresina,PI,capital
+64218,642,Parnaíba,PI,interior
+64237,642,Parnaíba,PI,interior
+64276,642,Parnaíba,PI,interior
+64660,646,Picos,PI,interior
+64662,646,Picos,PI,interior
+64668,646,Picos,PI,interior
+65008,650,São Luís,MA,capital
+65030,650,São Luís,MA,capital
+65053,650,São Luís,MA,capital
+65078,650,São Luís,MA,capital
+65653,656,Caxias,MA,interior
+65661,656,Caxias,MA,interior
+65671,656,Caxias,MA,interior
+65913,659,Imperatriz,MA,interior
+65933,659,Imperatriz,MA,interior
+65943,659,Imperatriz,MA,interior
+66043,660,Belém,PA,capital
+66067,660,Belém,PA,capital
+66072,660,Belém,PA,capital
+66083,660,Belém,PA,capital
+66717,667,Ananindeua,PA,metropolitana
+66732,667,Ananindeua,PA,metropolitana
+66779,667,Ananindeua,PA,metropolitana
+68114,681,Santarém,PA,interior
+68142,681,Santarém,PA,interior
+68170,681,Santarém,PA,interior
+68522,685,Marabá,PA,interior
+68523,685,Marabá,PA,interior
+68547,685,Marabá,PA,interior
+68716,687,Castanhal,PA,interior
+68740,687,Castanhal,PA,interior
+68763,687,Castanhal,PA,interior
+68908,689,Macapá,AP,capital
+68924,689,Macapá,AP,capital
+68957,689,Macapá,AP,capital
+68971,689,Macapá,AP,capital
+69003,690,Manaus,AM,capital
+69006,690,Manaus,AM,capital
+69033,690,Manaus,AM,capital
+69076,690,Manaus,AM,capital
+69172,691,Parintins,AM,interior
+69176,691,Parintins,AM,interior
+69178,691,Parintins,AM,interior
+69219,692,Itacoatiara,AM,interior
+69277,692,Itacoatiara,AM,interior
+69279,692,Itacoatiara,AM,interior
+69303,693,Boa Vista,RR,capital
+69331,693,Boa Vista,RR,capital
+69370,693,Boa Vista,RR,capital
+69376,693,Boa Vista,RR,capital
+69922,699,Rio Branco,AC,capital
+69924,699,Rio Branco,AC,capital
+69977,699,Rio Branco,AC,capital
+69986,699,Rio Branco,AC,capital
+70056,700,Brasília,DF,capital
+70074,700,Brasília,DF,capital
+70084,700,Brasília,DF,capital
+70094,700,Brasília,DF,capital
+71017,710,Brasília,DF,capital
+71077,710,Brasília,DF,capital
+71081,710,Brasília,DF,capital
+71098,710,Brasília,DF,capital
+72008,720,Brasília,DF,capital
+72016,720,Brasília,DF,capital
+72034,720,Brasília,DF,capital
+72049,720,Brasília,DF,capital
+74000,740,Goiânia,GO,capital
+74008,740,Goiânia,GO,capital
+74015,740,Goiânia,GO,capital
+74033,740,Goiânia,GO,capital
+74960,749,Aparecida de Goiânia,GO,metropolitana
+74961,749,Aparecida de Goiânia,GO,metropolitana
+74994,749,Aparecida de Goiânia,GO,metropolitana
+75066,750,Anápolis,GO,interior
+75074,750,Anápolis,GO,interior
+75077,750,Anápolis,GO,interior
+75925,759,Rio Verde,GO,interior
+75929,759,Rio Verde,GO,interior
+75989,759,Rio Verde,GO,interior
+76821,768,Porto Velho,RO,capital
+76840,768,Porto Velho,RO,capital
+76888,768,Porto Velho,RO,capital
+76898,768,Porto Velho,RO,capital
+76919,769,Ji-Paraná,RO,interior
+76939,769,Ji-Paraná,RO,interior
+76984,769,Ji-Paraná,RO,interior
+77032,770,Palmas,TO,capital
+77075,770,Palmas,TO,capital
+77078,770,Palmas,TO,capital
+77095,770,Palmas,TO,capital
+77830,778,Araguaína,TO,interior
+77865,778,Araguaína,TO,interior
+77884,778,Araguaína,TO,interior
+78015,780,Cuiabá,MT,capital
+78060,780,Cuiabá,MT,capital
+78065,780,Cuiabá,MT,capital
+78085,780,Cuiabá,MT,capital
+78115,781,Várzea Grande,MT,metropolitana
+78134,781,Várzea Grande,MT,metropolitana
+78198,781,Várzea Grande,MT,metropolitana
+78507,785,Sinop,MT,interior
+78515,785,Sinop,MT,interior
+78529,785,Sinop,MT,interior
+78700,787,Rondonópolis,MT,interior
+78732,787,Rondonópolis,MT,interior
+78768,787,Rondonópolis,MT,interior
+79001,790,Campo Grande,MS,capital
+79002,790,Campo Grande,MS,capital
+79020,790,Campo Grande,MS,capital
+79032,790,Campo Grande,MS,capital
+79638,796,Três Lagoas,MS,interior
+79677,796,Três Lagoas,MS,interior
+79686,796,Três Lagoas,MS,interior
+79843,798,Dourados,MS,interior
+79872,798,Dourados,MS,interior
+79885,798,Dourados,MS,interior
+80043,800,Curitiba,PR,capital
+80081,800,Curitiba,PR,capital
+80082,800,Curitiba,PR,capital
+80084,800,Curitiba,PR,capital
+81001,810,Curitiba,PR,capital
+81010,810,Curitiba,PR,capital
+81017,810,Curitiba,PR,capital
+81050,810,Curitiba,PR,capital
+82008,820,Curitiba,PR,capital
+82017,820,Curitiba,PR,capital
+82031,820,Curitiba,PR,capital
+82074,820,Curitiba,PR,capital
+83069,830,São José dos Pinhais,PR,metropolitana
+83072,830,São José dos Pinhais,PR,metropolitana
+83080,830,São José dos Pinhais,PR,metropolitana
+84046,840,Ponta Grossa,PR,interior
+84080,840,Ponta Grossa,PR,interior
+84095,840,Ponta Grossa,PR,interior
+85853,858,Cascavel,PR,interior
+85864,858,Cascavel,PR,interior
+85892,858,Cascavel,PR,interior
+85900,859,Foz do Iguaçu,PR,interior
+85908,859,Foz do Iguaçu,PR,interior
+85953,859,Foz do Iguaçu,PR,interior
+86001,860,Londrina,PR,interior
+86038,860,Londrina,PR,interior
+86060,860,Londrina,PR,interior
+87056,870,Maringá,PR,interior
+87071,870,Maringá,PR,interior
+87095,870,Maringá,PR,interior
+88028,880,Florianópolis,SC,capital
+88041,880,Florianópolis,SC,capital
+88072,880,Florianópolis,SC,capital
+88076,880,Florianópolis,SC,capital
+88112,881,São José,SC,metropolitana
+88138,881,São José,SC,metropolitana
+88170,881,São José,SC,metropolitana
+88347,883,Itajaí,SC,interior
+88370,883,Itajaí,SC,interior
+88372,883,Itajaí,SC,interior
+88809,888,Criciúma,SC,interior
+88817,888,Criciúma,SC,interior
+88853,888,Criciúma,SC,interior
+89028,890,Blumenau,SC,interior
+89029,890,Blumenau,SC,interior
+89062,890,Blumenau,SC,interior
+89220,892,Joinville,SC,interior
+89259,892,Joinville,SC,interior
+89262,892,Joinville,SC,interior
+89843,898,Chapecó,SC,interior
+89863,898,Chapecó,SC,interior
+89879,898,Chapecó,SC,interior
+90001,900,Porto Alegre,RS,capital
+90074,900,Porto Alegre,RS,capital
+90092,900,Porto Alegre,RS,capital
+90093,900,Porto Alegre,RS,capital
+91015,910,Porto Alegre,RS,capital
+91066,910,Porto Alegre,RS,capital
+91081,910,Porto Alegre,RS,capital
+91098,910,Porto Alegre,RS,capital
+92010,920,Canoas,RS,metropolitana
+92047,920,Canoas,RS,metropolitana
+92051,920,Canoas,RS,metropolitana
+93301,933,Novo Hamburgo,RS,metropolitana
+93325,933,Novo Hamburgo,RS,metropolitana
+93327,933,Novo Hamburgo,RS,metropolitana
+95055,950,Caxias do Sul,RS,interior
+95076,950,Caxias do Sul,RS,interior
+95081,950,Caxias do Sul,RS,interior
+96067,960,Pelotas,RS,interior
+96090,960,Pelotas,RS,interior
+96091,960,Pelotas,RS,interior
+97029,970,Santa Maria,RS,interior
+97065,970,Santa Maria,RS,interior
+97091,970,Santa Maria,RS,interior
+99011,990,Passo Fundo,RS,interior
+99064,990,Passo Fundo,RS,interior
+99075,990,Passo Fundo,RS,interior

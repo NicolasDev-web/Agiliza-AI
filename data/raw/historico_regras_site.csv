@@ -1,0 +1,262 @@
+prefixo_cep3,uf,cidade_referencia,vigencia_inicio,vigencia_fim,transportadora_padrao,sla_contratual_dias_uteis,margem_seguranca_dias,prazo_exibido_dias_uteis,frete_cobrado,frete_cobrado_variante_teste_ab,alteracao,alterado_por
+010,SP,São Paulo,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+010,SP,São Paulo,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+010,SP,São Paulo,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+010,SP,São Paulo,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+020,SP,São Paulo,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+020,SP,São Paulo,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+020,SP,São Paulo,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+020,SP,São Paulo,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+030,SP,São Paulo,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+030,SP,São Paulo,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+030,SP,São Paulo,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+030,SP,São Paulo,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+040,SP,São Paulo,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+040,SP,São Paulo,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+040,SP,São Paulo,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+040,SP,São Paulo,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+050,SP,São Paulo,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+050,SP,São Paulo,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+050,SP,São Paulo,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+050,SP,São Paulo,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+080,SP,São Paulo,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+080,SP,São Paulo,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+080,SP,São Paulo,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+080,SP,São Paulo,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+060,SP,Osasco,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+060,SP,Osasco,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+060,SP,Osasco,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+060,SP,Osasco,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+070,SP,Guarulhos,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+070,SP,Guarulhos,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+070,SP,Guarulhos,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+070,SP,Guarulhos,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+090,SP,Santo André,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+090,SP,Santo André,2026-09-21,2026-09-30,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+090,SP,Santo André,2026-10-01,2026-10-04,ViaLog,2,2,5,17.90,12.90,margem de segurança de +2 dias úteis (reclamações de atraso no Sudeste em setembro),Marina Duarte
+090,SP,Santo André,2026-10-05,,ViaLog,2,2,5,17.90,,fim do teste A/B de frete,Rafael Lima
+110,SP,Santos,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+110,SP,Santos,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+110,SP,Santos,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+122,SP,São José dos Campos,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+122,SP,São José dos Campos,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+122,SP,São José dos Campos,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+130,SP,Campinas,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+130,SP,Campinas,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+130,SP,Campinas,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+134,SP,Piracicaba,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+134,SP,Piracicaba,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+134,SP,Piracicaba,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+140,SP,Ribeirão Preto,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+140,SP,Ribeirão Preto,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+140,SP,Ribeirão Preto,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+144,SP,Franca,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+144,SP,Franca,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+144,SP,Franca,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+150,SP,São José do Rio Preto,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+150,SP,São José do Rio Preto,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+150,SP,São José do Rio Preto,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+170,SP,Bauru,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+170,SP,Bauru,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+170,SP,Bauru,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+180,SP,Sorocaba,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+180,SP,Sorocaba,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+180,SP,Sorocaba,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+190,SP,Presidente Prudente,2026-07-01,2026-09-20,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+190,SP,Presidente Prudente,2026-09-21,2026-10-04,Correio Ágil,5,0,6,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+190,SP,Presidente Prudente,2026-10-05,,Correio Ágil,5,0,6,17.90,,fim do teste A/B de frete,Rafael Lima
+200,RJ,Rio de Janeiro,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+200,RJ,Rio de Janeiro,2026-09-21,2026-10-04,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+200,RJ,Rio de Janeiro,2026-10-05,,ViaLog,2,0,3,17.90,,fim do teste A/B de frete,Rafael Lima
+210,RJ,Rio de Janeiro,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+210,RJ,Rio de Janeiro,2026-09-21,2026-10-04,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+210,RJ,Rio de Janeiro,2026-10-05,,ViaLog,2,0,3,17.90,,fim do teste A/B de frete,Rafael Lima
+220,RJ,Rio de Janeiro,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+220,RJ,Rio de Janeiro,2026-09-21,2026-10-04,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+220,RJ,Rio de Janeiro,2026-10-05,,ViaLog,2,0,3,17.90,,fim do teste A/B de frete,Rafael Lima
+230,RJ,Rio de Janeiro,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+230,RJ,Rio de Janeiro,2026-09-21,2026-10-04,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+230,RJ,Rio de Janeiro,2026-10-05,,ViaLog,2,0,3,17.90,,fim do teste A/B de frete,Rafael Lima
+240,RJ,Niterói,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+240,RJ,Niterói,2026-09-21,2026-10-04,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+240,RJ,Niterói,2026-10-05,,ViaLog,2,0,3,17.90,,fim do teste A/B de frete,Rafael Lima
+250,RJ,Duque de Caxias,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+250,RJ,Duque de Caxias,2026-09-21,2026-10-04,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+250,RJ,Duque de Caxias,2026-10-05,,ViaLog,2,0,3,17.90,,fim do teste A/B de frete,Rafael Lima
+256,RJ,Petrópolis,2026-07-01,2026-09-20,ViaLog,3,0,4,20.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+256,RJ,Petrópolis,2026-09-21,2026-10-04,ViaLog,3,0,4,20.90,15.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+256,RJ,Petrópolis,2026-10-05,,ViaLog,3,0,4,20.90,,fim do teste A/B de frete,Rafael Lima
+260,RJ,Nova Iguaçu,2026-07-01,2026-09-20,ViaLog,2,0,3,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+260,RJ,Nova Iguaçu,2026-09-21,2026-10-04,ViaLog,2,0,3,17.90,12.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+260,RJ,Nova Iguaçu,2026-10-05,,ViaLog,2,0,3,17.90,,fim do teste A/B de frete,Rafael Lima
+272,RJ,Volta Redonda,2026-07-01,2026-09-20,ViaLog,3,0,4,20.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+272,RJ,Volta Redonda,2026-09-21,2026-10-04,ViaLog,3,0,4,20.90,15.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+272,RJ,Volta Redonda,2026-10-05,,ViaLog,3,0,4,20.90,,fim do teste A/B de frete,Rafael Lima
+280,RJ,Campos dos Goytacazes,2026-07-01,2026-09-20,ViaLog,3,0,4,20.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+280,RJ,Campos dos Goytacazes,2026-09-21,2026-10-04,ViaLog,3,0,4,20.90,15.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+280,RJ,Campos dos Goytacazes,2026-10-05,,ViaLog,3,0,4,20.90,,fim do teste A/B de frete,Rafael Lima
+289,RJ,Cabo Frio,2026-07-01,2026-09-20,ViaLog,3,0,4,20.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+289,RJ,Cabo Frio,2026-09-21,2026-10-04,ViaLog,3,0,4,20.90,15.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+289,RJ,Cabo Frio,2026-10-05,,ViaLog,3,0,4,20.90,,fim do teste A/B de frete,Rafael Lima
+290,ES,Vitória,2026-07-01,,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+291,ES,Vila Velha,2026-07-01,,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+292,ES,Serra,2026-07-01,,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+293,ES,Cachoeiro de Itapemirim,2026-07-01,,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+299,ES,Linhares,2026-07-01,,Correio Ágil,5,0,6,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+300,MG,Belo Horizonte,2026-07-01,2026-09-20,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+300,MG,Belo Horizonte,2026-09-21,2026-10-04,Correio Ágil,4,0,5,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+300,MG,Belo Horizonte,2026-10-05,,Correio Ágil,4,0,5,14.90,,fim do teste A/B de frete,Rafael Lima
+301,MG,Belo Horizonte,2026-07-01,2026-09-20,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+301,MG,Belo Horizonte,2026-09-21,2026-10-04,Correio Ágil,4,0,5,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+301,MG,Belo Horizonte,2026-10-05,,Correio Ágil,4,0,5,14.90,,fim do teste A/B de frete,Rafael Lima
+310,MG,Belo Horizonte,2026-07-01,2026-09-20,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+310,MG,Belo Horizonte,2026-09-21,2026-10-04,Correio Ágil,4,0,5,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+310,MG,Belo Horizonte,2026-10-05,,Correio Ágil,4,0,5,14.90,,fim do teste A/B de frete,Rafael Lima
+320,MG,Contagem,2026-07-01,2026-09-20,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+320,MG,Contagem,2026-09-21,2026-10-04,Correio Ágil,4,0,5,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+320,MG,Contagem,2026-10-05,,Correio Ágil,4,0,5,14.90,,fim do teste A/B de frete,Rafael Lima
+326,MG,Betim,2026-07-01,2026-09-20,Correio Ágil,4,0,5,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+326,MG,Betim,2026-09-21,2026-10-04,Correio Ágil,4,0,5,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+326,MG,Betim,2026-10-05,,Correio Ágil,4,0,5,14.90,,fim do teste A/B de frete,Rafael Lima
+350,MG,Governador Valadares,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+350,MG,Governador Valadares,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+350,MG,Governador Valadares,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+351,MG,Ipatinga,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+351,MG,Ipatinga,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+351,MG,Ipatinga,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+355,MG,Divinópolis,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+355,MG,Divinópolis,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+355,MG,Divinópolis,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+360,MG,Juiz de Fora,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+360,MG,Juiz de Fora,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+360,MG,Juiz de Fora,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+375,MG,Pouso Alegre,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+375,MG,Pouso Alegre,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+375,MG,Pouso Alegre,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+380,MG,Uberaba,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+380,MG,Uberaba,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+380,MG,Uberaba,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+384,MG,Uberlândia,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+384,MG,Uberlândia,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+384,MG,Uberlândia,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+394,MG,Montes Claros,2026-07-01,2026-09-20,Correio Ágil,5,0,6,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+394,MG,Montes Claros,2026-09-21,2026-10-04,Correio Ágil,5,0,6,15.90,10.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+394,MG,Montes Claros,2026-10-05,,Correio Ágil,5,0,6,15.90,,fim do teste A/B de frete,Rafael Lima
+400,BA,Salvador,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+410,BA,Salvador,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+420,BA,Salvador,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+427,BA,Lauro de Freitas,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+428,BA,Camaçari,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+440,BA,Feira de Santana,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+450,BA,Vitória da Conquista,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+455,BA,Itabuna,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+456,BA,Ilhéus,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+478,BA,Barreiras,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+489,BA,Juazeiro,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+490,SE,Aracaju,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+495,SE,Itabaiana,2026-07-01,,Expressa Já,6,0,7,26.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+500,PE,Recife,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+510,PE,Recife,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+520,PE,Recife,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+531,PE,Olinda,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+540,PE,Jaboatão dos Guararapes,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+550,PE,Caruaru,2026-07-01,,Expressa Já,6,0,7,24.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+553,PE,Garanhuns,2026-07-01,,Expressa Já,6,0,7,24.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+556,PE,Vitória de Santo Antão,2026-07-01,,Expressa Já,6,0,7,24.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+563,PE,Petrolina,2026-07-01,,Expressa Já,6,0,7,24.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+570,AL,Maceió,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+573,AL,Arapiraca,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+580,PB,João Pessoa,2026-07-01,,Expressa Já,5,0,6,20.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+584,PB,Campina Grande,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+587,PB,Patos,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+590,RN,Natal,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+591,RN,Parnamirim,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+593,RN,Caicó,2026-07-01,,Expressa Já,6,0,7,26.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+596,RN,Mossoró,2026-07-01,,Expressa Já,6,0,7,26.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+600,CE,Fortaleza,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+603,CE,Fortaleza,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+608,CE,Fortaleza,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+616,CE,Caucaia,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+619,CE,Maracanaú,2026-07-01,,Expressa Já,5,0,6,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+620,CE,Sobral,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+630,CE,Juazeiro do Norte,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+631,CE,Crato,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+635,CE,Iguatu,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+639,CE,Quixadá,2026-07-01,,Expressa Já,6,0,7,25.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+640,PI,Teresina,2026-07-01,,TransNorte,6,0,7,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+642,PI,Parnaíba,2026-07-01,,TransNorte,7,0,8,23.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+646,PI,Picos,2026-07-01,,TransNorte,7,0,8,23.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+650,MA,São Luís,2026-07-01,,TransNorte,6,0,7,19.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+656,MA,Caxias,2026-07-01,,TransNorte,7,0,8,24.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+659,MA,Imperatriz,2026-07-01,,TransNorte,7,0,8,24.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+660,PA,Belém,2026-07-01,,TransNorte,7,0,8,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+667,PA,Ananindeua,2026-07-01,,TransNorte,7,0,8,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+681,PA,Santarém,2026-07-01,,TransNorte,9,0,10,22.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+685,PA,Marabá,2026-07-01,,TransNorte,9,0,10,22.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+687,PA,Castanhal,2026-07-01,,TransNorte,9,0,10,22.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+689,AP,Macapá,2026-07-01,,TransNorte,7,0,8,19.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+690,AM,Manaus,2026-07-01,,TransNorte,7,0,8,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+691,AM,Parintins,2026-07-01,,TransNorte,9,0,10,22.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+692,AM,Itacoatiara,2026-07-01,,TransNorte,9,0,10,22.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+693,RR,Boa Vista,2026-07-01,,TransNorte,7,0,8,19.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+699,AC,Rio Branco,2026-07-01,,TransNorte,7,0,8,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+700,DF,Brasília,2026-07-01,,ViaLog,4,0,5,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+710,DF,Brasília,2026-07-01,,ViaLog,4,0,5,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+720,DF,Brasília,2026-07-01,,ViaLog,4,0,5,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+740,GO,Goiânia,2026-07-01,,ViaLog,4,0,5,19.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+749,GO,Aparecida de Goiânia,2026-07-01,,ViaLog,4,0,5,19.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+750,GO,Anápolis,2026-07-01,,ViaLog,5,0,6,20.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+759,GO,Rio Verde,2026-07-01,,ViaLog,5,0,6,20.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+768,RO,Porto Velho,2026-07-01,,TransNorte,7,0,8,17.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+769,RO,Ji-Paraná,2026-07-01,,TransNorte,9,0,10,21.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+770,TO,Palmas,2026-07-01,,TransNorte,7,0,8,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+778,TO,Araguaína,2026-07-01,,TransNorte,9,0,10,23.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+780,MT,Cuiabá,2026-07-01,,Correio Ágil,5,0,6,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+781,MT,Várzea Grande,2026-07-01,,Correio Ágil,5,0,6,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+785,MT,Sinop,2026-07-01,,Correio Ágil,6,0,7,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+787,MT,Rondonópolis,2026-07-01,,Correio Ágil,6,0,7,18.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+790,MS,Campo Grande,2026-07-01,,Correio Ágil,5,0,6,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+796,MS,Três Lagoas,2026-07-01,,Correio Ágil,6,0,7,19.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+798,MS,Dourados,2026-07-01,,Correio Ágil,6,0,7,19.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+800,PR,Curitiba,2026-07-01,2026-09-20,Rápido Sul,3,0,4,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+800,PR,Curitiba,2026-09-21,2026-10-04,Rápido Sul,3,0,4,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+800,PR,Curitiba,2026-10-05,,Rápido Sul,3,0,4,14.90,,fim do teste A/B de frete,Rafael Lima
+810,PR,Curitiba,2026-07-01,2026-09-20,Rápido Sul,3,0,4,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+810,PR,Curitiba,2026-09-21,2026-10-04,Rápido Sul,3,0,4,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+810,PR,Curitiba,2026-10-05,,Rápido Sul,3,0,4,14.90,,fim do teste A/B de frete,Rafael Lima
+820,PR,Curitiba,2026-07-01,2026-09-20,Rápido Sul,3,0,4,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+820,PR,Curitiba,2026-09-21,2026-10-04,Rápido Sul,3,0,4,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+820,PR,Curitiba,2026-10-05,,Rápido Sul,3,0,4,14.90,,fim do teste A/B de frete,Rafael Lima
+830,PR,São José dos Pinhais,2026-07-01,2026-09-20,Rápido Sul,3,0,4,14.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+830,PR,São José dos Pinhais,2026-09-21,2026-10-04,Rápido Sul,3,0,4,14.90,9.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+830,PR,São José dos Pinhais,2026-10-05,,Rápido Sul,3,0,4,14.90,,fim do teste A/B de frete,Rafael Lima
+840,PR,Ponta Grossa,2026-07-01,2026-09-20,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+840,PR,Ponta Grossa,2026-09-21,2026-10-04,Rápido Sul,4,0,5,16.90,11.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+840,PR,Ponta Grossa,2026-10-05,,Rápido Sul,4,0,5,16.90,,fim do teste A/B de frete,Rafael Lima
+858,PR,Cascavel,2026-07-01,2026-09-20,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+858,PR,Cascavel,2026-09-21,2026-10-04,Rápido Sul,4,0,5,16.90,11.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+858,PR,Cascavel,2026-10-05,,Rápido Sul,4,0,5,16.90,,fim do teste A/B de frete,Rafael Lima
+859,PR,Foz do Iguaçu,2026-07-01,2026-09-20,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+859,PR,Foz do Iguaçu,2026-09-21,2026-10-04,Rápido Sul,4,0,5,16.90,11.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+859,PR,Foz do Iguaçu,2026-10-05,,Rápido Sul,4,0,5,16.90,,fim do teste A/B de frete,Rafael Lima
+860,PR,Londrina,2026-07-01,2026-09-20,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+860,PR,Londrina,2026-09-21,2026-10-04,Rápido Sul,4,0,5,16.90,11.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+860,PR,Londrina,2026-10-05,,Rápido Sul,4,0,5,16.90,,fim do teste A/B de frete,Rafael Lima
+870,PR,Maringá,2026-07-01,2026-09-20,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+870,PR,Maringá,2026-09-21,2026-10-04,Rápido Sul,4,0,5,16.90,11.90,início do teste A/B de frete (variante com desconto de R$ 5.00),Rafael Lima
+870,PR,Maringá,2026-10-05,,Rápido Sul,4,0,5,16.90,,fim do teste A/B de frete,Rafael Lima
+880,SC,Florianópolis,2026-07-01,,Rápido Sul,3,0,4,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+881,SC,São José,2026-07-01,,Rápido Sul,3,0,4,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+883,SC,Itajaí,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+888,SC,Criciúma,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+890,SC,Blumenau,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+892,SC,Joinville,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+898,SC,Chapecó,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+900,RS,Porto Alegre,2026-07-01,,Rápido Sul,3,0,4,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+910,RS,Porto Alegre,2026-07-01,,Rápido Sul,3,0,4,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+920,RS,Canoas,2026-07-01,,Rápido Sul,3,0,4,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+933,RS,Novo Hamburgo,2026-07-01,,Rápido Sul,3,0,4,15.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+950,RS,Caxias do Sul,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+960,RS,Pelotas,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+970,RS,Santa Maria,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte
+990,RS,Passo Fundo,2026-07-01,,Rápido Sul,4,0,5,16.90,,tabelas de frete de 01/07/2026 carregadas no motor de cotação,Marina Duarte

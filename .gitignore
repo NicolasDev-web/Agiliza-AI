@@ -1,0 +1,9 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/processed/*.parquet
+
+# regenerável com scripts/01_processar.py
+data/processed/envios_medidos.csv

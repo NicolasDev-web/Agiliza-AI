@@ -1,0 +1,12 @@
+cod_status,descricao
+10,Coletado no cliente
+20,Em transferência entre bases
+30,Em rota de entrega
+40,Tentativa de entrega - destinatário ausente
+41,Tentativa de entrega - endereço não localizado
+50,Entregue ao destinatário
+55,Entregue a terceiro / portaria
+60,Devolvido ao remetente
+70,Aguardando retirada na base
+90,Extraviado / sinistro
+99,Baixa administrativa

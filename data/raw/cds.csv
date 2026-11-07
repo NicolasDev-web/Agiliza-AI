@@ -1,0 +1,3 @@
+cd_id,nome,cidade,uf,cep,endereco,cnpj,regioes_atendidas,horario_corte_pedidos,regra_expedicao,janela_coleta,dias_operacao,responsavel_operacao,capacidade_pedidos_dia
+CD1,CD Fortaleza,Fortaleza,CE,60870-440,"Av. Perimetral, 2150 - Messejana",15.714.113/0002-07,NE; N,23:59,separação e NF no 1º dia útil após o pedido (07h–14h); coleta no mesmo dia,15:00-21:00,"segunda a sexta, exceto feriados nacionais",Lucas Ferreira,9000
+CD2,CD Extrema,Extrema,MG,37640-000,"Rod. Fernão Dias, km 947 - Galpão 4",15.714.113/0003-98,SE; S; CO,23:59,separação e NF no 1º dia útil após o pedido (07h–14h); coleta no mesmo dia,15:00-21:00,"segunda a sexta, exceto feriados nacionais",Paulo Teixeira,14000

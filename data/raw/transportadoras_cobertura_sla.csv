@@ -1,0 +1,251 @@
+transportadora,uf,regiao,localidade,atende,prefixos_cep3,sla_contratual_dias_uteis
+Expressa Já,SP,SE,capital_e_metropolitana,sim,9,3
+Expressa Já,SP,SE,interior,sim,10,4
+Expressa Já,RJ,SE,capital_e_metropolitana,sim,7,3
+Expressa Já,RJ,SE,interior,sim,4,4
+Expressa Já,MG,SE,capital_e_metropolitana,sim,5,3
+Expressa Já,MG,SE,interior,sim,8,4
+Expressa Já,ES,SE,capital_e_metropolitana,sim,3,3
+Expressa Já,ES,SE,interior,sim,2,4
+Expressa Já,PR,S,capital_e_metropolitana,sim,4,5
+Expressa Já,PR,S,interior,sim,5,6
+Expressa Já,SC,S,capital_e_metropolitana,sim,2,5
+Expressa Já,SC,S,interior,sim,5,6
+Expressa Já,RS,S,capital_e_metropolitana,sim,4,5
+Expressa Já,RS,S,interior,sim,4,6
+Expressa Já,DF,CO,capital_e_metropolitana,sim,3,5
+Expressa Já,GO,CO,capital_e_metropolitana,sim,2,5
+Expressa Já,GO,CO,interior,sim,2,6
+Expressa Já,MT,CO,capital_e_metropolitana,sim,2,5
+Expressa Já,MT,CO,interior,sim,2,6
+Expressa Já,MS,CO,capital_e_metropolitana,sim,1,5
+Expressa Já,MS,CO,interior,sim,2,6
+Expressa Já,BA,NE,capital_e_metropolitana,sim,5,5
+Expressa Já,BA,NE,interior,sim,6,6
+Expressa Já,PE,NE,capital_e_metropolitana,sim,5,5
+Expressa Já,PE,NE,interior,sim,4,6
+Expressa Já,CE,NE,capital_e_metropolitana,sim,5,5
+Expressa Já,CE,NE,interior,sim,5,6
+Expressa Já,RN,NE,capital_e_metropolitana,sim,2,5
+Expressa Já,RN,NE,interior,sim,2,6
+Expressa Já,PB,NE,capital_e_metropolitana,sim,1,5
+Expressa Já,PB,NE,interior,sim,2,6
+Expressa Já,MA,NE,capital_e_metropolitana,sim,1,5
+Expressa Já,MA,NE,interior,sim,2,6
+Expressa Já,AL,NE,capital_e_metropolitana,sim,1,5
+Expressa Já,AL,NE,interior,sim,1,6
+Expressa Já,PI,NE,capital_e_metropolitana,sim,1,5
+Expressa Já,PI,NE,interior,sim,2,6
+Expressa Já,SE,NE,capital_e_metropolitana,sim,1,5
+Expressa Já,SE,NE,interior,sim,1,6
+Expressa Já,PA,N,capital_e_metropolitana,sim,2,8
+Expressa Já,PA,N,interior,sim,3,10
+Expressa Já,AM,N,capital_e_metropolitana,sim,1,8
+Expressa Já,AM,N,interior,sim,2,10
+Expressa Já,RO,N,capital_e_metropolitana,sim,1,8
+Expressa Já,RO,N,interior,sim,1,10
+Expressa Já,TO,N,capital_e_metropolitana,sim,1,8
+Expressa Já,TO,N,interior,sim,1,10
+Expressa Já,AC,N,capital_e_metropolitana,sim,1,8
+Expressa Já,AP,N,capital_e_metropolitana,sim,1,8
+Expressa Já,RR,N,capital_e_metropolitana,sim,1,8
+TransNorte,SP,SE,capital_e_metropolitana,sim,9,4
+TransNorte,SP,SE,interior,sim,10,5
+TransNorte,RJ,SE,capital_e_metropolitana,sim,7,4
+TransNorte,RJ,SE,interior,sim,4,5
+TransNorte,MG,SE,capital_e_metropolitana,sim,5,4
+TransNorte,MG,SE,interior,sim,8,5
+TransNorte,ES,SE,capital_e_metropolitana,sim,3,4
+TransNorte,ES,SE,interior,sim,2,5
+TransNorte,PR,S,capital_e_metropolitana,não,4,
+TransNorte,PR,S,interior,não,5,
+TransNorte,SC,S,capital_e_metropolitana,não,2,
+TransNorte,SC,S,interior,não,5,
+TransNorte,RS,S,capital_e_metropolitana,não,4,
+TransNorte,RS,S,interior,não,4,
+TransNorte,DF,CO,capital_e_metropolitana,sim,3,5
+TransNorte,GO,CO,capital_e_metropolitana,sim,2,5
+TransNorte,GO,CO,interior,sim,2,6
+TransNorte,MT,CO,capital_e_metropolitana,sim,2,5
+TransNorte,MT,CO,interior,sim,2,6
+TransNorte,MS,CO,capital_e_metropolitana,sim,1,5
+TransNorte,MS,CO,interior,sim,2,6
+TransNorte,BA,NE,capital_e_metropolitana,sim,5,6
+TransNorte,BA,NE,interior,sim,6,7
+TransNorte,PE,NE,capital_e_metropolitana,sim,5,6
+TransNorte,PE,NE,interior,sim,4,7
+TransNorte,CE,NE,capital_e_metropolitana,sim,5,6
+TransNorte,CE,NE,interior,sim,5,7
+TransNorte,RN,NE,capital_e_metropolitana,sim,2,6
+TransNorte,RN,NE,interior,sim,2,7
+TransNorte,PB,NE,capital_e_metropolitana,sim,1,6
+TransNorte,PB,NE,interior,sim,2,7
+TransNorte,MA,NE,capital_e_metropolitana,sim,1,6
+TransNorte,MA,NE,interior,sim,2,7
+TransNorte,AL,NE,capital_e_metropolitana,sim,1,6
+TransNorte,AL,NE,interior,sim,1,7
+TransNorte,PI,NE,capital_e_metropolitana,sim,1,6
+TransNorte,PI,NE,interior,sim,2,7
+TransNorte,SE,NE,capital_e_metropolitana,sim,1,6
+TransNorte,SE,NE,interior,sim,1,7
+TransNorte,PA,N,capital_e_metropolitana,sim,2,7
+TransNorte,PA,N,interior,sim,3,9
+TransNorte,AM,N,capital_e_metropolitana,sim,1,7
+TransNorte,AM,N,interior,sim,2,9
+TransNorte,RO,N,capital_e_metropolitana,sim,1,7
+TransNorte,RO,N,interior,sim,1,9
+TransNorte,TO,N,capital_e_metropolitana,sim,1,7
+TransNorte,TO,N,interior,sim,1,9
+TransNorte,AC,N,capital_e_metropolitana,sim,1,7
+TransNorte,AP,N,capital_e_metropolitana,sim,1,7
+TransNorte,RR,N,capital_e_metropolitana,sim,1,7
+Rápido Sul,SP,SE,capital_e_metropolitana,sim,9,3
+Rápido Sul,SP,SE,interior,sim,10,4
+Rápido Sul,RJ,SE,capital_e_metropolitana,sim,7,3
+Rápido Sul,RJ,SE,interior,sim,4,4
+Rápido Sul,MG,SE,capital_e_metropolitana,sim,5,3
+Rápido Sul,MG,SE,interior,sim,8,4
+Rápido Sul,ES,SE,capital_e_metropolitana,sim,3,3
+Rápido Sul,ES,SE,interior,sim,2,4
+Rápido Sul,PR,S,capital_e_metropolitana,sim,4,3
+Rápido Sul,PR,S,interior,sim,5,4
+Rápido Sul,SC,S,capital_e_metropolitana,sim,2,3
+Rápido Sul,SC,S,interior,sim,5,4
+Rápido Sul,RS,S,capital_e_metropolitana,sim,4,3
+Rápido Sul,RS,S,interior,sim,4,4
+Rápido Sul,DF,CO,capital_e_metropolitana,sim,3,5
+Rápido Sul,GO,CO,capital_e_metropolitana,sim,2,5
+Rápido Sul,GO,CO,interior,sim,2,6
+Rápido Sul,MT,CO,capital_e_metropolitana,sim,2,5
+Rápido Sul,MT,CO,interior,sim,2,6
+Rápido Sul,MS,CO,capital_e_metropolitana,sim,1,5
+Rápido Sul,MS,CO,interior,sim,2,6
+Rápido Sul,BA,NE,capital_e_metropolitana,sim,5,7
+Rápido Sul,BA,NE,interior,sim,6,8
+Rápido Sul,PE,NE,capital_e_metropolitana,sim,5,7
+Rápido Sul,PE,NE,interior,sim,4,8
+Rápido Sul,CE,NE,capital_e_metropolitana,sim,5,7
+Rápido Sul,CE,NE,interior,sim,5,8
+Rápido Sul,RN,NE,capital_e_metropolitana,sim,2,7
+Rápido Sul,RN,NE,interior,sim,2,8
+Rápido Sul,PB,NE,capital_e_metropolitana,sim,1,7
+Rápido Sul,PB,NE,interior,sim,2,8
+Rápido Sul,MA,NE,capital_e_metropolitana,sim,1,7
+Rápido Sul,MA,NE,interior,sim,2,8
+Rápido Sul,AL,NE,capital_e_metropolitana,sim,1,7
+Rápido Sul,AL,NE,interior,sim,1,8
+Rápido Sul,PI,NE,capital_e_metropolitana,sim,1,7
+Rápido Sul,PI,NE,interior,sim,2,8
+Rápido Sul,SE,NE,capital_e_metropolitana,sim,1,7
+Rápido Sul,SE,NE,interior,sim,1,8
+Rápido Sul,PA,N,capital_e_metropolitana,não,2,
+Rápido Sul,PA,N,interior,não,3,
+Rápido Sul,AM,N,capital_e_metropolitana,não,1,
+Rápido Sul,AM,N,interior,não,2,
+Rápido Sul,RO,N,capital_e_metropolitana,não,1,
+Rápido Sul,RO,N,interior,não,1,
+Rápido Sul,TO,N,capital_e_metropolitana,não,1,
+Rápido Sul,TO,N,interior,não,1,
+Rápido Sul,AC,N,capital_e_metropolitana,não,1,
+Rápido Sul,AP,N,capital_e_metropolitana,não,1,
+Rápido Sul,RR,N,capital_e_metropolitana,não,1,
+ViaLog,SP,SE,capital_e_metropolitana,sim,9,2
+ViaLog,SP,SE,interior,sim,10,3
+ViaLog,RJ,SE,capital_e_metropolitana,sim,7,2
+ViaLog,RJ,SE,interior,sim,4,3
+ViaLog,MG,SE,capital_e_metropolitana,sim,5,2
+ViaLog,MG,SE,interior,sim,8,3
+ViaLog,ES,SE,capital_e_metropolitana,sim,3,2
+ViaLog,ES,SE,interior,sim,2,3
+ViaLog,PR,S,capital_e_metropolitana,sim,4,4
+ViaLog,PR,S,interior,sim,5,5
+ViaLog,SC,S,capital_e_metropolitana,sim,2,4
+ViaLog,SC,S,interior,sim,5,5
+ViaLog,RS,S,capital_e_metropolitana,sim,4,4
+ViaLog,RS,S,interior,sim,4,5
+ViaLog,DF,CO,capital_e_metropolitana,sim,3,4
+ViaLog,GO,CO,capital_e_metropolitana,sim,2,4
+ViaLog,GO,CO,interior,sim,2,5
+ViaLog,MT,CO,capital_e_metropolitana,sim,2,4
+ViaLog,MT,CO,interior,sim,2,5
+ViaLog,MS,CO,capital_e_metropolitana,sim,1,4
+ViaLog,MS,CO,interior,sim,2,5
+ViaLog,BA,NE,capital_e_metropolitana,sim,5,6
+ViaLog,BA,NE,interior,sim,6,7
+ViaLog,PE,NE,capital_e_metropolitana,sim,5,6
+ViaLog,PE,NE,interior,sim,4,7
+ViaLog,CE,NE,capital_e_metropolitana,sim,5,6
+ViaLog,CE,NE,interior,sim,5,7
+ViaLog,RN,NE,capital_e_metropolitana,sim,2,6
+ViaLog,RN,NE,interior,sim,2,7
+ViaLog,PB,NE,capital_e_metropolitana,sim,1,6
+ViaLog,PB,NE,interior,sim,2,7
+ViaLog,MA,NE,capital_e_metropolitana,sim,1,6
+ViaLog,MA,NE,interior,sim,2,7
+ViaLog,AL,NE,capital_e_metropolitana,sim,1,6
+ViaLog,AL,NE,interior,sim,1,7
+ViaLog,PI,NE,capital_e_metropolitana,sim,1,6
+ViaLog,PI,NE,interior,sim,2,7
+ViaLog,SE,NE,capital_e_metropolitana,sim,1,6
+ViaLog,SE,NE,interior,sim,1,7
+ViaLog,PA,N,capital_e_metropolitana,sim,2,8
+ViaLog,PA,N,interior,sim,3,10
+ViaLog,AM,N,capital_e_metropolitana,sim,1,8
+ViaLog,AM,N,interior,sim,2,10
+ViaLog,RO,N,capital_e_metropolitana,sim,1,8
+ViaLog,RO,N,interior,sim,1,10
+ViaLog,TO,N,capital_e_metropolitana,sim,1,8
+ViaLog,TO,N,interior,sim,1,10
+ViaLog,AC,N,capital_e_metropolitana,sim,1,8
+ViaLog,AP,N,capital_e_metropolitana,sim,1,8
+ViaLog,RR,N,capital_e_metropolitana,sim,1,8
+Correio Ágil,SP,SE,capital_e_metropolitana,sim,9,4
+Correio Ágil,SP,SE,interior,sim,10,5
+Correio Ágil,RJ,SE,capital_e_metropolitana,sim,7,4
+Correio Ágil,RJ,SE,interior,sim,4,5
+Correio Ágil,MG,SE,capital_e_metropolitana,sim,5,4
+Correio Ágil,MG,SE,interior,sim,8,5
+Correio Ágil,ES,SE,capital_e_metropolitana,sim,3,4
+Correio Ágil,ES,SE,interior,sim,2,5
+Correio Ágil,PR,S,capital_e_metropolitana,sim,4,5
+Correio Ágil,PR,S,interior,sim,5,6
+Correio Ágil,SC,S,capital_e_metropolitana,sim,2,5
+Correio Ágil,SC,S,interior,sim,5,6
+Correio Ágil,RS,S,capital_e_metropolitana,sim,4,5
+Correio Ágil,RS,S,interior,sim,4,6
+Correio Ágil,DF,CO,capital_e_metropolitana,sim,3,5
+Correio Ágil,GO,CO,capital_e_metropolitana,sim,2,5
+Correio Ágil,GO,CO,interior,sim,2,6
+Correio Ágil,MT,CO,capital_e_metropolitana,sim,2,5
+Correio Ágil,MT,CO,interior,sim,2,6
+Correio Ágil,MS,CO,capital_e_metropolitana,sim,1,5
+Correio Ágil,MS,CO,interior,sim,2,6
+Correio Ágil,BA,NE,capital_e_metropolitana,sim,5,7
+Correio Ágil,BA,NE,interior,sim,6,8
+Correio Ágil,PE,NE,capital_e_metropolitana,sim,5,7
+Correio Ágil,PE,NE,interior,sim,4,8
+Correio Ágil,CE,NE,capital_e_metropolitana,sim,5,7
+Correio Ágil,CE,NE,interior,sim,5,8
+Correio Ágil,RN,NE,capital_e_metropolitana,sim,2,7
+Correio Ágil,RN,NE,interior,sim,2,8
+Correio Ágil,PB,NE,capital_e_metropolitana,sim,1,7
+Correio Ágil,PB,NE,interior,sim,2,8
+Correio Ágil,MA,NE,capital_e_metropolitana,sim,1,7
+Correio Ágil,MA,NE,interior,sim,2,8
+Correio Ágil,AL,NE,capital_e_metropolitana,sim,1,7
+Correio Ágil,AL,NE,interior,sim,1,8
+Correio Ágil,PI,NE,capital_e_metropolitana,sim,1,7
+Correio Ágil,PI,NE,interior,sim,2,8
+Correio Ágil,SE,NE,capital_e_metropolitana,sim,1,7
+Correio Ágil,SE,NE,interior,sim,1,8
+Correio Ágil,PA,N,capital_e_metropolitana,sim,2,9
+Correio Ágil,PA,N,interior,sim,3,11
+Correio Ágil,AM,N,capital_e_metropolitana,sim,1,9
+Correio Ágil,AM,N,interior,sim,2,11
+Correio Ágil,RO,N,capital_e_metropolitana,sim,1,9
+Correio Ágil,RO,N,interior,sim,1,11
+Correio Ágil,TO,N,capital_e_metropolitana,sim,1,9
+Correio Ágil,TO,N,interior,sim,1,11
+Correio Ágil,AC,N,capital_e_metropolitana,sim,1,9
+Correio Ágil,AP,N,capital_e_metropolitana,sim,1,9
+Correio Ágil,RR,N,capital_e_metropolitana,sim,1,9

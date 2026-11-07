@@ -1,0 +1,29 @@
+uf,localidade,transportadora
+SP,capital_e_metropolitana,ViaLog
+SP,interior,Correio Ágil
+RJ,todas,ViaLog
+MG,todas,Correio Ágil
+ES,todas,Correio Ágil
+PR,todas,Rápido Sul
+SC,todas,Rápido Sul
+RS,todas,Rápido Sul
+DF,todas,ViaLog
+GO,todas,ViaLog
+MT,todas,Correio Ágil
+MS,todas,Correio Ágil
+BA,todas,Expressa Já
+PE,todas,Expressa Já
+CE,todas,Expressa Já
+RN,todas,Expressa Já
+PB,todas,Expressa Já
+MA,todas,TransNorte
+AL,todas,Expressa Já
+PI,todas,TransNorte
+SE,todas,Expressa Já
+PA,todas,TransNorte
+AM,todas,TransNorte
+RO,todas,TransNorte
+TO,todas,TransNorte
+AC,todas,TransNorte
+AP,todas,TransNorte
+RR,todas,TransNorte

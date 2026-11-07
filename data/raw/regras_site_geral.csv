@@ -1,0 +1,21 @@
+regra,valor
+versao,7
+atualizado_em,2026-11-01T22:00:00
+regra_prazo,prazo exibido = 1 dia útil de separação + SLA contratual da transportadora cotada + margem de segurança do prefixo
+regra_cotacao,"o motor cota a transportadora padrão do prefixo; até 31/10 parte dos envios foi para transportadoras secundárias por cota de volume, e o checkout mostrava o prazo da transportadora cotada"
+dias_uteis,"segunda a sexta, exceto feriados nacionais (ver parametros.md)"
+frete_gratis_acima_de,199.0
+margens_seguranca[1].prefixos_cep3,010; 020; 030; 040; 050; 080; 060; 070; 090
+margens_seguranca[1].dias,2
+margens_seguranca[1].desde,2026-10-01
+margens_seguranca[1].motivo,reclamações de atraso no Sudeste em setembro
+historico_alteracoes[1].data,2026-07-01
+historico_alteracoes[1].alteracao,tabelas de frete de todas as transportadoras cadastradas no motor de cotação (vigência 01/07/2026)
+historico_alteracoes[2].data,2026-08-01
+historico_alteracoes[2].alteracao,"cotas de volume com transportadoras secundárias: cerca de 30% dos envios de cada região, até 31/10"
+historico_alteracoes[3].data,2026-09-21
+historico_alteracoes[3].alteracao,"teste A/B de frete em SP, RJ, MG, PR: metade das sessões abaixo do frete grátis viu frete R$ 5.00 menor, até 2026-10-04"
+historico_alteracoes[4].data,2026-10-01
+historico_alteracoes[4].alteracao,margem de segurança de +2 dias úteis em 9 prefixos (reclamações de atraso no Sudeste em setembro)
+historico_alteracoes[5].data,2026-11-01
+historico_alteracoes[5].alteracao,"fim das cotas de volume; a partir de 02/11 cada envio vai para a transportadora padrão, salvo escolha do analista"

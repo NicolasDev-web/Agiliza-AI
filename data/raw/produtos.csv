@@ -1,0 +1,67 @@
+sku,ean,nome,marca,categoria,peso_g,comprimento_cm,largura_cm,altura_cm,preco_lista,ativo
+GC-0090-01,7890214551756,Capa iPhone 16 Pro personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-02,7896359618224,Capa iPhone 16 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-03,7895708070102,Capa iPhone 15 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-04,7894023081688,Capa iPhone 14 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-05,7897168365316,Capa Galaxy S25 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-06,7897488042799,Capa Galaxy S24 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-07,7896573747724,Capa Galaxy A55 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-08,7897727226119,Capa Moto G85 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0090-09,7898047209462,Capa Redmi Note 14 personalizada,Gocase,Capas de celular,90,17,9,2,89.90,sim
+GC-0380-01,7891329647815,Copo térmico 500 ml preto,Gocase,Copos e garrafas,380,10,10,20,119.90,sim
+GC-0380-02,7898182228724,Copo térmico 500 ml rosa,Gocase,Copos e garrafas,380,10,10,20,119.90,sim
+GC-0380-03,7897037902833,Copo térmico 500 ml verde,Gocase,Copos e garrafas,380,10,10,20,119.90,sim
+GC-0520-01,7898622181855,Garrafa térmica 750 ml preta,Gocase,Copos e garrafas,520,9,9,28,149.90,sim
+GC-0520-02,7897016104234,Garrafa térmica 750 ml lilás,Gocase,Copos e garrafas,520,9,9,28,149.90,sim
+GC-0250-01,7896769903187,Necessaire personalizada,Gocase,Acessórios,250,24,16,5,89.90,sim
+GC-0250-02,7899073274011,Capa para notebook 13 pol. personalizada,Gocase,Acessórios,250,24,16,5,89.90,sim
+GC-0060-01,7897203286026,Pop socket personalizado,Gocase,Acessórios,60,8,8,2,39.90,sim
+GC-0060-02,7896979914683,Alça de celular personalizada,Gocase,Acessórios,60,8,8,2,39.90,sim
+APC-0120,7896804240888,Ápice Sérum facial 30 ml,Ápice,Skincare,120,4,4,11,59.90,sim
+APC-0230,7896723429616,Ápice Body splash 200 ml,Ápice,Perfumaria,230,6,4,18,69.90,sim
+APC-0260,7893291264489,Ápice Hidratante corporal 200 ml,Ápice,Corpo e banho,260,6,4,17,64.90,sim
+APC-0350,7891791916044,Ápice Perfume 100 ml,Ápice,Perfumaria,350,8,5,14,139.90,sim
+APC-0520,7891371495211,Ápice Kit shampoo e condicionador,Ápice,Cabelos,520,12,6,20,99.90,sim
+APC-1050,7896710324962,Ápice Kit presente corpo e banho,Ápice,Kits,1050,25,18,10,189.90,sim
+BRB-0120,7892620243096,Barbour's Sérum facial 30 ml,Barbour's,Skincare,120,4,4,11,59.90,sim
+BRB-0230,7898168808148,Barbour's Body splash 200 ml,Barbour's,Perfumaria,230,6,4,18,69.90,sim
+BRB-0260,7895241269216,Barbour's Hidratante corporal 200 ml,Barbour's,Corpo e banho,260,6,4,17,64.90,sim
+BRB-0350,7892256648203,Barbour's Perfume 100 ml,Barbour's,Perfumaria,350,8,5,14,139.90,sim
+BRB-0520,7899368792794,Barbour's Kit shampoo e condicionador,Barbour's,Cabelos,520,12,6,20,99.90,sim
+BRB-1050,7899888768507,Barbour's Kit presente corpo e banho,Barbour's,Kits,1050,25,18,10,189.90,sim
+KKS-0120,7898521225872,Kokeshi Sérum facial 30 ml,Kokeshi,Skincare,120,4,4,11,59.90,sim
+KKS-0230,7891938856646,Kokeshi Body splash 200 ml,Kokeshi,Perfumaria,230,6,4,18,69.90,sim
+KKS-0260,7892276291168,Kokeshi Hidratante corporal 200 ml,Kokeshi,Corpo e banho,260,6,4,17,64.90,sim
+KKS-0350,7897822156069,Kokeshi Perfume 100 ml,Kokeshi,Perfumaria,350,8,5,14,139.90,sim
+KKS-0520,7895446644603,Kokeshi Kit shampoo e condicionador,Kokeshi,Cabelos,520,12,6,20,99.90,sim
+KKS-1050,7893128172185,Kokeshi Kit presente corpo e banho,Kokeshi,Kits,1050,25,18,10,189.90,sim
+LSC-0120,7890627833548,Lescent Sérum facial 30 ml,Lescent,Skincare,120,4,4,11,59.90,sim
+LSC-0230,7894339032268,Lescent Body splash 200 ml,Lescent,Perfumaria,230,6,4,18,69.90,sim
+LSC-0260,7890929153511,Lescent Hidratante corporal 200 ml,Lescent,Corpo e banho,260,6,4,17,64.90,sim
+LSC-0350,7892246267421,Lescent Perfume 100 ml,Lescent,Perfumaria,350,8,5,14,139.90,sim
+LSC-0520,7891191084169,Lescent Kit shampoo e condicionador,Lescent,Cabelos,520,12,6,20,99.90,sim
+LSC-1050,7890497225504,Lescent Kit presente corpo e banho,Lescent,Kits,1050,25,18,10,189.90,sim
+RTU-0120,7899727527777,Rituária Sérum facial 30 ml,Rituária,Skincare,120,4,4,11,59.90,sim
+RTU-0230,7893237082559,Rituária Body splash 200 ml,Rituária,Perfumaria,230,6,4,18,69.90,sim
+RTU-0260,7890109446273,Rituária Hidratante corporal 200 ml,Rituária,Corpo e banho,260,6,4,17,64.90,sim
+RTU-0350,7890144799730,Rituária Perfume 100 ml,Rituária,Perfumaria,350,8,5,14,139.90,sim
+RTU-0520,7894736133575,Rituária Kit shampoo e condicionador,Rituária,Cabelos,520,12,6,20,99.90,sim
+RTU-1050,7890380280801,Rituária Kit presente corpo e banho,Rituária,Kits,1050,25,18,10,189.90,sim
+BSM-0120,7894148071366,By Samia Sérum facial 30 ml,By Samia,Skincare,120,4,4,11,59.90,sim
+BSM-0230,7899993522100,By Samia Body splash 200 ml,By Samia,Perfumaria,230,6,4,18,69.90,sim
+BSM-0260,7891683990251,By Samia Hidratante corporal 200 ml,By Samia,Corpo e banho,260,6,4,17,64.90,sim
+BSM-0350,7893191731678,By Samia Perfume 100 ml,By Samia,Perfumaria,350,8,5,14,139.90,sim
+BSM-0520,7897409631576,By Samia Kit shampoo e condicionador,By Samia,Cabelos,520,12,6,20,99.90,sim
+BSM-1050,7895368711421,By Samia Kit presente corpo e banho,By Samia,Kits,1050,25,18,10,189.90,sim
+YNZ-0120,7899966970693,Yenzah Sérum facial 30 ml,Yenzah,Skincare,120,4,4,11,59.90,sim
+YNZ-0230,7891664932485,Yenzah Body splash 200 ml,Yenzah,Perfumaria,230,6,4,18,69.90,sim
+YNZ-0260,7897280909306,Yenzah Hidratante corporal 200 ml,Yenzah,Corpo e banho,260,6,4,17,64.90,sim
+YNZ-0350,7898672503560,Yenzah Perfume 100 ml,Yenzah,Perfumaria,350,8,5,14,139.90,sim
+YNZ-0520,7895725108789,Yenzah Kit shampoo e condicionador,Yenzah,Cabelos,520,12,6,20,99.90,sim
+YNZ-1050,7897472331182,Yenzah Kit presente corpo e banho,Yenzah,Kits,1050,25,18,10,189.90,sim
+AUA-0120,7893114013591,Auá Sérum facial 30 ml,Auá,Skincare,120,4,4,11,59.90,sim
+AUA-0230,7898681215225,Auá Body splash 200 ml,Auá,Perfumaria,230,6,4,18,69.90,sim
+AUA-0260,7896632600663,Auá Hidratante corporal 200 ml,Auá,Corpo e banho,260,6,4,17,64.90,sim
+AUA-0350,7894886086868,Auá Perfume 100 ml,Auá,Perfumaria,350,8,5,14,139.90,sim
+AUA-0520,7892559140473,Auá Kit shampoo e condicionador,Auá,Cabelos,520,12,6,20,99.90,sim
+AUA-1050,7890941988276,Auá Kit presente corpo e banho,Auá,Kits,1050,25,18,10,189.90,sim

@@ -1,0 +1,21 @@
+ferramenta,tipo,papeis_permitidos,descricao,parametros,limites,custo_rs
+consultar_envios,leitura,analista_logistica; planejador; gerente,"Envios do ERP (histórico e novos), com filtros. Não traz data de entrega: ela está nos portais.",uf; prefixo_cep; transportadora; data_inicio; data_fim; somente_nao_postados; limite,"{""leituras_por_segundo"": 10}",0.0
+consultar_portal,leitura,analista_logistica; planejador; gerente,Rastreio de um envio no portal da transportadora (formato próprio de cada portal).,transportadora*; codigo_rastreio*,"{""consultas_por_minuto_por_portal"": 60}",0.0
+exportar_portal,leitura,planejador; gerente,Exportação completa dos eventos de um portal num período (mesmo formato do arquivo portal_*).,transportadora*; data_inicio; data_fim,"{""exportacoes_por_hora_por_portal"": 2}",0.0
+consultar_tabela_frete,leitura,analista_logistica; planejador; gerente,"Tabela de frete de uma transportadora (todas as vigências), no formato de origem.",transportadora*,{},0.0
+cotar_frete,leitura,analista_logistica; planejador; gerente,Cotação do motor do ERP para um CEP e peso: valor e prazo de cada transportadora que atende. Usa as tabelas cadastradas no motor.,cep*; peso_g*; valor_pedido,{},0.0
+consultar_concorrentes,leitura,analista_logistica; planejador; gerente,Cotações coletadas no checkout dos concorrentes.,uf; prefixo_cep; concorrente; data_inicio,{},0.0
+consultar_conversao,leitura,planejador; gerente,"Sessões de checkout e pedidos por dia, prefixo de 3 dígitos, prazo e frete exibidos.",prefixo_cep3; uf; data_inicio; data_fim,{},0.0
+consultar_regras_site,leitura,analista_logistica; planejador; gerente,Configuração atual do site (regras_site.json).,,{},0.0
+consultar_politicas,leitura,analista_logistica; planejador; gerente,Devolve politicas.json.,,{},0.0
+feriados,leitura,analista_logistica; planejador; gerente,Feriados nacionais e estaduais do período.,uf,{},0.0
+rotear_envio,acao,analista_logistica,Define a transportadora de um envio novo ainda não postado. O custo real é o frete da transportadora escolhida.,envio_id*; transportadora*; justificativa,"{""um_por_envio"": true, ""antes_da_postagem"": true, ""desvio_max_sem_aprovacao_pct_uf_dia"": 40}",frete real da transportadora escolhida
+abrir_chamado_portal,acao,analista_logistica; planejador,"Abre chamado no portal da transportadora sobre um envio (atraso, extravio, sem rastreio). A transportadora responde em 4 a 24 h.",transportadora*; codigo_rastreio; envio_id; motivo*,"{""chamados_por_dia"": 80}",0.0
+medir_desempenho,leitura,planejador; gerente,"Cumprimento de prazo, trânsito real (p50, p80, p92) e custo por transportadora e prefixo, calculados a partir dos portais.",transportadora; prefixos_cep; periodo_inicio; periodo_fim,{},0.0
+propor_mudanca,acao,planejador,"Cria proposta regional (prazo exibido, frete cobrado, roteamento padrão, tabela de cotação ou frete grátis) para aprovação do gerente.",tipo*; prefixos_cep3; ufs; valor_novo*; transportadora; evidencia*; impacto_estimado_reais,"{""propostas_abertas_max"": 8}",0.0
+abrir_incidente_transportadora,acao,planejador,Abre incidente formal com uma transportadora sobre desempenho em prefixos específicos.,transportadora*; prefixos_cep*; evidencia*; meta_cumprimento,"{""incidentes_abertos_por_transportadora"": 2}",15.0
+aprovar_proposta,acao,gerente,Aprova ou recusa uma proposta regional. Não aprova proposta própria.,proposta_id*; decisao*; comentario,"{""max_aprovadas_por_cenario"": 12}",15.0
+negociar_transportadora,acao,gerente,"Responde a uma proposta comercial de transportadora (aceitar, recusar ou contrapropor).",transportadora*; resposta*; condicoes,{},0.0
+solicitar_aprovacao,comunicacao,analista_logistica; planejador,"Pede aprovação ao gerente para uma proposta ou ação acima do limite, com resumo e evidência.",proposta_id; acao; resumo*; evidencia,{},15.0
+acionar_pessoa,comunicacao,analista_logistica; planejador; gerente,"Levanta a mão para uma pessoa nomeada (gerente, marketing, comercial, CX, financeiro, operação ou gerente de contas da transportadora) quando a decisão não é do agente.",destino*; motivo*; urgencia,{},15.0
+responder_colaborador,comunicacao,analista_logistica; planejador; gerente,"Responde a um pedido de colaborador (Slack, WhatsApp ou e-mail).",pedido_id*; mensagem*,{},0.0

@@ -1,0 +1,7 @@
+embalagem_id,descricao,comprimento_cm,largura_cm,altura_cm,peso_cubado_g
+ENV-P,Envelope de segurança P,24,16,2,128
+CX-P,Caixa P,16,11,6,176
+ENV-M,Envelope bolha M,30,22,4,440
+CX-M,Caixa M,22,16,10,586
+CX-G,Caixa G,30,22,15,1650
+CX-GG,Caixa GG,40,30,20,4000

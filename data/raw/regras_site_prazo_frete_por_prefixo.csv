@@ -1,0 +1,149 @@
+prefixo_cep3,uf,cidade_referencia,localidade,transportadora_padrao,sla_contratual_dias_uteis,margem_seguranca_dias,prazo_exibido_dias_uteis,frete_cobrado
+010,SP,São Paulo,capital,ViaLog,2,2,5,17.9
+020,SP,São Paulo,capital,ViaLog,2,2,5,17.9
+030,SP,São Paulo,capital,ViaLog,2,2,5,17.9
+040,SP,São Paulo,capital,ViaLog,2,2,5,17.9
+050,SP,São Paulo,capital,ViaLog,2,2,5,17.9
+080,SP,São Paulo,capital,ViaLog,2,2,5,17.9
+060,SP,Osasco,metropolitana,ViaLog,2,2,5,17.9
+070,SP,Guarulhos,metropolitana,ViaLog,2,2,5,17.9
+090,SP,Santo André,metropolitana,ViaLog,2,2,5,17.9
+110,SP,Santos,interior,Correio Ágil,5,0,6,17.9
+122,SP,São José dos Campos,interior,Correio Ágil,5,0,6,17.9
+130,SP,Campinas,interior,Correio Ágil,5,0,6,17.9
+134,SP,Piracicaba,interior,Correio Ágil,5,0,6,17.9
+140,SP,Ribeirão Preto,interior,Correio Ágil,5,0,6,17.9
+144,SP,Franca,interior,Correio Ágil,5,0,6,17.9
+150,SP,São José do Rio Preto,interior,Correio Ágil,5,0,6,17.9
+170,SP,Bauru,interior,Correio Ágil,5,0,6,17.9
+180,SP,Sorocaba,interior,Correio Ágil,5,0,6,17.9
+190,SP,Presidente Prudente,interior,Correio Ágil,5,0,6,17.9
+200,RJ,Rio de Janeiro,capital,ViaLog,2,0,3,17.9
+210,RJ,Rio de Janeiro,capital,ViaLog,2,0,3,17.9
+220,RJ,Rio de Janeiro,capital,ViaLog,2,0,3,17.9
+230,RJ,Rio de Janeiro,capital,ViaLog,2,0,3,17.9
+240,RJ,Niterói,metropolitana,ViaLog,2,0,3,17.9
+250,RJ,Duque de Caxias,metropolitana,ViaLog,2,0,3,17.9
+256,RJ,Petrópolis,interior,ViaLog,3,0,4,20.9
+260,RJ,Nova Iguaçu,metropolitana,ViaLog,2,0,3,17.9
+272,RJ,Volta Redonda,interior,ViaLog,3,0,4,20.9
+280,RJ,Campos dos Goytacazes,interior,ViaLog,3,0,4,20.9
+289,RJ,Cabo Frio,interior,ViaLog,3,0,4,20.9
+290,ES,Vitória,capital,Correio Ágil,4,0,5,14.9
+291,ES,Vila Velha,metropolitana,Correio Ágil,4,0,5,14.9
+292,ES,Serra,metropolitana,Correio Ágil,4,0,5,14.9
+293,ES,Cachoeiro de Itapemirim,interior,Correio Ágil,5,0,6,17.9
+299,ES,Linhares,interior,Correio Ágil,5,0,6,17.9
+300,MG,Belo Horizonte,capital,Correio Ágil,4,0,5,14.9
+301,MG,Belo Horizonte,capital,Correio Ágil,4,0,5,14.9
+310,MG,Belo Horizonte,capital,Correio Ágil,4,0,5,14.9
+320,MG,Contagem,metropolitana,Correio Ágil,4,0,5,14.9
+326,MG,Betim,metropolitana,Correio Ágil,4,0,5,14.9
+350,MG,Governador Valadares,interior,Correio Ágil,5,0,6,15.9
+351,MG,Ipatinga,interior,Correio Ágil,5,0,6,15.9
+355,MG,Divinópolis,interior,Correio Ágil,5,0,6,15.9
+360,MG,Juiz de Fora,interior,Correio Ágil,5,0,6,15.9
+375,MG,Pouso Alegre,interior,Correio Ágil,5,0,6,15.9
+380,MG,Uberaba,interior,Correio Ágil,5,0,6,15.9
+384,MG,Uberlândia,interior,Correio Ágil,5,0,6,15.9
+394,MG,Montes Claros,interior,Correio Ágil,5,0,6,15.9
+400,BA,Salvador,capital,Expressa Já,5,0,6,21.9
+410,BA,Salvador,capital,Expressa Já,5,0,6,21.9
+420,BA,Salvador,capital,Expressa Já,5,0,6,21.9
+427,BA,Lauro de Freitas,metropolitana,Expressa Já,5,0,6,21.9
+428,BA,Camaçari,metropolitana,Expressa Já,5,0,6,21.9
+440,BA,Feira de Santana,interior,Expressa Já,6,0,7,25.9
+450,BA,Vitória da Conquista,interior,Expressa Já,6,0,7,25.9
+455,BA,Itabuna,interior,Expressa Já,6,0,7,25.9
+456,BA,Ilhéus,interior,Expressa Já,6,0,7,25.9
+478,BA,Barreiras,interior,Expressa Já,6,0,7,25.9
+489,BA,Juazeiro,interior,Expressa Já,6,0,7,25.9
+490,SE,Aracaju,capital,Expressa Já,5,0,6,21.9
+495,SE,Itabaiana,interior,Expressa Já,6,0,7,26.9
+500,PE,Recife,capital,Expressa Já,5,0,6,21.9
+510,PE,Recife,capital,Expressa Já,5,0,6,21.9
+520,PE,Recife,capital,Expressa Já,5,0,6,21.9
+531,PE,Olinda,metropolitana,Expressa Já,5,0,6,21.9
+540,PE,Jaboatão dos Guararapes,metropolitana,Expressa Já,5,0,6,21.9
+550,PE,Caruaru,interior,Expressa Já,6,0,7,24.9
+553,PE,Garanhuns,interior,Expressa Já,6,0,7,24.9
+556,PE,Vitória de Santo Antão,interior,Expressa Já,6,0,7,24.9
+563,PE,Petrolina,interior,Expressa Já,6,0,7,24.9
+570,AL,Maceió,capital,Expressa Já,5,0,6,21.9
+573,AL,Arapiraca,interior,Expressa Já,6,0,7,25.9
+580,PB,João Pessoa,capital,Expressa Já,5,0,6,20.9
+584,PB,Campina Grande,interior,Expressa Já,6,0,7,25.9
+587,PB,Patos,interior,Expressa Já,6,0,7,25.9
+590,RN,Natal,capital,Expressa Já,5,0,6,21.9
+591,RN,Parnamirim,metropolitana,Expressa Já,5,0,6,21.9
+593,RN,Caicó,interior,Expressa Já,6,0,7,26.9
+596,RN,Mossoró,interior,Expressa Já,6,0,7,26.9
+600,CE,Fortaleza,capital,Expressa Já,5,0,6,21.9
+603,CE,Fortaleza,capital,Expressa Já,5,0,6,21.9
+608,CE,Fortaleza,capital,Expressa Já,5,0,6,21.9
+616,CE,Caucaia,metropolitana,Expressa Já,5,0,6,21.9
+619,CE,Maracanaú,metropolitana,Expressa Já,5,0,6,21.9
+620,CE,Sobral,interior,Expressa Já,6,0,7,25.9
+630,CE,Juazeiro do Norte,interior,Expressa Já,6,0,7,25.9
+631,CE,Crato,interior,Expressa Já,6,0,7,25.9
+635,CE,Iguatu,interior,Expressa Já,6,0,7,25.9
+639,CE,Quixadá,interior,Expressa Já,6,0,7,25.9
+640,PI,Teresina,capital,TransNorte,6,0,7,18.9
+642,PI,Parnaíba,interior,TransNorte,7,0,8,23.9
+646,PI,Picos,interior,TransNorte,7,0,8,23.9
+650,MA,São Luís,capital,TransNorte,6,0,7,19.9
+656,MA,Caxias,interior,TransNorte,7,0,8,24.9
+659,MA,Imperatriz,interior,TransNorte,7,0,8,24.9
+660,PA,Belém,capital,TransNorte,7,0,8,17.9
+667,PA,Ananindeua,metropolitana,TransNorte,7,0,8,17.9
+681,PA,Santarém,interior,TransNorte,9,0,10,22.9
+685,PA,Marabá,interior,TransNorte,9,0,10,22.9
+687,PA,Castanhal,interior,TransNorte,9,0,10,22.9
+689,AP,Macapá,capital,TransNorte,7,0,8,19.9
+690,AM,Manaus,capital,TransNorte,7,0,8,18.9
+691,AM,Parintins,interior,TransNorte,9,0,10,22.9
+692,AM,Itacoatiara,interior,TransNorte,9,0,10,22.9
+693,RR,Boa Vista,capital,TransNorte,7,0,8,19.9
+699,AC,Rio Branco,capital,TransNorte,7,0,8,18.9
+700,DF,Brasília,capital,ViaLog,4,0,5,18.9
+710,DF,Brasília,capital,ViaLog,4,0,5,18.9
+720,DF,Brasília,capital,ViaLog,4,0,5,18.9
+740,GO,Goiânia,capital,ViaLog,4,0,5,19.9
+749,GO,Aparecida de Goiânia,metropolitana,ViaLog,4,0,5,19.9
+750,GO,Anápolis,interior,ViaLog,5,0,6,20.9
+759,GO,Rio Verde,interior,ViaLog,5,0,6,20.9
+768,RO,Porto Velho,capital,TransNorte,7,0,8,17.9
+769,RO,Ji-Paraná,interior,TransNorte,9,0,10,21.9
+770,TO,Palmas,capital,TransNorte,7,0,8,18.9
+778,TO,Araguaína,interior,TransNorte,9,0,10,23.9
+780,MT,Cuiabá,capital,Correio Ágil,5,0,6,16.9
+781,MT,Várzea Grande,metropolitana,Correio Ágil,5,0,6,16.9
+785,MT,Sinop,interior,Correio Ágil,6,0,7,18.9
+787,MT,Rondonópolis,interior,Correio Ágil,6,0,7,18.9
+790,MS,Campo Grande,capital,Correio Ágil,5,0,6,16.9
+796,MS,Três Lagoas,interior,Correio Ágil,6,0,7,19.9
+798,MS,Dourados,interior,Correio Ágil,6,0,7,19.9
+800,PR,Curitiba,capital,Rápido Sul,3,0,4,14.9
+810,PR,Curitiba,capital,Rápido Sul,3,0,4,14.9
+820,PR,Curitiba,capital,Rápido Sul,3,0,4,14.9
+830,PR,São José dos Pinhais,metropolitana,Rápido Sul,3,0,4,14.9
+840,PR,Ponta Grossa,interior,Rápido Sul,4,0,5,16.9
+858,PR,Cascavel,interior,Rápido Sul,4,0,5,16.9
+859,PR,Foz do Iguaçu,interior,Rápido Sul,4,0,5,16.9
+860,PR,Londrina,interior,Rápido Sul,4,0,5,16.9
+870,PR,Maringá,interior,Rápido Sul,4,0,5,16.9
+880,SC,Florianópolis,capital,Rápido Sul,3,0,4,15.9
+881,SC,São José,metropolitana,Rápido Sul,3,0,4,15.9
+883,SC,Itajaí,interior,Rápido Sul,4,0,5,16.9
+888,SC,Criciúma,interior,Rápido Sul,4,0,5,16.9
+890,SC,Blumenau,interior,Rápido Sul,4,0,5,16.9
+892,SC,Joinville,interior,Rápido Sul,4,0,5,16.9
+898,SC,Chapecó,interior,Rápido Sul,4,0,5,16.9
+900,RS,Porto Alegre,capital,Rápido Sul,3,0,4,15.9
+910,RS,Porto Alegre,capital,Rápido Sul,3,0,4,15.9
+920,RS,Canoas,metropolitana,Rápido Sul,3,0,4,15.9
+933,RS,Novo Hamburgo,metropolitana,Rápido Sul,3,0,4,15.9
+950,RS,Caxias do Sul,interior,Rápido Sul,4,0,5,16.9
+960,RS,Pelotas,interior,Rápido Sul,4,0,5,16.9
+970,RS,Santa Maria,interior,Rápido Sul,4,0,5,16.9
+990,RS,Passo Fundo,interior,Rápido Sul,4,0,5,16.9

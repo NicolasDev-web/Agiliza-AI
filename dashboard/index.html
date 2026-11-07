@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transporte: prazo que vende e cumpre</title>
+  <meta name="description" content="Agente de logística: mede quem entrega bem em cada região, compara com os concorrentes e propõe o prazo do site.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='2' fill='%232f37c4'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%23fff'/%3E%3Crect x='9' y='3' width='4' height='4' fill='%23b9bce9'/%3E%3Crect x='3' y='9' width='4' height='4' fill='%23b9bce9'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#mapa">Pular para o mapa</a>
+
+  <header class="nav" id="topo">
+    <a class="marca" href="#topo" aria-label="Transporte, início">
+      <span class="marca-nome">Transporte</span>
+      <span class="marca-sub">prazo certo</span>
+    </a>
+    <nav class="nav-links" aria-label="Seções">
+      <a href="#mapa">Mapa</a>
+      <a href="#transportadoras">Transportadoras</a>
+      <a href="#metodo">Como medimos</a>
+      <a href="#propostas" class="nav-destaque">Propostas</a>
+    </nav>
+  </header>
+
+  <section class="hero" aria-labelledby="hero-titulo">
+    <div class="hero-texto">
+      <p class="rotulo"><span class="rotulo-marca" aria-hidden="true"></span><span id="hero-rotulo"></span></p>
+      <h1 id="hero-titulo" class="hero-titulo">
+        <span class="linha">Prazo que vende</span>
+        <span class="linha">e que cumpre</span>
+      </h1>
+      <div class="hero-pe">
+        <p class="hero-lede">Um colega de logística que lê os portais das transportadoras, mede quem entrega bem em cada região e propõe o prazo do site. Quando a decisão não é dele, chama o gerente.</p>
+        <div class="hero-acoes">
+          <a class="botao botao-claro" href="#mapa"><span class="botao-icone" aria-hidden="true">+</span>Explorar o mapa</a>
+          <a class="botao botao-contorno-claro" href="#propostas"><span class="botao-icone" aria-hidden="true">↳</span>Ver as propostas</a>
+        </div>
+      </div>
+    </div>
+    <figure class="hero-mapa" aria-label="Brasil desenhado em pixels: quanto mais claro o pixel, mais entregas chegam no prazo naquele estado">
+      <canvas id="pixels" role="img" aria-label="Mapa em pixels dos estados pelo cumprimento de prazo"></canvas>
+      <div class="cidade-tag" id="pixels-tag" hidden></div>
+      <figcaption class="hero-legenda">
+        <span class="px px-p" aria-hidden="true"></span>poucas entregas no prazo
+        <span class="px px-g" aria-hidden="true"></span>muitas entregas no prazo
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="frase" aria-label="Resumo">
+    <p class="frase-texto" id="frase-texto"></p>
+    <dl class="numeros" id="numeros"></dl>
+  </section>
+
+  <section class="secao" id="mapa" aria-labelledby="mapa-titulo">
+    <div class="secao-cabeca">
+      <h2 id="mapa-titulo">Mapa das regiões</h2>
+      <p class="secao-nota">Escolha o que pintar no mapa e clique num estado para ver os prefixos de CEP dele e o que o agente propõe.</p>
+    </div>
+    <div class="controles" role="toolbar" aria-label="Controles do mapa">
+      <div class="segmentado" id="ctl-camada" role="group" aria-label="O que pintar">
+        <button type="button" data-v="cumprimento" aria-pressed="true">Entregas no prazo</button>
+        <button type="button" data-v="acao" aria-pressed="false">Prazos a corrigir</button>
+        <button type="button" data-v="impacto" aria-pressed="false">Custo de atraso</button>
+      </div>
+      <div><span class="rotulo-ctl">Transportadora</span><select class="seletor" id="ctl-transp" aria-label="Transportadora"></select></div>
+    </div>
+    <div class="explorar-grade">
+      <div class="mapa-caixa">
+        <div id="mapa-leaflet" class="mapa" aria-label="Mapa dos estados do Brasil"></div>
+        <div class="legenda" id="legenda"></div>
+      </div>
+      <aside class="ficha" id="ficha" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section class="secao fundo-claro" id="transportadoras" aria-labelledby="transp-titulo">
+    <div class="secao-cabeca">
+      <h2 id="transp-titulo">Quem entrega no prazo</h2>
+      <p class="secao-nota">De cada 100 pedidos, quantos chegaram até a data prometida ao cliente. A meta da empresa é 92.</p>
+    </div>
+    <div class="barras" id="barras"></div>
+    <div class="cards-transp" id="cards-transp"></div>
+  </section>
+
+  <section class="secao" id="propostas" aria-labelledby="prop-titulo">
+    <div class="secao-cabeca">
+      <h2 id="prop-titulo">O que o agente propõe</h2>
+      <p class="secao-nota">Um prazo para cada prefixo de CEP: o menor que ainda cumpre a meta. Toda mudança de prazo é uma proposta e só vale depois do OK do gerente.</p>
+    </div>
+    <div class="controles" role="toolbar" aria-label="Filtros das propostas">
+      <div class="segmentado" id="ctl-acao" role="group" aria-label="Tipo de proposta">
+        <button type="button" data-v="todas" aria-pressed="true">Todas</button>
+        <button type="button" data-v="aumentar" aria-pressed="false">Aumentar prazo</button>
+        <button type="button" data-v="reduzir" aria-pressed="false">Reduzir prazo</button>
+        <button type="button" data-v="manter" aria-pressed="false">Manter</button>
+      </div>
+      <div><span class="rotulo-ctl">Estado</span><select class="seletor" id="ctl-uf" aria-label="Estado"></select></div>
+    </div>
+    <div class="tabela-caixa">
+      <table class="tabela" id="tabela">
+        <thead><tr>
+          <th>Região</th><th>Transportadora</th><th>Prazo do site</th><th>Chegam no prazo</th>
+          <th>Concorrentes</th><th>Custo de atraso</th><th>Proposta</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="secao-nota" id="tabela-nota" style="margin-top:12px"></p>
+
+    <div class="agente">
+      <div class="msg" id="msg" aria-live="polite"></div>
+      <div class="regras">
+        <h3>Onde o agente decide e onde chama alguém</h3>
+        <ul>
+          <li><b>Faz sozinho:</b> ler os portais, medir o desempenho, escolher a transportadora de cada envio novo (até 40% dos envios de um estado por dia fora da padrão) e abrir chamado de um envio atrasado.</li>
+          <li><b>Pede aprovação do gerente:</b> mudar o prazo exibido, o frete, a transportadora padrão de uma região, ou mostrar um prazo abaixo do contrato.</li>
+          <li><b>Chama a pessoa certa:</b> campanha de marketing, proposta comercial de transportadora, divergência de fatura, cliente esperando resposta.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="secao fundo-claro" id="metodo" aria-labelledby="metodo-titulo">
+    <div class="secao-cabeca">
+      <h2 id="metodo-titulo">Como medimos</h2>
+      <p class="secao-nota">Os pedidos não trazem a data de entrega. Ela está nos portais, cada um com seu formato.</p>
+    </div>
+    <div class="metodo" id="metodo-corpo"></div>
+  </section>
+
+  <footer class="rodape">Dados fictícios do desafio de Transportes (GoHacks Talent). Gerado em <span id="gerado"></span>.</footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="ufs.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
