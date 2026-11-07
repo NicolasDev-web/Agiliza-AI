@@ -11,6 +11,12 @@ from __future__ import annotations
 
 import json
 import sys
+
+for _f in (sys.stdout, sys.stderr):   # Windows: o console padrão não é UTF-8 e acento vira "?"
+    try:
+        _f.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 from datetime import datetime
 from pathlib import Path
 
@@ -55,12 +61,12 @@ def main() -> None:
     props = props.merge(cid[["cidade", "uf", "latitude", "longitude"]].rename(columns={"cidade": "cidade_referencia"}),
                         on=["cidade_referencia", "uf"], how="left")
 
-    d.drop(columns=["rastreio"]).to_csv(PROCESSED / "envios_medidos.csv", index=False)
-    transp.to_csv(PROCESSED / "desempenho_transportadora.csv", index=False)
-    prefixos.to_csv(PROCESSED / "desempenho_prefixo.csv", index=False)
-    ufs.to_csv(PROCESSED / "desempenho_uf.csv", index=False)
-    props.to_csv(PROCESSED / "propostas_prazo.csv", index=False)
-    (PROCESSED / "qualidade_dados.json").write_text(json.dumps(_limpa(qualidade), ensure_ascii=False, indent=2))
+    d.drop(columns=["rastreio"]).to_csv(PROCESSED / "envios_medidos.csv", index=False, encoding="utf-8")
+    transp.to_csv(PROCESSED / "desempenho_transportadora.csv", index=False, encoding="utf-8")
+    prefixos.to_csv(PROCESSED / "desempenho_prefixo.csv", index=False, encoding="utf-8")
+    ufs.to_csv(PROCESSED / "desempenho_uf.csv", index=False, encoding="utf-8")
+    props.to_csv(PROCESSED / "propostas_prazo.csv", index=False, encoding="utf-8")
+    (PROCESSED / "qualidade_dados.json").write_text(json.dumps(_limpa(qualidade), ensure_ascii=False, indent=2), encoding="utf-8")
 
     # resumo por UF para o mapa
     pu = props.copy()
@@ -103,7 +109,7 @@ def main() -> None:
     }
     DASHBOARD.mkdir(exist_ok=True)
     (DASHBOARD / "data.js").write_text(
-        "window.DADOS = " + json.dumps(_limpa(dados), ensure_ascii=False, separators=(",", ":")) + ";\n")
+        "window.DADOS = " + json.dumps(_limpa(dados), ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
     print(f"ok: {len(m):,} envios medidos, {len(props)} prefixos, "
           f"{dados['meta']['propostas_aumentar']} para aumentar e {dados['meta']['propostas_reduzir']} para reduzir")
 

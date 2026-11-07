@@ -218,3 +218,32 @@ def test_consultas_independentes_rodam_juntas_e_voltam_na_ordem():
     assert tipos.count("ferramenta") == 2 and tipos.count("resultado") == 2
     assert [e["nome"] for e in ev if e["tipo"] == "resultado"] == ["medir_desempenho", "consultar_problemas"]
     assert tipos[-1] == "resposta"
+
+
+def test_varios_pedidos_de_prazo_numa_frase_e_nome_mais_longo_vence():
+    from transporte.agente.simulado import _lugares_na_pergunta
+    ach = _lugares_na_pergunta("mude o prazo de Marabá para 18 dias e de Vitória da Conquista para 12")
+    assert [(a["cidade"], a["valor"]) for a in ach] == [("Marabá", 18), ("Vitória da Conquista", 12)]
+    s = Sessao(cliente=Cliente(url="", token=""), usuario="lucas")
+    r = [e for e in s.responder("Peça à Marina para mudar o prazo de Marabá para 18 dias e de Santarém para 15 dias") if e["tipo"] == "resposta"][0]
+    assert "2 pedidos" in r["texto"] and "Marabá" in r["texto"] and "Santarém" in r["texto"]
+    from transporte import estado
+    assert len([a for a in estado.listar_aprovacoes("lucas") if a["situacao"] == "pendente"]) == 2
+
+
+def test_dicas_do_agente_so_trazem_o_que_ainda_nao_foi_pedido():
+    from transporte import dicas
+    antes = dicas.dicas_de_prazo(3)
+    assert len(antes) == 3
+    s = Sessao(cliente=Cliente(url="", token=""), usuario="lucas")
+    list(s.responder(antes[0]["pedido"]))
+    depois = dicas.dicas_de_prazo(3)
+    assert antes[0]["cep3"] not in {d["cep3"] for d in depois} and len(depois) == 3
+
+
+def test_duas_propostas_no_mesmo_segundo_nao_se_fundem():
+    from transporte import estado
+    s = Sessao(cliente=Cliente(url="", token=""), usuario="lucas")
+    list(s.responder("mude o prazo de Marabá para 20 dias e de Santarém para 18 dias"))
+    pend = [a for a in estado.listar_aprovacoes("lucas") if a["situacao"] == "pendente"]
+    assert len(pend) == 2 and len({a["proposta_id"] for a in pend}) == 2

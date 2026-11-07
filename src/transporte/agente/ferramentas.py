@@ -7,6 +7,7 @@ Assim o "levantar a mão" é uma regra do sistema, não uma promessa do modelo.
 from __future__ import annotations
 
 import datetime as dt
+import itertools
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -315,6 +316,9 @@ def rotear_envios(envio_ids=None, uf=None, limite=10, _diario: Diario | None = N
                     "nada é gravado no ERP."}
 
 
+_SEQ_PROPOSTA = itertools.count(1)
+
+
 def propor_mudanca(tipo=None, prefixos_cep=None, valor_novo=None, evidencia=None, impacto_estimado_reais=None,
                    _diario: Diario | None = None):
     """Cria uma proposta regional (prazo, frete, roteamento padrão). Quem aprova é o gerente."""
@@ -325,7 +329,7 @@ def propor_mudanca(tipo=None, prefixos_cep=None, valor_novo=None, evidencia=None
                         "envios considerados, taxa de cumprimento e impacto em R$"}
     if tipo == "prazo_exibido" and float(valor_novo) < 2:
         return {"erro": "o prazo exibido não pode ser menor que 2 dias úteis (mínimo absoluto)"}
-    pid = f"PROP-{dt.datetime.now().strftime('%H%M%S')}"
+    pid = f"PROP-{dt.datetime.now().strftime('%H%M%S')}-{next(_SEQ_PROPOSTA)}"   # contador: duas propostas no mesmo segundo não podem se fundir
     detalhe = {"proposta_id": pid, "tipo": tipo, "prefixos": prefixos_cep, "valor_novo": valor_novo,
                "evidencia": evidencia, "impacto_estimado_reais": impacto_estimado_reais}
     if _diario:

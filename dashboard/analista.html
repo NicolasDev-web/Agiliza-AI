@@ -31,8 +31,6 @@
     <div class="an-acoes" id="acoes"></div>
   </section>
 
-  <div id="panorama" aria-label="Panorama das entregas"></div>
-
   <main class="an-grade">
     <section class="painel" aria-label="Melhor rota">
       <h2>Melhor rota <span id="rota-sub"></span></h2>
@@ -41,6 +39,11 @@
     </section>
 
     <div class="mesa">
+      <section class="painel" aria-label="Sugestões do agente" id="dicas-painel" hidden>
+        <h2>O agente sugere pedir à Marina <span id="n-dicas"></span></h2>
+        <div id="dicas"></div>
+      </section>
+
       <section class="painel" aria-label="Pedidos para a gerente">
         <h2>Seus pedidos para a Marina <span id="n-pedidos"></span></h2>
         <div id="fila"><p class="vazio">Quando o agente precisar de um OK, o pedido aparece aqui com a resposta dela.</p></div>
@@ -52,6 +55,11 @@
       </section>
     </div>
   </main>
+
+  <details class="visao" id="visao">
+    <summary>Ver visão geral das entregas</summary>
+    <div id="panorama" aria-label="Visão geral das entregas"></div>
+  </details>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
   <script src="data.js"></script>

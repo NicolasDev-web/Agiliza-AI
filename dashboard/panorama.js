@@ -79,5 +79,5 @@
   }
 
   window.Agiliza = window.Agiliza || {};
-  window.Agiliza.panorama = function (el, papel) { el.classList.add("panorama"); el.replaceChildren(kpis(papel), transportadoras(), mapa(), piores()); };
+  window.Agiliza.panorama = function (el, papel) { el.classList.add("panorama"); el.replaceChildren(kpis(papel), transportadoras(), piores()); };
 })();

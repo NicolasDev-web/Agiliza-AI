@@ -23,7 +23,7 @@
   [["Melhor rota dos envios novos", "Qual a melhor rota para os envios novos de SP?"], ["Qual prazo precisa mudar?", "Qual prazo do site precisa mudar?"], ["Onde há mais problemas?", "Onde resolvemos mais problemas?"]]
     .forEach(([t, p]) => $("#acoes").append(h("button", { type: "button", class: "botao botao-cobalto", onclick: () => window.AgilizaAgente && window.AgilizaAgente.perguntar(p) }, h("span", { class: "botao-icone", "aria-hidden": "true" }, "→"), t)));
 
-  if (window.Agiliza.panorama) window.Agiliza.panorama($("#panorama"), "analista");
+  $("#visao").addEventListener("toggle", () => { if ($("#visao").open && window.Agiliza.panorama) window.Agiliza.panorama($("#panorama"), "analista"); }, { once: true });
 
   /* ---------- mapa (coordenadas reais dos municípios) ---------- */
   const temMapa = typeof L !== "undefined";
@@ -66,7 +66,7 @@
     const e = ev.detail; if (e.tipo !== "resultado") return; const r = e.resultado || {};
     if (e.nome === "escolher_melhor_rota") { if (r.melhor_rota) rotaUnica(r); else if (r.detalhe && r.detalhe[0]) rotaUnica(r.detalhe[0]); }
     if (e.nome === "rotear_envios") lote(r);
-    if (e.nome === "solicitar_aprovacao") carregarFila();
+    if (e.nome === "solicitar_aprovacao") { carregarFila(); carregarDicas(); }
   });
 
   /* ---------- pedidos para a Marina ---------- */
@@ -95,11 +95,26 @@
   }
   async function carregarMensagens() { try { const r = await fetch("/api/mensagens"); if (r.ok) { const d = await r.json(); if (d.mensagens[0]) zap(d.mensagens[0], d.canal); else $("#canal").textContent = d.canal === "qr" ? "ligado" : "prévia"; } } catch (e) { /* servidor fora */ } }
 
-  carregarFila(); carregarMensagens();
+  /* ---------- o que o agente acha que vale pedir à Marina ---------- */
+  const brl0 = (x) => "R$ " + Number(x).toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+  const pedir = (t) => window.AgilizaAgente && window.AgilizaAgente.perguntar(t);
+  async function carregarDicas() {
+    try {
+      const r = await fetch("/api/dicas"); if (!r.ok) return; const { dicas } = await r.json();
+      $("#dicas-painel").hidden = !dicas.length; $("#n-dicas").replaceChildren(dicas.length ? h("em", {}, dicas.length) : "");
+      $("#dicas").replaceChildren(...dicas.map((d) => h("div", { class: "dica" },
+        h("b", {}, `${d.cidade}/${d.uf}: ${d.hoje} → ${d.proposto} dias úteis`),
+        h("small", {}, `${d.motivo} `, h("span", { class: "ganho" }, `evita ~${brl0(d.impacto)}`)),
+        h("button", { type: "button", class: "botao botao-cobalto pequeno", onclick: () => pedir(d.pedido) }, "Pedir"))),
+        ...(dicas.length > 1 ? [h("button", { type: "button", class: "botao botao-cheio pequeno dicas-todas", onclick: () => pedir("Peça à Marina para mudar o prazo de " + dicas.map((d) => `${d.cidade} para ${d.proposto} dias`).join(", ")) }, `Pedir as ${dicas.length} de uma vez`)] : []));
+    } catch (e) { /* servidor fora */ }
+  }
+
+  carregarFila(); carregarMensagens(); carregarDicas();
   const canal = new EventSource("/api/eventos");
   canal.onmessage = (m) => {
     let e; try { e = JSON.parse(m.data); } catch (x) { return; }
-    if (e.tipo === "pedido_enviado" || e.tipo === "decisao" || e.tipo === "reiniciado") carregarFila();
+    if (e.tipo === "pedido_enviado" || e.tipo === "decisao" || e.tipo === "reiniciado") { carregarFila(); carregarDicas(); }
     if (e.tipo === "whatsapp") zap(e.mensagem);
     if (e.tipo === "reiniciado") { $("#zap").replaceChildren(h("p", { class: "vazio" }, "Quando a Marina decidir, a resposta chega aqui e no seu WhatsApp.")); }
   };

@@ -46,7 +46,7 @@ body.pagina-analista, body.pagina-gerente, body.pagina-login { background: linea
 .pan-kpi b { display: block; font-size: 30px; font-weight: 400; letter-spacing: -0.03em; color: var(--cobalto); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .pan-kpi b.ruim { color: var(--perda); }
 .pan-kpi span { font-size: 12.5px; color: var(--tinta-2); }
-.pan-transp { grid-column: span 4; } .pan-mapa { grid-column: span 4; } .pan-piores { grid-column: span 4; }
+.pan-transp { grid-column: span 6; } .pan-piores { grid-column: span 6; }
 .pan-cartao h3 { font-size: 15px; font-weight: 550; letter-spacing: -0.01em; margin-bottom: 4px; }
 .pan-cartao > small { display: block; color: var(--tinta-3); font-size: 12px; margin-bottom: 14px; }
 .barra-lin { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: 13px; padding: 6px 0; }
@@ -77,3 +77,18 @@ body.pagina-analista, body.pagina-gerente, body.pagina-login { background: linea
 .painel h2 em.zap-pilula { font-style: normal; font-size: 11px; background: var(--papel); color: var(--tinta-2); padding: 3px 10px; }
 .painel h2 em.zap-pilula.conectado { background: #d9f0e6; color: #0b6b47; }
 .painel h2 em.zap-pilula.aguardando_qr { background: #fde8d8; color: #a8470f; }
+
+/* visão geral: fica recolhida no pé da página, para quem quiser ver o todo */
+.visao { margin: 0 var(--g) 90px; background: var(--branco); border-radius: var(--raio-g); box-shadow: var(--sombra); }
+.visao > summary { cursor: pointer; padding: 16px 22px; font-size: 14.5px; font-weight: 550; list-style: none; display: flex; justify-content: space-between; color: var(--tinta-2); }
+.visao > summary::after { content: "+"; font-family: var(--mono); color: var(--cobalto); }
+.visao[open] > summary::after { content: "–"; }
+.visao .panorama { padding: 0 22px 22px; }
+.visao .pan-cartao, .visao .pan-kpi { box-shadow: none; background: var(--papel-claro); }
+
+/* dicas do agente */
+.dica { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; padding: 12px 14px; background: var(--papel-claro); border-radius: var(--raio); margin-bottom: 8px; align-items: center; }
+.dica b { font-weight: 550; font-size: 14.5px; } .dica small { grid-column: 1; color: var(--tinta-2); font-size: 12.5px; line-height: 1.4; }
+.dica .botao { grid-column: 2; grid-row: 1 / span 2; }
+.dica .ganho { color: var(--bom); font-family: var(--mono); font-size: 11.5px; }
+.dicas-todas { margin-top: 4px; }

@@ -1,5 +1,11 @@
 """Monta a base SQLite (data/processed/transporte.db) a partir de data/raw e data/ref."""
 import sys
+
+for _f in (sys.stdout, sys.stderr):   # Windows: o console padrão não é UTF-8 e acento vira "?"
+    try:
+        _f.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 import time
 from pathlib import Path
 

@@ -11,6 +11,12 @@ import mimetypes
 import os
 import re
 import sys
+
+for _f in (sys.stdout, sys.stderr):   # Windows: o console padrão não é UTF-8 e acento vira "?"
+    try:
+        _f.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 import threading
 import traceback
 import uuid
@@ -185,6 +191,11 @@ class Handler(BaseHTTPRequestHandler):
                 u = self._quem(q, corpo)
                 if u:
                     self._json({"mensagens": estado.listar_mensagens(u["id"]), "canal": whatsapp.configuracao()["canal"]})
+                return
+            if caminho == "/api/dicas" and metodo == "GET":
+                if self._quem(q, corpo, "analista_logistica"):
+                    from transporte import dicas
+                    self._json({"dicas": dicas.dicas_de_prazo(3)})
                 return
             if caminho == "/api/whatsapp" and metodo == "GET":
                 if self._quem(q, corpo, "gerente"):
