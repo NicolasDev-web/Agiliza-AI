@@ -292,7 +292,7 @@
         ? `A ${p.transportadora} entrega só ${pct(p.cumprimento_hoje)} dos pedidos no prazo na região ${p.cep3} (${p.cidade_referencia}/${p.uf}). O site promete ${dias(p.prazo_site_hoje)} dias, mas 9 em cada 10 entregas levam até ${dias(p.prazo_proposto)}. Sugiro mostrar ${dias(p.prazo_proposto)} dias.${conc} Isso evita cerca de ${brl(p.impacto_custo_atraso_rs)} de custo com atraso no período. Você aprova?`
         : `Na região ${p.cep3} (${p.cidade_referencia}/${p.uf}) a ${p.transportadora} entrega mais rápido do que o site promete: 9 em cada 10 chegam em até ${dias(p.prazo_proposto)} dias e o site mostra ${dias(p.prazo_site_hoje)}. Sugiro mostrar ${dias(p.prazo_proposto)} para ficar mais competitivo.${conc} Você aprova?`;
       acoes = h("div", { class: "msg-acoes" },
-        h("a", { class: "botao botao-cheio", href: "login.html" }, h("span", { class: "botao-icone", "aria-hidden": "true" }, "→"), "Decidir na tela da gerente"));
+        h("a", { class: "botao botao-cheio", href: "login.html" }, h("span", { class: "botao-icone", "aria-hidden": "true" }, "→"), "Decidir (entrar como gerente)"));
     } else if (p.acao === "manter") {
       texto = `Região ${p.cep3} (${p.cidade_referencia}/${p.uf}): o prazo de ${dias(p.prazo_site_hoje)} dias está certo para a ${p.transportadora}. Nada a aprovar.`;
     } else {
@@ -310,7 +310,7 @@
     }).catch(() => {});
   }
   aplicarAprovados();
-  try { const f = new EventSource("/api/eventos?usuario=marina"); f.onmessage = (m) => { try { if (JSON.parse(m.data).tipo === "prazos_mudaram") aplicarAprovados(); } catch (e) {} }; } catch (e) {}
+  setInterval(aplicarAprovados, 6000);   // o painel é público: sem canal ao vivo, só confere de tempos em tempos
 
   /* ---------- método ---------- */
   (function metodo() {

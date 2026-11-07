@@ -19,13 +19,11 @@
   const NOMES = { lucas: "Lucas Ferreira", marina: "Marina Duarte" };
   const TIPOS = { prazo_exibido: "Prazo exibido no site", frete_cobrado: "Frete cobrado", roteamento_padrao: "Transportadora padrão da região", outro: "Pedido do agente" };
 
-  const eu = await window.Transporte.exigir("gerente");
-  const q = "usuario=" + encodeURIComponent(eu.id);
+  const eu = await window.Agiliza.exigir("gerente");
   let novos = new Set();
 
   async function api(caminho, metodo, corpo) {
-    const sep = caminho.includes("?") ? "&" : "?";
-    const r = await fetch(caminho + sep + q, { method: metodo || "GET", headers: { "Content-Type": "application/json" }, body: corpo ? JSON.stringify(corpo) : undefined });
+    const r = await fetch(caminho, { method: metodo || "GET", headers: { "Content-Type": "application/json" }, body: corpo ? JSON.stringify(corpo) : undefined });
     const d = await r.json(); if (!r.ok) throw new Error(d.erro || "erro"); return d;
   }
 
@@ -34,17 +32,15 @@
     if (!p) return;
     const usado = p.aprovadas / p.limite * 100;
     $("#placar").replaceChildren(
-      h("div", { class: p.pendentes ? "alerta" : "" }, h("b", {}, p.pendentes), h("span", {}, "pedidos esperando você")),
-      h("div", {}, h("b", {}, `${p.restantes} de ${p.limite}`), h("span", {}, "aprovações que ainda cabem no cenário"), h("div", { class: "barra-limite" }, h("i", { style: `width:${usado}%` }))),
-      h("div", {}, h("b", {}, brl0(p.custo_pedidos)), h("span", {}, "custo de pedir aprovação (R$ 15 cada)")),
-      h("div", {}, h("b", {}, brl0(p.economia_prazos + p.economia_rotas)), h("span", {}, `economia estimada: ${brl0(p.economia_prazos)} em prazos e ${brl0(p.economia_rotas)} em ${p.rotas_trocadas} rotas`)),
-      h("div", { class: p.alertas_sem_ciencia ? "alerta" : "" }, h("b", {}, p.alertas_sem_ciencia), h("span", {}, "alertas financeiros sem ciência")));
+      h("div", { class: p.pendentes ? "alerta" : "" }, h("b", {}, p.pendentes), h("span", {}, p.pendentes === 1 ? "pedido esperando você" : "pedidos esperando você")),
+      h("div", {}, h("b", {}, `${p.restantes} de ${p.limite}`), h("span", {}, "aprovações ainda disponíveis"), h("div", { class: "barra-limite" }, h("i", { style: `width:${usado}%` }))),
+      h("div", {}, h("b", {}, brl0(p.economia_prazos + p.economia_rotas)), h("span", {}, "economia estimada até agora")));
   }
 
   /* ---------- pedido ---------- */
   function cartaoPedido(a) {
     const ajustavel = a.valor_proposto != null;
-    const coment = h("textarea", { placeholder: "Comentário (opcional): aparece para o analista e para o agente", "aria-label": "Comentário" });
+    const coment = h("textarea", { placeholder: "Motivo (opcional): o agente conta ao Lucas com as suas palavras", "aria-label": "Comentário" });
     const valor = h("input", { type: "number", min: "2", step: "1", value: a.valor_proposto ?? "", "aria-label": "Novo valor em dias úteis" });
     const caixaAjuste = h("div", { class: "pedido-botoes", hidden: true }, h("span", { class: "rotulo-ctl" }, "Novo prazo"), valor, h("span", {}, "dias úteis"),
       h("button", { type: "button", class: "botao botao-cheio pequeno", onclick: () => decidir("ajustar") }, "Aprovar com este valor"));
@@ -64,11 +60,10 @@
       ? h("div", { class: "pedido-valores" }, h("small", {}, "hoje"), h("b", {}, a.valor_atual != null ? dias(a.valor_atual) : "–"), h("span", { class: "seta" }, "→"), h("small", {}, "proposto"), h("b", {}, dias(a.valor_proposto)))
       : null;
     return h("article", { class: "pedido" + (novos.has(a.id) ? " novo" : "") },
-      h("div", { class: "pedido-topo" }, h("span", {}, `#${a.id} · ${TIPOS[a.tipo] || a.tipo}${a.prefixos.length ? " · prefixo " + a.prefixos.join(", ") : ""}`),
-        h("span", {}, `${NOMES[a.solicitante] || a.solicitante} via agente · ${quando(a.criado_em)}`)),
+      h("div", { class: "pedido-topo" }, h("span", {}, TIPOS[a.tipo] || a.tipo), h("span", {}, `pedido pelo ${NOMES[a.solicitante] || a.solicitante} · ${quando(a.criado_em)}`)),
       h("p", { class: "pedido-resumo" }, a.resumo), valores,
-      a.evidencia ? h("p", { class: "pedido-evid" }, h("b", {}, "Evidência: "), a.evidencia) : h("p", { class: "pedido-evid" }, "Sem evidência anexada: peça ao agente antes de aprovar."),
-      a.impacto_reais != null ? h("p", { class: "pedido-impacto" }, `Evita cerca de ${brl0(a.impacto_reais)} de custo com atraso no período`) : null,
+      a.impacto_reais != null ? h("p", { class: "pedido-impacto" }, `Evita cerca de ${brl0(a.impacto_reais)} de custo com atraso`) : null,
+      a.evidencia ? h("details", { class: "pedido-evid" }, h("summary", {}, "Ver os números"), a.evidencia) : h("p", { class: "pedido-evid" }, "Sem evidência anexada: peça ao agente antes de aprovar."),
       coment, caixaAjuste,
       h("div", { class: "pedido-botoes" },
         btn("Aprovar", "✓", "botao-cheio", () => decidir("aprovar")),
@@ -94,19 +89,18 @@
   /* ---------- financeiro ---------- */
   function cartaoAlerta(a) {
     const d = a.detalhe || {};
-    const partes = [h("div", { class: "quando" }, `${quando(a.quando)} · ${a.categoria === "troca_de_rota" ? "troca de rota" : a.categoria}`), h("h3", {}, a.titulo), h("p", {}, a.texto)];
+    const resumo = h("summary", {}, h("b", {}, a.titulo), h("span", { class: "quando" }, " · " + quando(a.quando)));
+    const corpo = [h("p", {}, a.texto)];
     if (d.trocas && d.trocas.length) {
-      const linhas = d.trocas.slice(0, 6).map((t) => {
+      const linhas = d.trocas.slice(0, 8).map((t) => {
         const df = t.frete_para - t.frete_de;
-        return h("tr", {}, h("td", {}, t.envio_id), h("td", {}, t.destino), h("td", {}, `${t.de} → ${t.para}`),
-          h("td", { class: df > 0 ? "pos" : "neg" }, (df > 0 ? "+" : "") + brl(df)), h("td", { class: "neg" }, brl(t.economia_estimada)));
+        return h("tr", {}, h("td", {}, t.destino), h("td", {}, `${t.de} → ${t.para}`), h("td", { class: df > 0 ? "pos" : "neg" }, (df > 0 ? "+" : "") + brl(df)), h("td", { class: "neg" }, brl(t.economia_estimada)));
       });
-      partes.push(h("table", { class: "mini-tabela" }, h("thead", {}, h("tr", {}, ...["Envio", "Destino", "Rota", "Frete", "Saldo"].map((x) => h("th", {}, x)))), h("tbody", {}, linhas)));
-      if (d.trocas.length > 6) partes.push(h("p", { class: "quando" }, `e mais ${d.trocas.length - 6} envios`));
-      partes.push(h("p", { class: "quando" }, `Frete ${d.variacao_frete > 0 ? "sobe" : "cai"} ${brl(Math.abs(d.variacao_frete))} · atraso evitado ${brl(d.atraso_evitado)} · saldo ${brl(d.saldo)}`));
+      corpo.push(h("table", { class: "mini-tabela" }, h("thead", {}, h("tr", {}, ...["Destino", "Rota", "Frete", "Saldo"].map((x) => h("th", {}, x)))), h("tbody", {}, linhas)));
+      if (d.trocas.length > 8) corpo.push(h("p", { class: "quando" }, `e mais ${d.trocas.length - 8} envios`));
     }
-    if (!a.ciente) partes.push(h("div", { class: "pedido-botoes" }, h("button", { type: "button", class: "botao botao-cobalto pequeno", onclick: async () => { const r = await api(`/api/alertas/${a.id}/ciente`, "POST", {}); placar(r.placar); carregarAlertas(); } }, "Ciente")));
-    return h("article", { class: "alerta-fin" + (a.ciente ? " ciente" : "") }, ...partes);
+    if (!a.ciente) corpo.push(h("div", { class: "pedido-botoes" }, h("button", { type: "button", class: "botao botao-cobalto pequeno", onclick: async () => { const r = await api(`/api/alertas/${a.id}/ciente`, "POST", {}); placar(r.placar); carregarAlertas(); } }, "Ciente")));
+    return h("details", { class: "alerta-fin" + (a.ciente ? " ciente" : "") }, resumo, ...corpo);
   }
   async function carregarAlertas() {
     const r = await api("/api/alertas"); placar(r.placar);
@@ -120,7 +114,7 @@
 
   /* ---------- tempo real ---------- */
   function conectar() {
-    const fonte = new EventSource("/api/eventos?" + q);
+    const fonte = new EventSource("/api/eventos");
     const marca = (ok, t) => { $("#conexao").className = "ag-modo " + (ok ? "ia" : "simulado"); $("#conexao span").textContent = t; };
     fonte.onopen = () => marca(true, "ao vivo: os pedidos chegam sozinhos");
     fonte.onerror = () => marca(false, "reconectando…");

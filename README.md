@@ -1,4 +1,6 @@
-# Transporte: prazo que vende e que cumpre
+# Agiliza AI: prazo que vende e que cumpre
+
+> Projeto do desafio de Transportes (GoHacks Talent). O produto se chama **Agiliza AI**.
 
 Projeto do desafio **Transportes** (GoHacks Talent, Agentes de IA). A ideia é um colega de logística
 que lê os portais das transportadoras, mede quem entrega bem em cada região, compara com os
@@ -46,9 +48,8 @@ mapa por regiões, rampa de uma cor só e pixels como textura.
 
 ## Parte 2: o agente trabalhando em tempo real
 
-`python servidor.py` abre **http://localhost:8000**, uma tela de entrada com dois usuários (veja
-"Dois usuários" abaixo). A tela do analista é o "Agente ao vivo": à esquerda uma conversa
-estilo WhatsApp, à direita a *mesa do agente*. A cada pergunta o agente decide quais ferramentas usar
+`python servidor.py` abre **http://localhost:8000**, o login (veja abaixo). O modo apresentação ("Agente trabalhando") tem à esquerda uma conversa
+estilo WhatsApp e à direita a *mesa do agente*. A cada pergunta o agente decide quais ferramentas usar
 e a interface mostra, na hora, cada passo: a ferramenta chamada, o que voltou, a rota no mapa e o
 pedido de aprovação que chega para o gerente. Exemplos:
 
@@ -62,29 +63,45 @@ pedido de aprovação que chega para o gerente. Exemplos:
 As 18 ferramentas (`src/transporte/agente/ferramentas.py`) seguem o catálogo do desafio. **O papel é
 conferido no código**, não só no prompt: se o modelo tentar aprovar uma proposta, a ferramenta recusa.
 
-### Dois usuários, duas telas
+### Login, duas telas e o agente no canto
 
-Hackathon: **sem senha**. A tela de entrada (`/`) tem dois cartões; a escolha fica na aba, então dá para abrir
-os dois lado a lado (ou `agente.html?como=lucas` e `gerente.html?como=marina`).
+`/` abre o **login com e-mail e senha** (sessão por cookie no servidor, senha guardada com hash). Contas de demonstração, fictícias:
 
-| Usuário | Papel (`politicas.csv`) | Tela |
-| --- | --- | --- |
-| Lucas Ferreira | `analista_logistica` | conversa com o agente, vê a melhor rota no mapa, acompanha o que a gerente respondeu |
-| Marina Duarte | `gerente` | fila de aprovação, placar, histórico e **financeiro** |
+| Quem | Papel (`politicas.csv`) | E-mail | Senha |
+| --- | --- | --- | --- |
+| Lucas Ferreira | `analista_logistica` | lucas.ferreira@agiliza.ai | Agiliza@Lucas26 |
+| Marina Duarte | `gerente` | marina.duarte@agiliza.ai | Agiliza@Marina26 |
+
+Cookie é por navegador: para ver as duas ao mesmo tempo, use uma janela normal e uma anônima.
+
+- **Analista** (`analista.html`): só o essencial. A melhor rota no mapa, os pedidos dele para a Marina com o status ao vivo e o WhatsApp que ele recebeu. "Agente trabalhando" mostra a linha do tempo completa (modo apresentação).
+- **Gerente** (`gerente.html`): três números, a fila de decisões (frase grande, prazo de hoje e proposto, números recolhidos), o histórico e o financeiro das rotas trocadas, recolhido numa linha.
+- **Agente no canto** (todas as telas): conversa por texto ou **voz**. Para o analista é o planejador completo; para a gerente é um agente de **consulta**, que explica ("por que Marabá?") mas não propõe, não troca rota e não decide por ela (isso vale no código, papel `consulta`).
 
 Como o ciclo fecha, ao vivo (SSE por usuário):
 
-1. O agente monta a proposta e chama `solicitar_aprovacao`; o pedido cai na fila da Marina na hora.
-2. Ela **aprova, ajusta** (muda o prazo e aprova) **ou recusa**, com comentário.
-3. A decisão volta para a tela do Lucas, para a conversa e para o agente (próxima resposta).
-4. Prazo aprovado **passa a valer dentro da demonstração**: o painel mostra e o agente usa nas consultas. Nada vai ao ERP.
-5. Sempre que o agente **troca rotas**, a Marina recebe um alerta financeiro: quanto o frete sobe ou cai,
-   quanto de atraso se evita e o saldo, envio a envio. `acionar_pessoa("financeiro")` também cai ali.
+1. O analista pede (escrevendo ou falando); o agente monta a proposta e chama `solicitar_aprovacao`. O pedido cai na fila da Marina na hora.
+2. Ela **aprova, ajusta** (muda o prazo e aprova) **ou recusa**, com um motivo opcional.
+3. O agente escreve a mensagem de decisão **com as palavras da Marina** (com a IA do evento; sem token, um modelo de frase) e gera um **cartão de imagem** (`src/transporte/cartao.py`).
+4. A mensagem e o cartão chegam ao WhatsApp do analista e aparecem na tela dele. A decisão também volta para a conversa do agente.
+5. Prazo aprovado **passa a valer dentro da demonstração**: o painel mostra e o agente usa nas consultas. Nada vai ao ERP.
+6. Sempre que o agente **troca rotas**, a Marina recebe o alerta financeiro (frete, atraso evitado, saldo). `acionar_pessoa("financeiro")` também cai ali.
 
-As regras valem no servidor, não só na tela (`src/transporte/estado.py`, `tests/test_estado.py`): só o gerente decide,
-nunca a própria proposta, no máximo 12 aprovações por cenário (R$ 15 cada pedido), prazo inteiro e de no mínimo 2 dias úteis.
-O estado fica em `data/processed/estado.db` (gravável, ignorado pelo git); a base do desafio segue só de leitura.
-O botão "Reiniciar demonstração" na tela da gerente zera tudo para repetir a apresentação.
+O motivo escrito pela gerente é tratado como **dado, nunca como ordem** (no prompt de reescrita e no aviso ao agente).
+As regras valem no servidor (`src/transporte/estado.py`, `tests/test_estado.py`): só o gerente decide, nunca a própria proposta, no máximo 12 aprovações por cenário (R$ 15 cada pedido), prazo inteiro de no mínimo 2 dias úteis. O estado fica em `data/processed/estado.db` (gravável, ignorado pelo git); a base do desafio segue só de leitura. "Reiniciar demonstração" na tela da gerente zera tudo.
+
+### WhatsApp (envio ao analista)
+
+Dois modos, escolhidos pelo `.env` (`src/transporte/whatsapp.py`):
+
+- **meta**: WhatsApp Cloud API oficial. Preencha `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` e `WHATSAPP_DESTINO` (só dígitos, com 55 e DDD). O número do analista deve estar cadastrado como destinatário de teste. A mensagem livre só vale até 24 h depois do último "oi" do analista ao número de teste.
+- **previa** (padrão sem credencial): nada sai; a tela do analista mostra a mensagem e o cartão como o WhatsApp mostraria, e avisa que é prévia. Se o envio real falhar, cai nisso com um aviso, e a demonstração segue.
+
+O número fica só no `.env`, nunca no repositório.
+
+### Voz
+
+O microfone do agente usa o reconhecimento de voz do navegador (pt-BR, Chrome/Edge, sem gastar token). Em navegador sem isso, grava o áudio e o servidor transcreve por `/v1/audio/transcriptions` do proxy do evento (`AI_PROXY_MODELO_AUDIO`, padrão `whisper-1`), **se o proxy tiver um modelo de áudio**: abra `/api/saude` e veja a lista. O botão de alto-falante faz o agente ler as respostas em voz alta.
 
 ### Base de dados e geografia real
 
@@ -135,10 +152,11 @@ data/processed/      saídas da parte 1 e a base SQLite (transporte.db, gerada)
 src/transporte/      calendario, portais, entregas, desempenho, concorrentes, propostas
 src/transporte/agente/  ferramentas, roteamento, llm (proxy), loop (eventos), simulado, prompt
 servidor.py          servidor: conversa por SSE, eventos por usuário, aprovações, arquivos do painel
-src/transporte/estado.py   usuários, fila de aprovação, alertas financeiros, tempo real (estado.db)
+src/transporte/estado.py   login, fila de aprovação, alertas financeiros, tempo real (estado.db)
+src/transporte/cartao.py, whatsapp.py   cartão de imagem e envio da decisão ao analista
 src/transporte/base.py, geo.py   base SQLite e geografia (coordenadas, distâncias)
 scripts/             01_processar.py, 02_base_de_dados.py
-dashboard/           login.html, agente.html (analista), gerente.html, index.html (painel), usuario.js, *.css, data.js (gerado)
+dashboard/           login, analista, gerente, agente (modo apresentação), index (painel), widget.js (agente no canto), data.js (gerado)
 tests/               testes do calendário e dos dados reais
 ```
 

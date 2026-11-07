@@ -18,6 +18,7 @@ from . import roteamento
 from .contexto import sql
 
 PAPEL_AGENTE = "planejador"
+PAPEL_CONSULTA = "consulta"      # o agente do canto da gerente: só lê e explica, não propõe nem troca nada
 LIMITE_DESVIO_UF_DIA = 0.40   # politicas.csv: até 40% dos envios novos de uma UF fora da padrão
 CUSTO_APROVACAO = 15.0
 MAX_PROPOSTAS_APROVADAS = 12
@@ -31,6 +32,7 @@ class Diario:
     usuario: str = "lucas"          # quem está conversando com o agente (o analista)
     sessao: str | None = None
     propostas: dict = field(default_factory=dict)   # propostas criadas nesta conversa, por id
+    ve_tudo: bool = False           # a gerente enxerga os pedidos de todos
 
     def registrar(self, ferramenta: str, detalhe: dict, custo: float = 0.0) -> None:
         self.acoes.append({"ferramenta": ferramenta, "detalhe": detalhe, "custo": custo,
@@ -240,7 +242,10 @@ def ver_propostas_de_prazo(uf=None, acao=None, top=8):
     filtro = (" where " + " and ".join(where)) if where else ""
     d = sql("select cep3, uf, cidade_referencia, transportadora, envios_medidos, cumprimento_hoje, prazo_site_hoje, "
             "prazo_proposto, acao, impacto_custo_atraso_rs, posicao_hoje, requer_aprovacao from propostas" + filtro +
-            " order by impacto_custo_atraso_rs desc limit ?", tuple(args) + (int(top),))
+            " order by impacto_custo_atraso_rs desc limit ?", tuple(args) + (int(top) + len(estado.prazos_vigentes()),))
+    if acao in ("aumentar", "reduzir"):   # o que a gerente já aprovou não volta como pendência
+        d = d[~d["cep3"].isin(estado.prazos_vigentes())]
+    d = d.head(int(top))
     d["requer_aprovacao"] = d["requer_aprovacao"].astype(bool)
     total = int(sql("select count(*) n from propostas" + filtro, tuple(args)).iloc[0]["n"])
     linhas = _tabela(d, int(top))
@@ -362,7 +367,7 @@ def consultar_aprovacoes(aprovacao_id=None, _diario: Diario | None = None):
     if aprovacao_id:
         a = estado.aprovacao(int(aprovacao_id))
         return {"aprovacao": _resumo_aprovacao(a)} if a else {"erro": "pedido não encontrado"}
-    lista = estado.listar_aprovacoes(_diario.usuario if _diario else None)
+    lista = estado.listar_aprovacoes(None if (_diario and _diario.ve_tudo) else (_diario.usuario if _diario else None))
     return {"pedidos": [_resumo_aprovacao(a) for a in lista[:10]], "total": len(lista),
             "aprovadas_no_cenario": estado.contar_aprovadas(), "limite": estado.MAX_APROVACOES}
 
@@ -430,7 +435,7 @@ _S_TEXTO = {"type": "string"}
 _S_NUM = {"type": "number"}
 _S_BOOL = {"type": "boolean"}
 _S_LISTA = {"type": "array", "items": {"type": "string"}}
-TODOS = ("analista_logistica", "planejador", "gerente")
+TODOS = ("analista_logistica", "planejador", "gerente", "consulta")
 
 CATALOGO: list[Ferramenta] = [
     Ferramenta("consultar_envios", "Envios do ERP, com filtros. Não traz data de entrega: ela está nos portais.",
@@ -439,20 +444,20 @@ CATALOGO: list[Ferramenta] = [
     Ferramenta("consultar_portal", "Rastreio de um envio no portal da transportadora (por envio_id ou código).",
                _p(transportadora=_S_TEXTO, codigo_rastreio=_S_TEXTO, envio_id=_S_TEXTO), consultar_portal, TODOS),
     Ferramenta("medir_desempenho", "Cumprimento de prazo, prazo real e custo por transportadora, estado ou prefixo de CEP.",
-               _p(transportadora=_S_TEXTO, uf=_S_TEXTO, prefixo_cep=_S_TEXTO), medir_desempenho, ("planejador", "gerente")),
+               _p(transportadora=_S_TEXTO, uf=_S_TEXTO, prefixo_cep=_S_TEXTO), medir_desempenho, ("planejador", "gerente", "consulta")),
     Ferramenta("consultar_problemas", "Onde estão os problemas: chamados do SAC, ocorrências e extravios. agrupar_por: transportadora, uf, prefixo_cep ou motivo.",
-               _p(agrupar_por=_S_TEXTO, uf=_S_TEXTO, top=_S_NUM), consultar_problemas, ("planejador", "gerente")),
+               _p(agrupar_por=_S_TEXTO, uf=_S_TEXTO, top=_S_NUM), consultar_problemas, ("planejador", "gerente", "consulta")),
     Ferramenta("consultar_concorrentes", "Prazo e frete dos concorrentes no checkout, comparados com o nosso.",
                _p(uf=_S_TEXTO, prefixo_cep=_S_TEXTO), consultar_concorrentes, TODOS),
     Ferramenta("cotar_frete", "O que cada transportadora cobra e promete para um envio ou um CEP e peso.",
                _p(cep=_S_TEXTO, peso_g=_S_NUM, envio_id=_S_TEXTO), cotar_frete, TODOS),
     Ferramenta("consultar_conversao", "Sessões de checkout e pedidos por prazo exibido.",
-               _p(prefixo_cep=_S_TEXTO, uf=_S_TEXTO), consultar_conversao, ("planejador", "gerente")),
+               _p(prefixo_cep=_S_TEXTO, uf=_S_TEXTO), consultar_conversao, ("planejador", "gerente", "consulta")),
     Ferramenta("consultar_regras_site", "Regra de prazo, transportadora padrão e frete cobrado por prefixo.",
                _p(prefixo_cep=_S_TEXTO, uf=_S_TEXTO), consultar_regras_site, TODOS),
     Ferramenta("consultar_politicas", "O que cada papel pode fazer e quais são os limites.", _p(), consultar_politicas, TODOS),
     Ferramenta("ver_propostas_de_prazo", "Propostas de prazo do site já calculadas por prefixo. acao: aumentar, reduzir ou manter.",
-               _p(uf=_S_TEXTO, acao=_S_TEXTO, top=_S_NUM), ver_propostas_de_prazo, ("planejador", "gerente")),
+               _p(uf=_S_TEXTO, acao=_S_TEXTO, top=_S_NUM), ver_propostas_de_prazo, ("planejador", "gerente", "consulta")),
     Ferramenta("escolher_melhor_rota", "A melhor transportadora para um envio novo (ou um lote não postado), por custo do frete mais o custo esperado de atraso.",
                _p(envio_id=_S_TEXTO, uf=_S_TEXTO, limite=_S_NUM), escolher_melhor_rota, TODOS),
     Ferramenta("rotear_envios", "Troca a transportadora de envios novos ainda não postados. O agente faz sozinho, dentro do limite de 40% por estado por dia.",
@@ -464,7 +469,7 @@ CATALOGO: list[Ferramenta] = [
                _p(resumo=_S_TEXTO, evidencia=_S_TEXTO, proposta_id=_S_TEXTO), solicitar_aprovacao,
                ("analista_logistica", "planejador"), "comunicacao", True),
     Ferramenta("consultar_aprovacoes", "Como estão os pedidos de aprovação já enviados ao gerente (aguardando, aprovado com o valor final, recusado).",
-               _p(aprovacao_id=_S_NUM), consultar_aprovacoes, ("analista_logistica", "planejador"), "leitura", True),
+               _p(aprovacao_id=_S_NUM), consultar_aprovacoes, ("analista_logistica", "planejador", "consulta"), "leitura", True),
     Ferramenta("acionar_pessoa", "Chama a pessoa certa quando a decisão não é do agente: gerente_logistica, marketing, comercial, cx, financeiro, operacao_cd1, operacao_cd2.",
                _p(destino=_S_TEXTO, motivo=_S_TEXTO, urgencia=_S_TEXTO), acionar_pessoa, TODOS, "comunicacao", True),
     Ferramenta("abrir_incidente_transportadora", "Abre incidente formal com uma transportadora sobre desempenho em prefixos específicos.",
@@ -476,10 +481,10 @@ CATALOGO: list[Ferramenta] = [
 POR_NOME = {f.nome: f for f in CATALOGO}
 
 
-def esquema_openai() -> list[dict]:
-    """O catálogo no formato de tool calling da API."""
+def esquema_openai(papel: str | None = None) -> list[dict]:
+    """O catálogo no formato de tool calling da API. Com `papel`, só as ferramentas que ele pode usar."""
     return [{"type": "function", "function": {"name": f.nome, "description": f.descricao, "parameters": f.parametros}}
-            for f in CATALOGO]
+            for f in CATALOGO if papel is None or papel in f.papeis]
 
 
 def executar(nome: str, argumentos: dict, papel: str = PAPEL_AGENTE, diario: Diario | None = None) -> dict:

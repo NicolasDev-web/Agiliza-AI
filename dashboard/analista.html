@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Início · Agiliza AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='2' fill='%232f37c4'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%23fff'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="agente.css">
+  <link rel="stylesheet" href="usuarios.css">
+</head>
+<body class="pagina-analista">
+  <header class="nav clara" id="topo">
+    <a class="marca" href="analista.html" aria-label="Agiliza AI, início"><span class="marca-nome">Agiliza<b>AI</b></span><span class="marca-sub">logística que cumpre</span></a>
+    <nav class="nav-links" aria-label="Páginas">
+      <a href="analista.html" class="nav-destaque">Início</a>
+      <a href="index.html">Painel</a>
+      <a href="agente.html">Agente trabalhando</a>
+    </nav>
+  </header>
+
+  <section class="an-topo">
+    <p class="rotulo-ctl">Analista de logística</p>
+    <h1 id="ola">Olá</h1>
+    <p class="an-sub">Peça por escrito ou por voz no agente do canto. Ele cuida das rotas e leva os prazos para a Marina.</p>
+    <div class="an-acoes" id="acoes"></div>
+  </section>
+
+  <main class="an-grade">
+    <section class="painel" aria-label="Melhor rota">
+      <h2>Melhor rota <span id="rota-sub"></span></h2>
+      <div id="mapa-rota"></div>
+      <div id="rota-resumo" class="rota-resumo"><p class="vazio">Peça a melhor rota de um envio ou dos envios novos de um estado.</p></div>
+    </section>
+
+    <div class="mesa">
+      <section class="painel" aria-label="Pedidos para a gerente">
+        <h2>Seus pedidos para a Marina <span id="n-pedidos"></span></h2>
+        <div id="fila"><p class="vazio">Quando o agente precisar de um OK, o pedido aparece aqui com a resposta dela.</p></div>
+      </section>
+
+      <section class="painel" aria-label="WhatsApp">
+        <h2>No seu WhatsApp <span id="canal"></span></h2>
+        <div id="zap" class="zap"><p class="vazio">Quando a Marina decidir, a resposta chega aqui e no seu WhatsApp.</p></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="ufs.js"></script>
+  <script src="usuario.js"></script>
+  <script src="widget.js"></script>
+  <script src="analista.js"></script>
+</body>
+</html>

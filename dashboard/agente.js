@@ -15,8 +15,7 @@
   const hora = () => new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
   const brl = (x) => (x == null ? "–" : "R$ " + Number(x).toLocaleString("pt-BR", { maximumFractionDigits: 2 }));
   const pct = (x) => (x == null ? "–" : Math.round(x * 100) + "%");
-  const eu = await window.Transporte.exigir("analista_logistica");
-  const q = "usuario=" + encodeURIComponent(eu.id);
+  const eu = await window.Agiliza.exigir("analista_logistica");
   const sid = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())).slice(0, 8);
   $("#sessao-id").textContent = "sessão " + sid;
 
@@ -121,10 +120,10 @@
       a.comentario ? h("p", { class: "aprov-com" }, `Marina: “${a.comentario}”`) : null)));
   }
   async function carregarFila() {
-    try { const r = await fetch("/api/aprovacoes?" + q); const d = await r.json(); if (r.ok) renderFila(d.aprovacoes); } catch (e) { /* servidor fora */ }
+    try { const r = await fetch("/api/aprovacoes"); const d = await r.json(); if (r.ok) renderFila(d.aprovacoes); } catch (e) { /* servidor fora */ }
   }
   carregarFila();
-  const canal = new EventSource("/api/eventos?" + q);
+  const canal = new EventSource("/api/eventos");
   canal.onmessage = (m) => {
     let e; try { e = JSON.parse(m.data); } catch (x) { return; }
     if (e.tipo === "pedido_enviado") carregarFila();
@@ -196,7 +195,7 @@
   function perguntar(texto) {
     texto = (texto || "").trim(); if (!texto || ocupado) return;
     ocupado = true; botao.disabled = true; campo.value = ""; bolha("eu", texto);
-    fonte = new EventSource(`/api/conversa?${q}&sessao=${sid}&pergunta=${encodeURIComponent(texto)}`);
+    fonte = new EventSource(`/api/conversa?sessao=${sid}&pergunta=${encodeURIComponent(texto)}`);
     fonte.onmessage = (m) => { try { tratar(JSON.parse(m.data)); } catch (err) { console.error(err); } };
     fonte.onerror = () => { if (ocupado) { tratar({ tipo: "erro", texto: "Perdi a conexão com o servidor." }); tratar({ tipo: "fim" }); } };
   }

@@ -132,7 +132,8 @@ def test_laco_com_ia_chama_ferramenta_recebe_recusa_e_responde(falsa_api):
     resultado = next(e for e in ev if e["tipo"] == "resultado")
     assert resultado["recusado"]  # o papel do agente barra a aprovação, mesmo que o modelo tente
     assert _FalsaAPI.visto[0]["auth"] == "Bearer token-de-teste"
-    assert len(_FalsaAPI.visto[0]["corpo"]["tools"]) == len(F.CATALOGO)
+    # o modelo só enxerga as ferramentas do papel dele (aprovar_proposta é só do gerente)
+    assert len(_FalsaAPI.visto[0]["corpo"]["tools"]) == len(F.esquema_openai(F.PAPEL_AGENTE)) == len(F.CATALOGO) - 1
 
 
 def test_api_fora_do_ar_cai_para_o_roteiro_local():

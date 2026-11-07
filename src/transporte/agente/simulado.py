@@ -174,7 +174,7 @@ def _prazo(sessao, uf, pergunta) -> Iterator[dict]:
             yield from _rodar(sessao, "ver_propostas_de_prazo", {"top": 5, **filtro})
             props = sessao._ultimo.get("linhas", [])
     if not props:
-        yield _fim(sessao, "Nao achei regiao com proposta de prazo nesse filtro.")
+        yield _fim(sessao, "Não achei região com proposta de prazo nesse filtro.")
         return
     p = props[0]
     yield from _rodar(sessao, "medir_desempenho", {"prefixo_cep": p["cep3"]})
@@ -183,31 +183,31 @@ def _prazo(sessao, uf, pergunta) -> Iterator[dict]:
     cabeca = f"*{p['cidade_referencia']}/{p['uf']}, prefixo {p['cep3']}*"
     if p["acao"] not in ("aumentar", "reduzir"):
         yield _fim(sessao, f"{cabeca}: a {p['transportadora']} entrega {_pct(p['cumprimento_hoje'])} no prazo e "
-                           f"o site mostra {int(p['prazo_site_hoje'])} dias uteis. Esta no lugar certo, nao mexeria.")
+                           f"o site mostra {int(p['prazo_site_hoje'])} dias úteis. Está no lugar certo, não mexeria.")
         return
     evidencia = (f"Prefixo {p['cep3']} ({p['cidade_referencia']}/{p['uf']}), {p['transportadora']}, "
                  f"03/09 a 02/11: {int(p['envios_medidos'])} envios medidos, {_pct(p['cumprimento_hoje'])} no prazo "
-                 f"(meta 92%). Prazo do site {int(p['prazo_site_hoje'])} dias; 9 em cada 10 entregas levam ate "
+                 f"(meta 92%). Prazo do site {int(p['prazo_site_hoje'])} dias; 9 em cada 10 entregas levam até "
                  f"{int(p['prazo_proposto'])}. Impacto estimado: {_brl(p['impacto_custo_atraso_rs'])}.")
     yield from _rodar(sessao, "propor_mudanca", {"tipo": "prazo_exibido", "prefixos_cep": [p["cep3"]],
                                                  "valor_novo": p["prazo_proposto"], "evidencia": evidencia,
                                                  "impacto_estimado_reais": p["impacto_custo_atraso_rs"]})
     proposta = sessao._ultimo
     verbo = "Subir" if p["acao"] == "aumentar" else "Baixar"
-    resumo = (f"{verbo} o prazo do site de {int(p['prazo_site_hoje'])} para {int(p['prazo_proposto'])} dias uteis no "
+    resumo = (f"{verbo} o prazo do site de {int(p['prazo_site_hoje'])} para {int(p['prazo_proposto'])} dias úteis no "
               f"prefixo {p['cep3']} ({p['cidade_referencia']}/{p['uf']}).")
     yield from _rodar(sessao, "solicitar_aprovacao", {"resumo": resumo, "evidencia": evidencia,
                                                       "proposta_id": proposta.get("proposta_id")})
     texto = (f"{cabeca}\n\n"
              f"A {p['transportadora']} entrega {_pct(p['cumprimento_hoje'])} no prazo ali"
              + (", bem abaixo da meta de 92%" if (p["cumprimento_hoje"] or 1) < 0.92 else "") + ". "
-             f"O site promete {int(p['prazo_site_hoje'])} dias e 9 em cada 10 entregas levam ate "
-             f"{int(p['prazo_proposto'])} dias uteis.\n"
-             + (f"Os concorrentes mostram cerca de {int(conc['prazo_conc_mediana'])} dias nessa regiao.\n" if conc.get("prazo_conc_mediana") else "")
+             f"O site promete {int(p['prazo_site_hoje'])} dias e 9 em cada 10 entregas levam até "
+             f"{int(p['prazo_proposto'])} dias úteis.\n"
+             + (f"Os concorrentes mostram cerca de {int(conc['prazo_conc_mediana'])} dias nessa região.\n" if conc.get("prazo_conc_mediana") else "")
              + f"\n{verbo} para {int(p['prazo_proposto'])} dias "
              + ("evita cerca de " + _brl(p["impacto_custo_atraso_rs"]) + " de custo com atraso" if p["acao"] == "aumentar"
                 else "deixa a gente mais competitivo sem furar a meta")
-             + ".\n\nMandei para a Marina: mudar prazo do site nao e minha decisao.")
+             + ".\n\nMandei para a Marina: mudar o prazo do site não é decisão minha.")
     yield _fim(sessao, texto)
 
 
@@ -226,6 +226,44 @@ def _status_aprovacoes(sessao) -> Iterator[dict]:
         linhas.append(f"{nomes.get(p['situacao'], p['situacao'])}{extra}: {p['resumo']}{com}")
     yield _fim(sessao, "Como estão os pedidos para a Marina:\n\n" + "\n".join(linhas) +
                f"\n\nO cenário permite {r.get('limite')} aprovações; já foram {r.get('aprovadas_no_cenario')}.")
+
+
+def _explicar(sessao, uf, prefixo, pergunta) -> Iterator[dict]:
+    """Agente de consulta (gerente): explica uma região em palavras simples, sem propor nada."""
+    filtro = {"uf": uf} if uf else {}
+    yield from _rodar(sessao, "ver_propostas_de_prazo", {"top": 200, **filtro} if prefixo else {"acao": "aumentar", "top": 5, **filtro})
+    props = sessao._ultimo.get("linhas", [])
+    if prefixo:
+        props = [l for l in props if l["cep3"] == prefixo]
+    if not props:
+        yield _fim(sessao, "Não achei uma região com proposta para explicar. Diga a cidade ou o estado.")
+        return
+    p = props[0]
+    yield from _rodar(sessao, "consultar_concorrentes", {"prefixo_cep": p["cep3"]})
+    conc = (sessao._ultimo.get("linhas") or [{}])[0]
+    texto = (f"*{p['cidade_referencia']}/{p['uf']}*\n\n"
+             f"A {p['transportadora']} entrega {_pct(p['cumprimento_hoje'])} no prazo ({int(p['envios_medidos'])} pedidos medidos). "
+             f"O site promete {int(p['prazo_site_hoje'])} dias úteis; 9 em cada 10 entregas levam até {int(p['prazo_proposto'])}.\n")
+    if conc.get("prazo_conc_mediana"):
+        texto += f"Os concorrentes mostram cerca de {int(conc['prazo_conc_mediana'])} dias.\n"
+    if p["acao"] in ("aumentar", "reduzir"):
+        texto += f"\nA conta aponta para {int(p['prazo_proposto'])} dias ({_brl(p['impacto_custo_atraso_rs'])} de custo de atraso em jogo)."
+    texto += "\n\nA decisão é sua: eu só explico."
+    yield _fim(sessao, texto)
+
+
+def _consulta(sessao, pergunta, s, uf, prefixo, transp) -> Iterator[dict]:
+    if any(k in s for k in ["pedido", "pendente", "esperando", "aprovacao", "aprovacoes"]):
+        yield from _status_aprovacoes(sessao)
+    elif any(k in s for k in ["problema", "reclama", "chamado", "extravio", "pior"]):
+        yield from _problemas(sessao, uf)
+    elif any(k in s for k in ["aprova", "troca", "muda", "propon", "proponha"]):
+        yield _fim(sessao, "Isso eu não faço: quem aprova é você, na fila de decisões, e as trocas de rota ficam com o analista. "
+                           "Posso explicar qualquer pedido, se quiser.")
+    elif prefixo or any(k in s for k in ["por que", "porque", "prazo", "explica", "concorrente"]):
+        yield from _explicar(sessao, uf, prefixo, pergunta)
+    else:
+        yield from _desempenho(sessao, uf, transp)
 
 
 def _aprovar(sessao, uf) -> Iterator[dict]:
@@ -262,6 +300,9 @@ def responder_sem_ia(sessao, pergunta: str) -> Iterator[dict]:
     uf = uf or _uf_na_pergunta(pergunta)
     transp = _transportadora_na_pergunta(pergunta)
     sessao._prefixo_pedido = prefixo
+    if sessao.papel == F.PAPEL_CONSULTA:
+        yield from _consulta(sessao, pergunta, s, uf, prefixo, transp)
+        return
     if any(k in s for k in ["ja respondeu", "marina respondeu", "resposta da marina", "aprovacoes", "aprovou", "recusou", "decidiu"]):
         yield from _status_aprovacoes(sessao)
     elif any(k in s for k in ["aprova", "autoriza", "pode mudar", "muda o prazo", "mude o prazo"]):

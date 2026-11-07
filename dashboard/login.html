@@ -3,64 +3,91 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Entrar · Transporte</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='2' fill='%232f37c4'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%23fff'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E">
+  <title>Entrar · Agiliza AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='2' fill='%232f37c4'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%23fff'/%3E%3Crect x='9' y='3' width='4' height='4' fill='%23b9bce9'/%3E%3Crect x='3' y='9' width='4' height='4' fill='%23b9bce9'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="usuarios.css">
+  <link rel="stylesheet" href="login.css">
 </head>
 <body class="pagina-login">
-  <header class="nav clara">
-    <a class="marca" href="login.html" aria-label="Transporte"><span class="marca-nome">Transporte</span><span class="marca-sub">prazo certo</span></a>
-    <nav class="nav-links" aria-label="Páginas"><a href="index.html">Painel</a></nav>
-  </header>
+  <main class="entrada">
+    <section class="entrada-marca" aria-hidden="true">
+      <canvas id="pixels-login"></canvas>
+      <div class="entrada-texto">
+        <div class="logo"><i></i><i></i><i></i><i></i><span>Agiliza<b>AI</b></span></div>
+        <p class="entrada-frase">A logística que cumpre o prazo que promete.</p>
+      </div>
+    </section>
 
-  <main class="login">
-    <p class="rotulo-ctl">Demonstração · sem senha</p>
-    <h1>Quem vai usar agora?</h1>
-    <p class="login-nota">Cada pessoa vê a tela do seu trabalho. Dá para abrir as duas em abas diferentes e ver o pedido do analista chegar, em tempo real, na tela da gerente.</p>
+    <section class="entrada-form">
+      <form id="form" autocomplete="on" novalidate>
+        <p class="rotulo-ctl">Bem-vindo de volta</p>
+        <h1>Entrar na Agiliza AI</h1>
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" autocomplete="username" placeholder="voce@agiliza.ai" required autofocus>
+        <label for="senha">Senha</label>
+        <div class="campo-senha">
+          <input id="senha" name="senha" type="password" autocomplete="current-password" placeholder="Sua senha" required>
+          <button type="button" id="ver" aria-label="Mostrar a senha">mostrar</button>
+        </div>
+        <p class="erro" id="erro" role="alert" hidden></p>
+        <button class="botao botao-cheio entrar" id="entrar" type="submit"><span class="botao-icone" aria-hidden="true">→</span>Entrar</button>
 
-    <div class="cartoes" id="cartoes" aria-live="polite"><p class="vazio">Carregando…</p></div>
-
-    <p class="login-rodape">Servidor fora do ar? Rode <code>python servidor.py</code> e recarregue.</p>
+        <details class="demo">
+          <summary>Contas de demonstração</summary>
+          <button type="button" data-e="lucas.ferreira@agiliza.ai" data-s="Agiliza@Lucas26"><b>Lucas Ferreira</b><span>Analista de logística</span></button>
+          <button type="button" data-e="marina.duarte@agiliza.ai" data-s="Agiliza@Marina26"><b>Marina Duarte</b><span>Gerente de logística</span></button>
+          <p>Toque numa conta para preencher. Para ver as duas ao mesmo tempo, use uma janela anônima.</p>
+        </details>
+      </form>
+    </section>
   </main>
 
-  <script src="usuario.js"></script>
   <script>
     (function () {
-      const T = window.Transporte;
-      const TEXTO = {
-        analista_logistica: {
-          titulo: "Consulta a rota",
-          itens: ["Conversa com o agente pelo WhatsApp", "Vê a melhor rota de cada envio no mapa", "Acompanha o que a gerente respondeu"],
-          botao: "Entrar como analista",
-        },
-        gerente: {
-          titulo: "Decide e acompanha o custo",
-          itens: ["Aprova, ajusta ou recusa as propostas", "Recebe o alerta financeiro de cada troca de rota", "Vê o placar: aprovações restantes e economia"],
-          botao: "Entrar como gerente",
-        },
-      };
-      const caixa = document.getElementById("cartoes");
-      fetch("/api/usuarios").then((r) => r.json()).then((d) => {
-        caixa.replaceChildren();
-        const ultimo = (function () { try { return localStorage.getItem("transporte.usuario.ultimo"); } catch (e) { return null; } })();
-        d.usuarios.forEach((u) => {
-          const t = TEXTO[u.papel] || { titulo: "", itens: [], botao: "Entrar" };
-          const c = document.createElement("article"); c.className = "cartao-usuario papel-" + u.papel;
-          const sel = document.createElement("span"); sel.className = "usuario-papel"; sel.textContent = u.cargo;
-          const nome = document.createElement("h2"); nome.textContent = u.nome;
-          const sub = document.createElement("p"); sub.className = "cartao-sub"; sub.textContent = t.titulo;
-          const ul = document.createElement("ul"); t.itens.forEach((i) => { const li = document.createElement("li"); li.textContent = i; ul.append(li); });
-          const b = document.createElement("button"); b.type = "button"; b.className = "botao botao-cheio";
-          b.innerHTML = '<span class="botao-icone" aria-hidden="true">→</span>'; b.append(t.botao);
-          if (u.id === ultimo) c.classList.add("ultimo");
-          b.addEventListener("click", async () => { const ent = await T.entrar(u.id); location.href = T.CASAS[ent.papel]; });
-          c.append(sel, nome, sub, ul, b); caixa.append(c);
-        });
-      }).catch(() => { caixa.innerHTML = '<p class="vazio">Não consegui falar com o servidor.</p>'; });
+      const $ = (s) => document.querySelector(s);
+      const CASAS = { analista_logistica: "analista.html", gerente: "gerente.html" };
+
+      /* quem já está logado vai direto para a sua tela */
+      fetch("/api/eu").then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && d.usuario) location.replace(CASAS[d.usuario.papel]); }).catch(() => {});
+
+      $("#ver").addEventListener("click", () => {
+        const c = $("#senha"), mostrar = c.type === "password";
+        c.type = mostrar ? "text" : "password"; $("#ver").textContent = mostrar ? "ocultar" : "mostrar";
+      });
+      document.querySelectorAll(".demo button").forEach((b) => b.addEventListener("click", () => { $("#email").value = b.dataset.e; $("#senha").value = b.dataset.s; $("#entrar").focus(); }));
+
+      $("#form").addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        const erro = $("#erro"); erro.hidden = true;
+        const botao = $("#entrar"); botao.disabled = true;
+        try {
+          const r = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: $("#email").value, senha: $("#senha").value }) });
+          const d = await r.json();
+          if (!r.ok) throw new Error(d.erro || "Não foi possível entrar.");
+          location.href = CASAS[d.usuario.papel];
+        } catch (e) {
+          erro.textContent = e.message === "Failed to fetch" ? "Não consegui falar com o servidor. Rode python servidor.py." : e.message; erro.hidden = false; botao.disabled = false;
+          $("#senha").select();
+        }
+      });
+
+      /* pixels do painel da marca: poucos, devagar, só textura */
+      const cv = $("#pixels-login"), cx = cv.getContext("2d"); let t0 = 0;
+      function desenhar(t) {
+        const w = cv.clientWidth, h = cv.clientHeight, dpr = Math.min(devicePixelRatio || 1, 2);
+        if (cv.width !== w * dpr) { cv.width = w * dpr; cv.height = h * dpr; }
+        cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, w, h);
+        const p = 28, g = 6;
+        for (let y = 0; y < h; y += p) for (let x = 0; x < w; x += p) {
+          const v = Math.sin(x * 0.012 + y * 0.017 + t / 2400) * 0.5 + 0.5;
+          if (v > 0.58) { cx.fillStyle = `rgba(185,188,233,${(v - 0.5) * 0.5})`; cx.fillRect(x, y, p - g, p - g); }
+        }
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) requestAnimationFrame(desenhar);
+      }
+      requestAnimationFrame(desenhar);
     })();
   </script>
 </body>

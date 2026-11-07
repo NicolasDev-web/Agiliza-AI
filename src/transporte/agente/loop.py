@@ -11,7 +11,7 @@ from typing import Iterator
 
 from . import ferramentas as F
 from .llm import Cliente, ErroDaAPI, SemCredencial
-from .prompt import SISTEMA
+from .prompt import SISTEMA, SISTEMA_CONSULTA
 
 MAX_RODADAS = 8
 
@@ -29,8 +29,8 @@ class Sessao:
         self.papel = papel
         self.usuario = usuario
         self.avisos: list[str] = []   # decisões do gerente que o modelo ainda não leu
-        self.diario = F.Diario(usuario=usuario, sessao=sid)
-        self.historico: list[dict] = [{"role": "system", "content": SISTEMA}]
+        self.diario = F.Diario(usuario=usuario, sessao=sid, ve_tudo=(papel == F.PAPEL_CONSULTA))
+        self.historico: list[dict] = [{"role": "system", "content": SISTEMA_CONSULTA if papel == F.PAPEL_CONSULTA else SISTEMA}]
 
     @property
     def modo(self) -> str:
@@ -68,7 +68,7 @@ class Sessao:
     def _rodadas(self) -> Iterator[dict]:
         for rodada in range(MAX_RODADAS):
             yield _evento("pensando", rodada=rodada + 1)
-            r = self.cliente.responder(self.historico, F.esquema_openai())
+            r = self.cliente.responder(self.historico, F.esquema_openai(self.papel))
             if r["texto"] and not r["chamadas"]:
                 self.historico.append({"role": "assistant", "content": r["texto"]})
                 yield _evento("resposta", texto=r["texto"], diario=self.diario.acoes, custo=self.diario.custo)

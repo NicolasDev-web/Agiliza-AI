@@ -79,3 +79,26 @@ body.pagina-agente { background: var(--papel); }
 .aprov .estado.recusada i { background: #b3261e; }
 .aprov .estado.pendente i { animation: pulsa 1.2s infinite; }
 @keyframes pulsa { 50% { opacity: .25; } }
+
+/* início do analista */
+.an-topo { padding: 96px var(--g) 8px; max-width: 980px; }
+.an-topo h1 { font-size: clamp(34px, 5vw, 60px); letter-spacing: -0.04em; font-weight: 450; margin: 2px 0 8px; }
+.an-sub { color: var(--tinta-2); max-width: 56ch; }
+.an-acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.an-acoes .botao { cursor: pointer; background: var(--branco); border: 1px solid var(--linha); }
+.an-acoes .botao:hover { border-color: var(--cobalto); }
+.an-grade { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; padding: 22px var(--g) 90px; align-items: start; }
+.pagina-analista { background: var(--papel); }
+.pagina-analista #mapa-rota { height: 360px; }
+.painel h2 em { font-style: normal; background: var(--perda); color: var(--branco); padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-left: 8px; }
+.rota-resumo { margin-top: 12px; display: grid; gap: 3px; }
+.rota-titulo { font-size: 19px; letter-spacing: -0.015em; color: var(--tinta); }
+.rota-titulo b { color: var(--cobalto); font-weight: 550; }
+.rota-linha { font-size: 14px; color: var(--tinta-2); }
+.rota-pe { font-family: var(--mono); font-size: 11px; color: var(--tinta-3); margin-top: 4px; }
+.zap { background: #f1f1f8; border-radius: var(--raio); padding: 12px; display: grid; gap: 6px; }
+.zap-bolha { background: var(--branco); border-radius: 10px; border-top-left-radius: 2px; padding: 5px; max-width: 320px; box-shadow: 0 1px 0 rgba(21,24,79,.08); }
+.zap-bolha img { display: block; width: 100%; border-radius: 7px; }
+.zap-texto { padding: 8px 8px 2px; font-size: 14px; line-height: 1.4; white-space: pre-wrap; }
+.zap-hora { display: block; text-align: right; font-family: var(--mono); font-size: 10px; color: var(--tinta-3); padding: 0 8px 4px; }
+@media (max-width: 960px) { .an-grade { grid-template-columns: 1fr; } }

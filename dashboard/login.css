@@ -1,0 +1,34 @@
+/* Entrada: painel da marca em cobalto + formulário limpo. */
+body.pagina-login { background: var(--branco); }
+.entrada { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+.entrada-marca { position: relative; background: var(--cobalto-fundo); color: var(--branco); overflow: hidden; display: flex; align-items: flex-end; padding: clamp(28px, 5vw, 64px); }
+.entrada-marca canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.entrada-texto { position: relative; max-width: 440px; }
+.logo { display: grid; grid-template-columns: 14px 14px auto; grid-template-rows: 14px 14px; gap: 4px 4px; align-items: center; margin-bottom: 34px; }
+.logo i { display: block; width: 14px; height: 14px; background: var(--branco); }
+.logo i:nth-child(2), .logo i:nth-child(3) { background: var(--tinta-clara); }
+.logo span { grid-column: 3; grid-row: 1 / 3; margin-left: 14px; font-size: 38px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
+.logo b { color: var(--tinta-clara); font-weight: 600; margin-left: 8px; }
+.entrada-frase { font-size: clamp(30px, 3.6vw, 52px); line-height: 1.05; letter-spacing: -0.035em; font-weight: 450; }
+
+.entrada-form { display: grid; place-items: center; padding: 32px clamp(20px, 5vw, 64px); }
+.entrada-form form { width: min(400px, 100%); display: grid; gap: 8px; }
+.entrada-form h1 { font-size: 34px; letter-spacing: -0.035em; margin: 2px 0 14px; }
+.entrada-form label { font-family: var(--mono); font-size: 11px; color: var(--tinta-3); letter-spacing: .06em; text-transform: uppercase; margin-top: 8px; }
+.entrada-form input { width: 100%; padding: 13px 14px; border: 1px solid var(--linha); border-radius: var(--raio); background: var(--branco); font-size: 16px; outline: none; transition: border-color var(--t-rapida), box-shadow var(--t-rapida); }
+.entrada-form input:focus { border-color: var(--cobalto); box-shadow: 0 0 0 3px rgba(47, 55, 196, .14); }
+.campo-senha { position: relative; }
+.campo-senha input { padding-right: 84px; }
+.campo-senha button { position: absolute; right: 6px; top: 6px; bottom: 6px; border: 0; background: transparent; color: var(--cobalto); font-family: var(--mono); font-size: 11px; cursor: pointer; padding: 0 10px; }
+.erro { color: #b3261e; font-size: 14px; background: #fdf1f0; padding: 9px 12px; border-radius: var(--raio); }
+.entrar { justify-content: center; margin-top: 14px; padding: 13px 16px; cursor: pointer; font-size: 13px; }
+.entrar:disabled { opacity: .6; cursor: wait; }
+.demo { margin-top: 26px; border-top: 1px solid var(--linha); padding-top: 14px; font-size: 14px; color: var(--tinta-2); }
+.demo summary { cursor: pointer; font-family: var(--mono); font-size: 11.5px; color: var(--tinta-3); list-style: none; }
+.demo summary::before { content: "+ "; }
+.demo[open] summary::before { content: "– "; }
+.demo button { display: flex; justify-content: space-between; width: 100%; margin-top: 8px; padding: 10px 12px; border: 1px solid var(--linha); background: var(--papel-claro); border-radius: var(--raio); cursor: pointer; text-align: left; }
+.demo button:hover { border-color: var(--cobalto); }
+.demo button span { color: var(--tinta-3); font-size: 12.5px; }
+.demo p { margin-top: 10px; font-size: 12.5px; color: var(--tinta-3); }
+@media (max-width: 820px) { .entrada { grid-template-columns: 1fr; } .entrada-marca { min-height: 220px; } .entrada-frase { font-size: 28px; } .logo { margin-bottom: 16px; } }

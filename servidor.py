@@ -20,19 +20,23 @@ from urllib.parse import parse_qs, urlparse
 RAIZ = Path(__file__).resolve().parent
 sys.path.insert(0, str(RAIZ / "src"))
 
-from transporte import estado  # noqa: E402
+from transporte import estado, whatsapp  # noqa: E402
 from transporte.agente.llm import Cliente  # noqa: E402
+from transporte.agente.ferramentas import PAPEL_AGENTE, PAPEL_CONSULTA  # noqa: E402
 from transporte.agente.loop import Sessao  # noqa: E402
 
 PUBLICO = RAIZ / "dashboard"
+COOKIE = "agiliza_sessao"
 SESSOES: dict[str, Sessao] = {}
 TRAVA = threading.Lock()
 
 
-def sessao(sid: str, usuario: str = "lucas") -> Sessao:
+def sessao(sid: str, usuario: str = "lucas", papel_usuario: str = "analista_logistica") -> Sessao:
+    """Analista conversa com o agente planejador; a gerente, com o agente de consulta (só lê e explica)."""
     with TRAVA:
         if sid not in SESSOES:
-            SESSOES[sid] = Sessao(usuario=usuario, sid=sid)
+            papel = PAPEL_CONSULTA if papel_usuario == "gerente" else PAPEL_AGENTE
+            SESSOES[sid] = Sessao(papel=papel, usuario=usuario, sid=sid)
         return SESSOES[sid]
 
 
@@ -42,9 +46,11 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, formato, *args):  # silêncio no terminal
         pass
 
-    def _json(self, dados: dict, codigo: int = 200) -> None:
+    def _json(self, dados: dict, codigo: int = 200, cabecalhos: dict | None = None) -> None:
         corpo = json.dumps(dados, ensure_ascii=False).encode()
         self.send_response(codigo)
+        for k, v in (cabecalhos or {}).items():
+            self.send_header(k, v)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(corpo)))
         self.end_headers()
@@ -59,8 +65,9 @@ class Handler(BaseHTTPRequestHandler):
         q = parse_qs(url.query)
         if url.path == "/api/conversa":
             return self._conversa(q)
-        if url.path == "/api/usuarios":
-            return self._json({"usuarios": estado.usuarios()})
+        if url.path == "/api/eu":
+            u = estado.usuario_da_sessao(self._token())
+            return self._json({"usuario": u}, 200 if u else 401)
         if url.path == "/api/prazos-vigentes":
             return self._json({"prazos": estado.prazos_vigentes()})
         if url.path.startswith("/api/"):
@@ -70,6 +77,8 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:
         url = urlparse(self.path)
         tamanho = int(self.headers.get("Content-Length") or 0)
+        if url.path == "/api/transcrever":
+            return self._transcrever(self.rfile.read(min(tamanho, 15_000_000)))
         try:
             corpo = json.loads(self.rfile.read(tamanho) or b"{}")
         except ValueError:
@@ -78,12 +87,18 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({"erro": "não achei isso"}, 404)
         self._api_com_usuario("POST", url.path, parse_qs(url.query), corpo)
 
-    # ---- tudo abaixo exige saber quem é o usuário; o papel vem do servidor, nunca do navegador
+    # ---- tudo abaixo exige login; o usuário e o papel vêm da sessão no servidor, nunca do navegador
+    def _token(self) -> str | None:
+        for parte in (self.headers.get("Cookie") or "").split(";"):
+            nome, _, valor = parte.strip().partition("=")
+            if nome == COOKIE:
+                return valor
+        return None
+
     def _quem(self, q: dict, corpo: dict, papel: str | None = None) -> dict | None:
-        uid = (q.get("usuario") or [corpo.get("usuario")])[0]
-        u = estado.usuario(uid)
+        u = estado.usuario_da_sessao(self._token())
         if not u:
-            self._json({"erro": "entre como Lucas ou Marina primeiro"}, 401)
+            self._json({"erro": "entre com seu e-mail e senha"}, 401)
             return None
         if papel and u["papel"] != papel:
             quem = "o gerente de logística" if papel == "gerente" else "o analista de logística"
@@ -93,6 +108,15 @@ class Handler(BaseHTTPRequestHandler):
 
     def _api_com_usuario(self, metodo: str, caminho: str, q: dict, corpo: dict) -> None:
         try:
+            if caminho == "/api/login" and metodo == "POST":
+                try:
+                    token, u = estado.entrar(corpo.get("email", ""), corpo.get("senha", ""))
+                except estado.ErroDeRegra as e:
+                    return self._json({"erro": str(e)}, 401)
+                return self._json({"usuario": u}, 200, {"Set-Cookie": f"{COOKIE}={token}; HttpOnly; Path=/; SameSite=Lax; Max-Age={estado.SESSAO_HORAS * 3600}"})
+            if caminho == "/api/sair" and metodo == "POST":
+                estado.sair(self._token())
+                return self._json({"ok": True}, 200, {"Set-Cookie": f"{COOKIE}=; HttpOnly; Path=/; Max-Age=0"})
             if caminho == "/api/eventos" and metodo == "GET":
                 u = self._quem(q, corpo)
                 return self._eventos(u) if u else None
@@ -115,7 +139,29 @@ class Handler(BaseHTTPRequestHandler):
                     s = SESSOES.get(a["sessao"] or "")
                 if s:
                     s.receber_decisao(a, u["nome"])
+                threading.Thread(target=whatsapp.enviar_decisao, args=(a, u["nome"]), daemon=True).start()
                 return self._json({"aprovacao": a, "placar": estado.placar()})
+            m = re.fullmatch(r"/api/cartao/(\d+)\.png", caminho)
+            if m and metodo == "GET":
+                u = self._quem(q, corpo)
+                a = estado.aprovacao(int(m.group(1))) if u else None
+                if u and (not a or (u["papel"] != "gerente" and a["solicitante"] != u["id"])):
+                    return self._json({"erro": "cartão não encontrado"}, 404)
+                png = whatsapp.cartao_png(int(m.group(1))) if u else None
+                if u and not png:
+                    return self._json({"erro": "cartão não encontrado"}, 404)
+                if u:
+                    self.send_response(200)
+                    self.send_header("Content-Type", "image/png")
+                    self.send_header("Content-Length", str(len(png)))
+                    self.end_headers()
+                    self.wfile.write(png)
+                return
+            if caminho == "/api/mensagens" and metodo == "GET":
+                u = self._quem(q, corpo)
+                if u:
+                    self._json({"mensagens": estado.listar_mensagens(u["id"]), "canal": whatsapp.configuracao()["canal"]})
+                return
             if caminho == "/api/alertas" and metodo == "GET":
                 if self._quem(q, corpo, "gerente"):
                     self._json({"alertas": estado.listar_alertas(), "placar": estado.placar()})
@@ -135,6 +181,18 @@ class Handler(BaseHTTPRequestHandler):
             self._json({"erro": "rota desconhecida"}, 404)
         except Exception:
             self._json({"erro": "algo quebrou no servidor", "detalhe": traceback.format_exc()[-500:]}, 500)
+
+    def _transcrever(self, audio: bytes) -> None:
+        """Voz -> texto quando o navegador não sabe transcrever sozinho (Firefox, por exemplo)."""
+        if not self._quem({}, {}):
+            return
+        c = Cliente()
+        if not c.configurado:
+            return self._json({"erro": "sem token da IA no .env: use o Chrome, que transcreve no próprio navegador"}, 501)
+        try:
+            self._json({"texto": c.transcrever(audio, (self.headers.get("Content-Type") or "audio/webm"))})
+        except Exception as e:
+            self._json({"erro": f"não consegui transcrever: {e}"}, 502)
 
     def _eventos(self, u: dict) -> None:
         """Canal em tempo real de um usuário: o que chega para ele aparece na tela na hora."""
@@ -160,7 +218,7 @@ class Handler(BaseHTTPRequestHandler):
     def _conversa(self, q: dict) -> None:
         pergunta = (q.get("pergunta") or [""])[0].strip()
         sid = (q.get("sessao") or [str(uuid.uuid4())])[0]
-        u = self._quem(q, {}, "analista_logistica")
+        u = self._quem(q, {})
         if not u:
             return
         if not pergunta:
@@ -170,7 +228,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Cache-Control", "no-cache")
         self.send_header("Connection", "close")
         self.end_headers()
-        s = sessao(sid, u["id"])
+        s = sessao(sid, u["id"], u["papel"])
         try:
             for evento in s.responder(pergunta):
                 evento["sessao"] = sid

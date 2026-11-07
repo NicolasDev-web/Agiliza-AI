@@ -7,8 +7,11 @@ cenário) valem no código, não só na tela.
 """
 from __future__ import annotations
 
+import hashlib
+import hmac
 import json
 import os
+import secrets
 import sqlite3
 import threading
 import time
@@ -21,10 +24,14 @@ from .config import PROCESSED
 MAX_APROVACOES = 12          # politicas.csv: no máximo 12 aprovações por cenário
 CUSTO_APROVACAO = 15.0       # R$ por pedido de aprovação
 
+# contas de demonstração (hackathon): fictícias, listadas no README
 USUARIOS = [
-    ("lucas", "Lucas Ferreira", "analista_logistica", "Analista de logística"),
-    ("marina", "Marina Duarte", "gerente", "Gerente de logística"),
+    ("lucas", "Lucas Ferreira", "analista_logistica", "Analista de logística",
+     "lucas.ferreira@agiliza.ai", "Agiliza@Lucas26"),
+    ("marina", "Marina Duarte", "gerente", "Gerente de logística",
+     "marina.duarte@agiliza.ai", "Agiliza@Marina26"),
 ]
+SESSAO_HORAS = 12
 
 _TRAVA = threading.RLock()
 _CON: sqlite3.Connection | None = None
@@ -65,7 +72,8 @@ def con() -> sqlite3.Connection:
 
 def _criar(c: sqlite3.Connection) -> None:
     c.executescript("""
-    create table if not exists usuarios (id text primary key, nome text, papel text, cargo text);
+    create table if not exists usuarios (id text primary key, nome text, papel text, cargo text, email text, senha_hash text);
+    create table if not exists sessoes (token text primary key, usuario text, criado_em real);
     create table if not exists aprovacoes (
       id integer primary key autoincrement, criado_em text, tipo text, proposta_id text,
       resumo text, evidencia text, prefixos text, valor_atual real, valor_proposto real,
@@ -76,11 +84,33 @@ def _criar(c: sqlite3.Connection) -> None:
     create table if not exists alertas (
       id integer primary key autoincrement, quando text, categoria text, titulo text, texto text,
       detalhe text, origem text, ciente integer default 0);
+    create table if not exists mensagens (
+      id integer primary key autoincrement, quando text, aprovacao_id integer, para_usuario text,
+      texto text, origem text, situacao text, aviso text, destino text);
     create index if not exists ix_aprov_situacao on aprovacoes(situacao);
     """)
-    for u in USUARIOS:
-        c.execute("insert or ignore into usuarios values (?,?,?,?)", u)
+    colunas = {r[1] for r in c.execute("pragma table_info(usuarios)")}
+    for falta in ("email", "senha_hash"):   # estado.db criado antes do login
+        if falta not in colunas:
+            c.execute(f"alter table usuarios add column {falta} text")
+    for uid, nome, papel, cargo, email, senha in USUARIOS:
+        c.execute("insert or ignore into usuarios (id,nome,papel,cargo) values (?,?,?,?)", (uid, nome, papel, cargo))
+        c.execute("update usuarios set nome=?, papel=?, cargo=?, email=?, senha_hash=? where id=?",
+                  (nome, papel, cargo, email, _hash(senha), uid))
     c.commit()
+
+
+def _hash(senha: str, sal: str | None = None) -> str:
+    sal = sal or secrets.token_hex(8)
+    h = hashlib.pbkdf2_hmac("sha256", senha.encode(), sal.encode(), 60_000).hex()
+    return f"{sal}${h}"
+
+
+def _confere(senha: str, guardado: str | None) -> bool:
+    if not guardado or "$" not in guardado:
+        return False
+    sal = guardado.split("$", 1)[0]
+    return hmac.compare_digest(_hash(senha, sal), guardado)
 
 
 def _linhas(consulta: str, args: tuple = ()) -> list[dict]:
@@ -92,21 +122,53 @@ def reiniciar() -> None:
     """Zera pedidos, decisões, prazos aprovados e alertas. Os usuários ficam."""
     with _TRAVA:
         c = con()
-        c.executescript("delete from aprovacoes; delete from prazos_vigentes; delete from alertas;"
+        c.executescript("delete from aprovacoes; delete from prazos_vigentes; delete from alertas; delete from mensagens;"
                         "delete from sqlite_sequence;")
         c.commit()
 
 
 # ---------------------------------------------------------------------------- usuários
+PUBLICO = "id, nome, papel, cargo, email"   # nunca devolver o hash
+
+
 def usuarios() -> list[dict]:
-    return _linhas("select * from usuarios order by papel desc")
+    return _linhas(f"select {PUBLICO} from usuarios order by papel desc")
 
 
 def usuario(uid: str | None) -> dict | None:
     if not uid:
         return None
-    r = _linhas("select * from usuarios where id = ?", (uid,))
+    r = _linhas(f"select {PUBLICO} from usuarios where id = ?", (uid,))
     return r[0] if r else None
+
+
+def entrar(email: str, senha: str) -> tuple[str, dict]:
+    """Confere e-mail e senha e abre uma sessão. Devolve (token, usuário)."""
+    r = _linhas("select * from usuarios where lower(email) = ?", ((email or "").strip().lower(),))
+    if not r or not _confere(senha or "", r[0]["senha_hash"]):
+        time.sleep(0.4)   # freio simples contra tentativa em série
+        raise ErroDeRegra("E-mail ou senha incorretos.")
+    token = secrets.token_urlsafe(24)
+    with _TRAVA:
+        con().execute("insert into sessoes values (?,?,?)", (token, r[0]["id"], time.time()))
+        con().commit()
+    return token, usuario(r[0]["id"])
+
+
+def usuario_da_sessao(token: str | None) -> dict | None:
+    if not token:
+        return None
+    r = _linhas("select usuario, criado_em from sessoes where token = ?", (token,))
+    if not r or time.time() - r[0]["criado_em"] > SESSAO_HORAS * 3600:
+        return None
+    return usuario(r[0]["usuario"])
+
+
+def sair(token: str | None) -> None:
+    if token:
+        with _TRAVA:
+            con().execute("delete from sessoes where token = ?", (token,))
+            con().commit()
 
 
 # ---------------------------------------------------------------------------- barramento (tempo real)
@@ -244,6 +306,28 @@ def decidir(aid: int, decisor: str, decisao: str, valor=None, comentario: str = 
 
 def prazos_vigentes() -> dict[str, dict]:
     return {r["cep3"]: r for r in _linhas("select * from prazos_vigentes")}
+
+
+# ---------------------------------------------------------------------------- mensagens de WhatsApp
+def registrar_mensagem(aprovacao_id: int, para_usuario: str, texto: str, origem: str, situacao: str,
+                       aviso: str | None, destino: str) -> dict:
+    """Guarda o que foi (ou seria) mandado ao analista e avisa a tela dele, que mostra como no WhatsApp."""
+    with _TRAVA:
+        c = con()
+        cur = c.execute("insert into mensagens (quando,aprovacao_id,para_usuario,texto,origem,situacao,aviso,destino) values (?,?,?,?,?,?,?,?)",
+                        (_agora(), aprovacao_id, para_usuario, texto, origem, situacao, aviso, destino))
+        c.commit()
+        m = _linhas("select * from mensagens where id = ?", (cur.lastrowid,))[0]
+    m["imagem"] = f"/api/cartao/{aprovacao_id}.png"
+    BARRAMENTO.publicar(para_usuario, "whatsapp", mensagem=m)
+    return m
+
+
+def listar_mensagens(uid: str, limite: int = 10) -> list[dict]:
+    r = _linhas("select * from mensagens where para_usuario = ? order by id desc limit ?", (uid, int(limite)))
+    for m in r:
+        m["imagem"] = f"/api/cartao/{m['aprovacao_id']}.png"
+    return r
 
 
 # ---------------------------------------------------------------------------- alertas para o gerente (financeiro)

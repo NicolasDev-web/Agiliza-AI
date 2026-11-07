@@ -74,6 +74,30 @@ class Cliente:
         itens = d.get("data") or d.get("models") or []
         return [m.get("id") or m.get("name") for m in itens if isinstance(m, dict)]
 
+    # ---------------------------------------------------------------- voz
+    def transcrever(self, audio: bytes, mime: str = "audio/webm") -> str:
+        """Áudio -> texto pelo proxy (/v1/audio/transcriptions). Só funciona se o proxy expuser um modelo de áudio."""
+        if not self.token:
+            raise SemCredencial("Falta AI_PROXY_TOKEN.")
+        import uuid
+        lim = uuid.uuid4().hex
+        modelo = os.getenv("AI_PROXY_MODELO_AUDIO") or "whisper-1"
+        ext = {"audio/ogg": "ogg", "audio/mp4": "m4a", "audio/mpeg": "mp3", "audio/wav": "wav"}.get(mime.split(";")[0], "webm")
+        corpo = b""
+        for k, v in {"model": modelo, "language": "pt", "response_format": "json"}.items():
+            corpo += f'--{lim}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode()
+        corpo += (f'--{lim}\r\nContent-Disposition: form-data; name="file"; filename="voz.{ext}"\r\n'
+                  f"Content-Type: {mime}\r\n\r\n").encode() + audio + f"\r\n--{lim}--\r\n".encode()
+        req = urllib.request.Request(f"{self.url}/v1/audio/transcriptions", data=corpo, method="POST", headers={
+            "Content-Type": f"multipart/form-data; boundary={lim}", "Authorization": f"Bearer {self.token}"})
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                return (json.loads(r.read().decode()).get("text") or "").strip()
+        except urllib.error.HTTPError as e:
+            raise ErroDaAPI(f"HTTP {e.code} na transcrição: {e.read().decode()[:300]}") from e
+        except urllib.error.URLError as e:
+            raise ErroDaAPI(f"não consegui falar com {self.url}: {e.reason}") from e
+
     # ---------------------------------------------------------------- conversa
     def responder(self, mensagens: list[dict], ferramentas: list[dict] | None = None) -> dict:
         """Uma rodada de conversa. Devolve {texto, chamadas:[{id,nome,argumentos}], bruto}."""

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gerente de logística · Transporte</title>
+  <title>Decisões · Agiliza AI</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='2' fill='%23e8631e'/%3E%3Crect x='3' y='3' width='4' height='4' fill='%23fff'/%3E%3Crect x='9' y='9' width='4' height='4' fill='%23fff'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,18 +14,18 @@
 </head>
 <body class="pagina-gerente">
   <header class="nav clara" id="topo">
-    <a class="marca" href="gerente.html" aria-label="Transporte, tela da gerente"><span class="marca-nome">Transporte</span><span class="marca-sub">prazo certo</span></a>
+    <a class="marca" href="gerente.html" aria-label="Agiliza AI, decisões"><span class="marca-nome">Agiliza<b>AI</b></span><span class="marca-sub">logística que cumpre</span></a>
     <nav class="nav-links" aria-label="Páginas">
+      <a href="gerente.html" class="nav-destaque">Decisões</a>
       <a href="index.html#mapa">Mapa</a>
       <a href="index.html#propostas">Painel</a>
-      <a href="gerente.html" class="nav-destaque">Decisões</a>
     </nav>
   </header>
 
   <section class="ger-topo">
     <div>
       <p class="rotulo-ctl">Gerente de logística</p>
-      <h1>O que precisa do seu OK</h1>
+      <h1 id="ola">O que precisa do seu OK</h1>
     </div>
     <div class="ger-acoes">
       <p class="ag-modo" id="conexao"><i></i><span>conectando…</span></p>
@@ -49,13 +49,13 @@
     <div class="ger-coluna">
       <section class="painel" aria-label="Financeiro">
         <h2>Financeiro · rotas trocadas <span id="n-alertas"></span></h2>
-        <p class="secao-nota" style="margin-bottom:10px">Toda vez que o agente muda a transportadora de um envio, você recebe aqui o que isso faz com o frete e com o custo de atraso.</p>
-        <div id="alertas"><p class="vazio">Nenhuma troca de rota ainda.</p></div>
+                <div id="alertas"><p class="vazio">Nenhuma troca de rota ainda.</p></div>
       </section>
     </div>
   </main>
 
   <script src="usuario.js"></script>
+  <script src="widget.js"></script>
   <script src="gerente.js"></script>
 </body>
 </html>
