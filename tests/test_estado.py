@@ -273,9 +273,9 @@ def test_texto_do_whatsapp_traz_resultado_prazos_e_motivo():
 
 def test_sem_credencial_do_whatsapp_a_mensagem_fica_em_previa_e_chega_a_tela(monkeypatch):
     from transporte import whatsapp
-    for k in ("WHATSAPP_TOKEN", "WHATSAPP_PHONE_ID", "WHATSAPP_DESTINO"):
-        monkeypatch.delenv(k, raising=False)
+    monkeypatch.delenv("WHATSAPP_DESTINO", raising=False)
     monkeypatch.setattr(whatsapp, "carregar_env", lambda *a, **k: None)
+    monkeypatch.setattr(whatsapp, "status_da_ponte", lambda: {"estado": "sem_ponte", "qr": None, "numero": None})
     cur = estado.BARRAMENTO.ultimo()
     a = _decidida("aprovada")
     m = whatsapp.enviar_decisao(a, "Marina Duarte")
@@ -285,12 +285,57 @@ def test_sem_credencial_do_whatsapp_a_mensagem_fica_em_previa_e_chega_a_tela(mon
     assert whatsapp.cartao_png(a["id"])[:4] == b"\x89PNG"
 
 
-def test_whatsapp_meta_falhando_cai_na_previa_sem_quebrar(monkeypatch):
+class _Ponte:
+    """Ponte falsa: guarda o estado e o que foi enviado, como o ponte.js faria."""
+    def __init__(self, monkeypatch, estado_ponte, falha=None):
+        from transporte import whatsapp
+        self.estado, self.falha, self.enviadas = estado_ponte, falha, []
+        monkeypatch.setenv("WHATSAPP_DESTINO", "5585999990000")
+        monkeypatch.setattr(whatsapp, "carregar_env", lambda *a, **k: None)
+        monkeypatch.setattr(whatsapp, "status_da_ponte", lambda: {"estado": self.estado, "qr": None, "numero": "5585911110000"})
+        monkeypatch.setattr(whatsapp, "_chamar", self.chamar)
+
+    def chamar(self, caminho, corpo=None, espera=20):
+        if self.falha:
+            raise RuntimeError(self.falha)
+        self.enviadas.append((caminho, corpo))
+        return {"ok": True}
+
+
+def test_whatsapp_conectado_envia_pela_ponte_com_cartao(monkeypatch):
     from transporte import whatsapp
-    monkeypatch.setenv("WHATSAPP_TOKEN", "t"); monkeypatch.setenv("WHATSAPP_PHONE_ID", "1"); monkeypatch.setenv("WHATSAPP_DESTINO", "5585999990000")
-    monkeypatch.setattr(whatsapp, "_meta", lambda *a: (_ for _ in ()).throw(RuntimeError("WhatsApp respondeu 400")))
+    ponte = _Ponte(monkeypatch, "conectado")
     m = whatsapp.enviar_decisao(_decidida("aprovada"), "Marina Duarte")
-    assert m["situacao"] == "falhou" and "400" in m["aviso"] and "0000" in m["destino"] and "5585999990000" not in m["destino"]
+    assert m["situacao"] == "enviada" and "5585999990000" not in m["destino"]
+    caminho, corpo = ponte.enviadas[0]
+    assert caminho == "/enviar" and corpo["numero"] == "5585999990000" and corpo["imagem_base64"] and "aprovou" in corpo["texto"]
+
+
+def test_whatsapp_ponte_falhando_cai_na_previa_sem_quebrar(monkeypatch):
+    from transporte import whatsapp
+    _Ponte(monkeypatch, "conectado", falha="esse número não tem WhatsApp")
+    m = whatsapp.enviar_decisao(_decidida("aprovada"), "Marina Duarte")
+    assert m["situacao"] == "falhou" and "não tem WhatsApp" in m["aviso"]
+
+
+def test_mensagem_espera_a_gerente_ler_o_qr_e_sai_sozinha_depois(monkeypatch):
+    from transporte import whatsapp
+    ponte = _Ponte(monkeypatch, "aguardando_qr")
+    m = whatsapp.enviar_decisao(_decidida("aprovada"), "Marina Duarte")
+    assert m["situacao"] == "pendente" and not ponte.enviadas
+    assert whatsapp.enviar_pendentes() == 0          # ainda sem QR lido: nada sai
+    ponte.estado = "conectado"
+    assert whatsapp.enviar_pendentes() == 1 and ponte.enviadas[0][0] == "/enviar"
+    assert estado.mensagens_pendentes() == [] and estado.listar_mensagens("lucas")[0]["situacao"] == "enviada"
+    assert whatsapp.enviar_pendentes() == 0          # não reenvia
+
+
+def test_sem_numero_do_analista_nao_envia(monkeypatch):
+    from transporte import whatsapp
+    ponte = _Ponte(monkeypatch, "conectado")
+    monkeypatch.delenv("WHATSAPP_DESTINO")
+    m = whatsapp.enviar_decisao(_decidida("aprovada"), "Marina Duarte")
+    assert m["situacao"] == "previa" and "WHATSAPP_DESTINO" in m["aviso"] and not ponte.enviadas
 
 
 def test_ia_reescreve_a_mensagem_e_o_motivo_vira_dado(monkeypatch):
@@ -314,3 +359,34 @@ def test_prazo_ja_aprovado_nao_volta_como_proposta_pendente():
     estado.decidir(a["id"], "marina", "aprovar")
     depois = F.executar("ver_propostas_de_prazo", {"acao": "aumentar", "top": 3})["linhas"]
     assert antes[0]["cep3"] not in [l["cep3"] for l in depois] and len(depois) == 3
+
+
+# ---------------------------------------------------------------- conversa isolada por usuário
+def test_mesma_sessao_em_outro_perfil_e_outra_conversa(servidor):
+    base, S = servidor
+    a = S.sessao("abc", "lucas", "analista_logistica")
+    b = S.sessao("abc", "marina", "gerente")
+    assert a is not b and a.papel != b.papel and S.sessao("abc", "lucas") is a
+
+
+def test_whatsapp_painel_da_gerente_e_so_dela(servidor, monkeypatch):
+    base, S = servidor
+    monkeypatch.setattr(S.whatsapp, "status_da_ponte", lambda: {"estado": "aguardando_qr", "qr": "data:image/png;base64,AAA", "numero": None})
+    monkeypatch.setenv("WHATSAPP_DESTINO", "5585999990000")
+    cod, _ = _req(base, "/api/whatsapp", como="lucas")
+    assert cod == 403
+    cod, r = _req(base, "/api/whatsapp", como="marina")
+    assert cod == 200 and r["estado"] == "aguardando_qr" and r["qr"].startswith("data:image") and "5585999990000" not in json.dumps(r)
+
+
+def test_voz_corrige_nomes_e_a_resposta_leva_a_fala(servidor):
+    base, S = servidor
+    import urllib.parse
+    q = urllib.parse.urlencode({"sessao": "v1", "pergunta": "como esta a trans note", "alt": "como esta a trans norte em maraba", "voz": "1"})
+    r = urllib.request.Request(base + "/api/conversa?" + q, headers={"Cookie": f"agiliza_sessao={_COOKIES['lucas']}"})
+    with urllib.request.urlopen(r, timeout=30) as f:
+        evs = [json.loads(l[6:]) for l in f.read().decode().splitlines() if l.startswith("data: ")]
+    entendi = [e for e in evs if e["tipo"] == "entendi"]
+    assert entendi and "TransNorte" in entendi[0]["texto"] and "Marabá" in entendi[0]["texto"]
+    resp = [e for e in evs if e["tipo"] == "resposta"][0]
+    assert resp["fala"] and "*" not in resp["fala"] and len(resp["fala"]) <= 340

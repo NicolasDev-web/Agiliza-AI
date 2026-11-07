@@ -11,10 +11,12 @@
     filhos.flat().forEach((f) => { if (f != null) el.append(f.nodeType ? f : document.createTextNode(String(f))); });
     return el;
   }
-  const guardar = (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) { /* sem storage */ } };
-  const ler = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
-  const sid = ler("agiliza.sid") || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())).slice(0, 8);
-  guardar("agiliza.sid", sid);
+  /* tudo que fica no navegador leva o id do usuário na chave: trocar de perfil nunca mostra a conversa do outro */
+  let uid = "";
+  const chave = (k) => `agiliza.${uid}.${k}`;
+  const guardar = (k, v) => { try { sessionStorage.setItem(chave(k), v); } catch (e) { /* sem storage */ } };
+  const ler = (k) => { try { return sessionStorage.getItem(chave(k)); } catch (e) { return null; } };
+  let sid = "";
 
   const SUGESTOES = {
     analista_logistica: ["Qual a melhor rota para os envios novos de SP?", "Qual prazo do site precisa mudar?", "A Marina já respondeu?"],
@@ -23,8 +25,8 @@
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const podeGravar = !!(navigator.mediaDevices && window.MediaRecorder);
 
-  let painel, lista, campo, mic, enviar, status, fonte = null, ocupado = false, digitando = null, porVoz = false, ouvir = ler("agiliza.ouvir") === "1";
-  const historico = JSON.parse(ler("agiliza.chat") || "[]");
+  let painel, lista, campo, mic, enviar, status, fonte = null, ocupado = false, digitando = null, porVoz = false, ouvir = false;
+  let historico = [];
 
   function formatar(texto) {
     const frag = document.createDocumentFragment();
@@ -34,7 +36,7 @@
   function bolha(tipo, texto, voz, guardarNoHistorico = true) {
     const b = h("div", { class: "aw-bolha " + tipo }, voz ? h("span", { class: "aw-voz", title: "enviada por voz" }) : null, formatar(texto));
     lista.append(b); lista.scrollTop = lista.scrollHeight;
-    if (guardarNoHistorico) { historico.push([tipo, texto, !!voz]); guardar("agiliza.chat", JSON.stringify(historico.slice(-30))); }
+    if (guardarNoHistorico) { historico.push([tipo, texto, !!voz]); guardar("chat", JSON.stringify(historico.slice(-30))); }
     return b;
   }
   function pontos(sim) {
@@ -43,8 +45,11 @@
   }
 
   function falar(texto) {
-    if (!ouvir || !window.speechSynthesis) return;
-    const u = new SpeechSynthesisUtterance(texto.replace(/\*/g, "").replace(/[✅❌▫️🔴🟢•]/g, "")); u.lang = "pt-BR"; u.rate = 1.05;
+    if (!ouvir || !window.speechSynthesis || !texto) return;
+    const u = new SpeechSynthesisUtterance(texto); u.lang = "pt-BR"; u.rate = 1.08;
+    const vozes = speechSynthesis.getVoices().filter((v) => /^pt(-|_)BR/i.test(v.lang));
+    const boa = vozes.find((v) => /google|luciana|francisca|microsoft/i.test(v.name)) || vozes[0];
+    if (boa) u.voice = boa;
     speechSynthesis.cancel(); speechSynthesis.speak(u);
   }
 
@@ -53,16 +58,18 @@
     switch (e.tipo) {
       case "ferramenta": if (status) status.textContent = e.rotulo + "…"; break;
       case "nota": bolha("ag", e.texto); break;
-      case "resposta": pontos(false); bolha("ag", e.texto); if (porVoz) falar(e.texto); break;
+      case "entendi": { const eu = [...lista.querySelectorAll(".aw-bolha.eu")].pop(); if (eu) { eu.append(h("small", { class: "aw-entendi" }, "entendi: " + e.texto)); } break; }
+      case "resposta": pontos(false); bolha("ag", e.texto); if (porVoz) falar(e.fala || e.texto); break;
       case "erro": pontos(false); bolha("sis", e.texto); break;
       case "fim": pontos(false); ocupado = false; enviar.disabled = false; porVoz = false; if (fonte) { fonte.close(); fonte = null; } break;
     }
   }
-  function perguntar(texto, voz) {
+  function perguntar(texto, voz, alternativas = []) {
     texto = (texto || "").trim(); if (!texto || ocupado) return;
     abrir(); ocupado = true; enviar.disabled = true; campo.value = ""; porVoz = !!voz;
     bolha("eu", texto, voz); pontos(true);
-    fonte = new EventSource(`/api/conversa?sessao=${sid}&pergunta=${encodeURIComponent(texto)}`);
+    const extra = voz ? `&voz=1${alternativas.length ? "&alt=" + encodeURIComponent(alternativas.join("||")) : ""}` : "";
+    fonte = new EventSource(`/api/conversa?sessao=${sid}&pergunta=${encodeURIComponent(texto)}${extra}`);
     fonte.onmessage = (m) => { try { tratar(JSON.parse(m.data)); } catch (err) { console.error(err); } };
     fonte.onerror = () => { if (ocupado) { tratar({ tipo: "erro", texto: "Perdi a conexão com o servidor." }); tratar({ tipo: "fim" }); } };
   }
@@ -73,15 +80,19 @@
   function comecarVoz() {
     if (ocupado) return;
     if (SR) {
-      reconhecimento = new SR(); reconhecimento.lang = "pt-BR"; reconhecimento.interimResults = true; reconhecimento.continuous = false;
-      let final = "";
+      reconhecimento = new SR(); reconhecimento.lang = "pt-BR"; reconhecimento.interimResults = true; reconhecimento.continuous = false; reconhecimento.maxAlternatives = 3;
+      let final = "", alternativas = [];
+      if (window.speechSynthesis) speechSynthesis.cancel();   // não deixa o agente falando por cima de quem fala
       reconhecimento.onresult = (ev) => {
         let parcial = ""; final = "";
-        for (const r of ev.results) { if (r.isFinal) final += r[0].transcript; else parcial += r[0].transcript; }
+        alternativas = [];
+        for (const r of ev.results) {
+          if (r.isFinal) { final += r[0].transcript; for (let i = 1; i < r.length; i++) alternativas.push(r[i].transcript); } else parcial += r[0].transcript;
+        }
         campo.value = (final + " " + parcial).trim();
       };
       reconhecimento.onerror = (ev) => { marcarMic(false); if (ev.error === "not-allowed") bolha("sis", "O navegador bloqueou o microfone. Libere nas permissões do site.", false, false); };
-      reconhecimento.onend = () => { marcarMic(false); const t = (final || campo.value).trim(); reconhecimento = null; if (t) perguntar(t, true); };
+      reconhecimento.onend = () => { marcarMic(false); const t = (final || campo.value).trim(); reconhecimento = null; if (t) perguntar(t, true, alternativas); };
       marcarMic(true); reconhecimento.start(); return;
     }
     if (podeGravar) {   // navegador sem reconhecimento de voz: grava e o servidor transcreve
@@ -105,17 +116,22 @@
   function pararVoz() { if (reconhecimento) reconhecimento.stop(); else if (gravador && gravador.state === "recording") gravador.stop(); }
 
   /* ---------- tela ---------- */
-  function abrir() { painel.classList.add("aberto"); document.body.classList.add("aw-aberto"); campo && campo.focus({ preventScroll: true }); guardar("agiliza.aberto", "1"); }
-  function fechar() { painel.classList.remove("aberto"); document.body.classList.remove("aw-aberto"); guardar("agiliza.aberto", "0"); }
+  function abrir() { painel.classList.add("aberto"); document.body.classList.add("aw-aberto"); campo && campo.focus({ preventScroll: true }); guardar("aberto", "1"); }
+  function fechar() { painel.classList.remove("aberto"); document.body.classList.remove("aw-aberto"); guardar("aberto", "0"); }
 
   function montar(u) {
+    uid = u.id;
+    sid = ler("sid") || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())).slice(0, 8);
+    guardar("sid", sid);
+    ouvir = ler("ouvir") === "1";
+    try { historico = JSON.parse(ler("chat") || "[]"); } catch (e) { historico = []; }
     const css = h("link", { rel: "stylesheet", href: "widget.css" }); document.head.append(css);
     lista = h("div", { class: "aw-lista", "aria-live": "polite" });
     campo = h("input", { placeholder: "Escreva ou fale com o agente…", autocomplete: "off", "aria-label": "Mensagem para o agente" });
     enviar = h("button", { type: "submit", class: "aw-enviar", "aria-label": "Enviar" }, "↑");
     mic = h("button", { type: "button", class: "aw-mic", "aria-label": "Falar com o agente", "aria-pressed": "false", title: "Falar com o agente", onclick: () => (mic.classList.contains("ligado") ? pararVoz() : comecarVoz()) });
     if (!SR && !podeGravar) mic.hidden = true;
-    const som = h("button", { type: "button", class: "aw-som" + (ouvir ? " ligado" : ""), title: "Ouvir as respostas em voz alta", "aria-label": "Ouvir as respostas", onclick: () => { ouvir = !ouvir; guardar("agiliza.ouvir", ouvir ? "1" : "0"); som.classList.toggle("ligado", ouvir); if (!ouvir && window.speechSynthesis) speechSynthesis.cancel(); } });
+    const som = h("button", { type: "button", class: "aw-som" + (ouvir ? " ligado" : ""), title: "Ouvir as respostas em voz alta", "aria-label": "Ouvir as respostas", onclick: () => { ouvir = !ouvir; guardar("ouvir", ouvir ? "1" : "0"); som.classList.toggle("ligado", ouvir); if (!ouvir && window.speechSynthesis) speechSynthesis.cancel(); } });
     if (!window.speechSynthesis) som.hidden = true;
     const sug = h("div", { class: "aw-sug" }, ...(SUGESTOES[u.papel] || []).map((t) => h("button", { type: "button", onclick: () => perguntar(t) }, t)));
     painel = h("section", { class: "aw-painel", "aria-label": "Agente Agiliza" },
@@ -128,7 +144,7 @@
 
     if (historico.length) historico.forEach(([t, x, v]) => bolha(t, x, v, false));
     else bolha("ag", `Oi, ${u.nome.split(" ")[0]}! Pode escrever ou apertar o microfone e falar. ${u.papel === "gerente" ? "Eu explico qualquer pedido, mas a decisão é sua." : "Eu cuido das rotas e levo os prazos para a Marina."}`, false, false);
-    if (ler("agiliza.aberto") === "1") abrir();
+    if (ler("aberto") === "1") abrir();
   }
 
   window.AgilizaAgente = { abrir, fechar, perguntar: (t, v) => perguntar(t, v) };

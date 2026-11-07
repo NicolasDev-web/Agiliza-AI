@@ -112,6 +112,29 @@
     const r = await api("/api/aprovacoes"); lista(r.aprovacoes); placar(r.placar); carregarAlertas();
   }
 
+  /* ---------- WhatsApp: a Marina conecta lendo o QR code ---------- */
+  let ultimoZap = "";
+  async function carregarZap() {
+    let z;
+    try { z = await api("/api/whatsapp"); } catch (e) { return; }
+    const chave = z.estado + (z.qr || "").slice(-24) + z.numero;
+    if (chave === ultimoZap) return; ultimoZap = chave;
+    const ROT = { conectado: "conectado", aguardando_qr: "aguardando leitura", iniciando: "iniciando…", desconectado: "desconectado", sem_ponte: "desligado" };
+    $("#zap-estado").replaceChildren(h("em", { class: "zap-pilula " + z.estado }, ROT[z.estado] || z.estado));
+    const corpo = $("#zap-corpo");
+    if (z.estado === "conectado") {
+      corpo.replaceChildren(h("p", { class: "zap-ok" }, `Conectado${z.numero ? " no número +" + z.numero : ""}. As decisões saem daqui para ${z.destino || "o analista"}.`),
+        h("button", { type: "button", class: "botao botao-cobalto pequeno", onclick: async () => { if (confirm("Desconectar o WhatsApp deste sistema?")) { await api("/api/whatsapp/sair", "POST", {}).catch(() => {}); ultimoZap = ""; carregarZap(); } } }, "Desconectar"));
+    } else if (z.estado === "aguardando_qr" && z.qr) {
+      corpo.replaceChildren(h("div", { class: "zap-qr" }, h("img", { src: z.qr, alt: "QR code do WhatsApp", width: 220, height: 220 }),
+        h("ol", {}, h("li", {}, "Abra o WhatsApp no celular"), h("li", {}, "Toque em Aparelhos conectados"), h("li", {}, "Conectar um aparelho e aponte para este código"))),
+        h("p", { class: "zap-nota" }, `Depois de ler, as respostas aos pedidos vão para ${z.destino || "o analista"} sozinhas. Uso de teste: WhatsApp Web não é a via oficial.`));
+    } else if (z.estado === "sem_ponte") {
+      corpo.replaceChildren(h("p", { class: "vazio" }, z.ponte_instalada ? "A ponte do WhatsApp não está respondendo. Reinicie o servidor." : "Ponte do WhatsApp não instalada. No terminal: cd whatsapp && npm install, e reinicie o servidor."),
+        h("p", { class: "zap-nota" }, "Enquanto isso, o Lucas vê a mensagem como prévia na tela dele."));
+    } else corpo.replaceChildren(h("p", { class: "vazio" }, "Preparando o código de leitura…"));
+  }
+
   /* ---------- tempo real ---------- */
   function conectar() {
     const fonte = new EventSource("/api/eventos");
@@ -128,4 +151,6 @@
   $("#reiniciar").addEventListener("click", async () => { if (confirm("Zerar pedidos, decisões, prazos aprovados e alertas?")) { await api("/api/demo/reiniciar", "POST", {}); carregar(); } });
   await carregar().catch((e) => { $("#fila").replaceChildren(h("p", { class: "vazio" }, "Não consegui falar com o servidor: " + e.message)); });
   conectar();
+  if (window.Agiliza.panorama) window.Agiliza.panorama($("#panorama"), "gerente");
+  carregarZap(); setInterval(carregarZap, 3000);
 })();

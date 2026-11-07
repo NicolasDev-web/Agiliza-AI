@@ -22,12 +22,14 @@ RAIZ = Path(__file__).resolve().parent
 sys.path.insert(0, str(RAIZ / "src"))
 
 from transporte import estado, whatsapp  # noqa: E402
+from transporte.agente import entender  # noqa: E402
 from transporte.agente.llm import Cliente  # noqa: E402
 from transporte.agente.ferramentas import PAPEL_AGENTE, PAPEL_CONSULTA  # noqa: E402
 from transporte.agente.loop import Sessao  # noqa: E402
 
 PUBLICO = RAIZ / "dashboard"
 COOKIE = "agiliza_sessao"
+PONTE_JS = RAIZ / "whatsapp" / "ponte.js"
 TELAS = ["/login.html", "/analista.html", "/gerente.html", "/agente.html", "/index.html"]
 
 
@@ -48,10 +50,11 @@ TRAVA = threading.Lock()
 def sessao(sid: str, usuario: str = "lucas", papel_usuario: str = "analista_logistica") -> Sessao:
     """Analista conversa com o agente planejador; a gerente, com o agente de consulta (só lê e explica)."""
     with TRAVA:
-        if sid not in SESSOES:
+        chave = f"{usuario}:{sid}"   # a conversa pertence ao usuário: o mesmo sid em outro perfil é outra conversa
+        if chave not in SESSOES:
             papel = PAPEL_CONSULTA if papel_usuario == "gerente" else PAPEL_AGENTE
-            SESSOES[sid] = Sessao(papel=papel, usuario=usuario, sid=sid)
-        return SESSOES[sid]
+            SESSOES[chave] = Sessao(papel=papel, usuario=usuario, sid=sid)
+        return SESSOES[chave]
 
 
 class Servidor(ThreadingHTTPServer):
@@ -157,7 +160,7 @@ class Handler(BaseHTTPRequestHandler):
                 except estado.ErroDeRegra as e:
                     return self._json({"erro": str(e)}, 409)
                 with TRAVA:
-                    s = SESSOES.get(a["sessao"] or "")
+                    s = SESSOES.get(f'{a["solicitante"]}:{a["sessao"] or ""}')
                 if s:
                     s.receber_decisao(a, u["nome"])
                 threading.Thread(target=whatsapp.enviar_decisao, args=(a, u["nome"]), daemon=True).start()
@@ -182,6 +185,22 @@ class Handler(BaseHTTPRequestHandler):
                 u = self._quem(q, corpo)
                 if u:
                     self._json({"mensagens": estado.listar_mensagens(u["id"]), "canal": whatsapp.configuracao()["canal"]})
+                return
+            if caminho == "/api/whatsapp" and metodo == "GET":
+                if self._quem(q, corpo, "gerente"):
+                    st = whatsapp.status_da_ponte()
+                    if st["estado"] == "conectado":
+                        threading.Thread(target=whatsapp.enviar_pendentes, daemon=True).start()
+                    d = whatsapp.configuracao()["destino"]
+                    self._json({**st, "destino": whatsapp.mascara(d) if d else None, "ponte_instalada": PONTE_JS.exists() and (PONTE_JS.parent / "node_modules").exists()})
+                return
+            if caminho == "/api/whatsapp/sair" and metodo == "POST":
+                if self._quem(q, corpo, "gerente"):
+                    try:
+                        whatsapp._chamar("/sair", {}, espera=30)
+                        self._json({"ok": True})
+                    except RuntimeError as e:
+                        self._json({"erro": str(e)}, 502)
                 return
             if caminho == "/api/alertas" and metodo == "GET":
                 if self._quem(q, corpo, "gerente"):
@@ -238,6 +257,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def _conversa(self, q: dict) -> None:
         pergunta = (q.get("pergunta") or [""])[0].strip()
+        voz = (q.get("voz") or ["0"])[0] == "1"
+        alternativas = [a for a in (q.get("alt") or [""])[0].split("||") if a.strip()]
         sid = (q.get("sessao") or [str(uuid.uuid4())])[0]
         u = self._quem(q, {})
         if not u:
@@ -251,7 +272,12 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         s = sessao(sid, u["id"], u["papel"])
         try:
-            for evento in s.responder(pergunta):
+            if voz:   # a voz erra nomes do nosso domínio: escolhe a melhor alternativa e conserta
+                entendido = entender.escolher([pergunta] + alternativas)
+                if entendido and entendido != pergunta:
+                    self._enviar({"tipo": "entendi", "original": pergunta, "texto": entendido, "sessao": sid})
+                pergunta = entendido or pergunta
+            for evento in s.responder(pergunta, voz):
                 evento["sessao"] = sid
                 self._enviar(evento)
         except Exception:
@@ -283,6 +309,25 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(corpo)
 
 
+def iniciar_ponte():
+    """Liga a ponte do WhatsApp (Node) junto com o servidor, se ela estiver instalada. Devolve o processo ou None."""
+    import shutil
+    import subprocess
+    from transporte.agente.llm import carregar_env
+    carregar_env()
+    if os.getenv("WHATSAPP_PONTE") or not PONTE_JS.exists():
+        return None   # ponte externa, ou ausente
+    if not (PONTE_JS.parent / "node_modules").exists() or not shutil.which("node"):
+        print("  WhatsApp: ponte não instalada. Para ligar o QR code: cd whatsapp && npm install", flush=True)
+        return None
+    if whatsapp.status_da_ponte()["estado"] != "sem_ponte":
+        return None   # já tem uma rodando
+    p = subprocess.Popen(["node", str(PONTE_JS)], cwd=PONTE_JS.parent, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    import atexit
+    atexit.register(p.terminate)
+    return p
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--porta", type=int, default=8000)
@@ -304,6 +349,7 @@ def main() -> None:
             porta += 1
     if servidor is None:
         raise SystemExit("Nenhuma porta livre entre %d e %d." % (args.porta, args.porta + 10))
+    iniciar_ponte()
     print(f"\nAgiliza AI · versão {VERSAO} · modo: {modo}", flush=True)
     print(f"  Entrar:   http://localhost:{porta}/login.html", flush=True)
     print(f"  Conferir: http://localhost:{porta}/api/saude  (deve mostrar \"app\": \"Agiliza AI\" e versão {VERSAO})\n", flush=True)

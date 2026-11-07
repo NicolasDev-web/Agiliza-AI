@@ -23,6 +23,8 @@
   [["Melhor rota dos envios novos", "Qual a melhor rota para os envios novos de SP?"], ["Qual prazo precisa mudar?", "Qual prazo do site precisa mudar?"], ["Onde há mais problemas?", "Onde resolvemos mais problemas?"]]
     .forEach(([t, p]) => $("#acoes").append(h("button", { type: "button", class: "botao botao-cobalto", onclick: () => window.AgilizaAgente && window.AgilizaAgente.perguntar(p) }, h("span", { class: "botao-icone", "aria-hidden": "true" }, "→"), t)));
 
+  if (window.Agiliza.panorama) window.Agiliza.panorama($("#panorama"), "analista");
+
   /* ---------- mapa (coordenadas reais dos municípios) ---------- */
   const temMapa = typeof L !== "undefined";
   let mapa = null, camada = null;
@@ -83,7 +85,7 @@
 
   /* ---------- WhatsApp: a mensagem e o cartão como chegam ---------- */
   function zap(m, canal) {
-    const sit = { enviada: "enviada ao seu WhatsApp", previa: "prévia: WhatsApp ainda não configurado", falhou: "o WhatsApp falhou; veja aqui" }[m.situacao] || m.situacao;
+    const sit = { enviada: "enviada ao seu WhatsApp", pendente: "vai ao seu WhatsApp assim que a Marina conectar", previa: "prévia: WhatsApp ainda não conectado", falhou: "o WhatsApp falhou; veja aqui" }[m.situacao] || m.situacao;
     $("#canal").textContent = m.situacao === "enviada" ? "enviada" : "prévia";
     $("#zap").replaceChildren(h("div", { class: "zap-bolha" },
       h("img", { src: m.imagem, alt: "Cartão da decisão", loading: "lazy" }),
@@ -91,7 +93,7 @@
       h("span", { class: "zap-hora" }, hora(m.quando) + " ✓✓")),
       h("p", { class: "rota-pe" }, `${sit}${m.destino ? " · " + m.destino : ""}`));
   }
-  async function carregarMensagens() { try { const r = await fetch("/api/mensagens"); if (r.ok) { const d = await r.json(); if (d.mensagens[0]) zap(d.mensagens[0], d.canal); else $("#canal").textContent = d.canal === "meta" ? "ligado" : "prévia"; } } catch (e) { /* servidor fora */ } }
+  async function carregarMensagens() { try { const r = await fetch("/api/mensagens"); if (r.ok) { const d = await r.json(); if (d.mensagens[0]) zap(d.mensagens[0], d.canal); else $("#canal").textContent = d.canal === "qr" ? "ligado" : "prévia"; } } catch (e) { /* servidor fora */ } }
 
   carregarFila(); carregarMensagens();
   const canal = new EventSource("/api/eventos");

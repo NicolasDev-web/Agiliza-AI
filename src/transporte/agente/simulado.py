@@ -14,7 +14,7 @@ from typing import Iterator
 from . import ferramentas as F
 from .loop import _evento, rotulo_da_ferramenta
 
-PAUSA = 0.45
+PAUSA = 0.12
 
 
 def _sem_acento(t: str) -> str:
@@ -73,7 +73,7 @@ def _rodar(sessao, nome: str, args: dict) -> Iterator[dict]:
     time.sleep(PAUSA)
     res = F.executar(nome, args, sessao.papel, sessao.diario)
     yield _evento("resultado", nome=nome, resultado=res, recusado=bool(res.get("recusado")), custo=sessao.diario.custo)
-    time.sleep(0.2)
+    time.sleep(0.04)
     sessao._ultimo = res
 
 
@@ -293,6 +293,15 @@ def _desempenho(sessao, uf, transp) -> Iterator[dict]:
     yield _fim(sessao, f"Cumprimento de prazo{alvo}, de 03/09 a 02/11:\n\n{corpo}\n\nA meta é 92%. Quer que eu veja o que fazer com quem está abaixo?")
 
 
+def _nao_entendi(sessao) -> Iterator[dict]:
+    """Não casou com nada: em vez de chutar um assunto, diz o que não pegou e o que dá para pedir."""
+    if sessao.papel == F.PAPEL_CONSULTA:
+        sug = "“O que está esperando minha decisão?”, “Por que Marabá?” ou “Onde resolvemos mais problemas?”"
+    else:
+        sug = "“Qual a melhor rota para os envios novos de SP?”, “Qual prazo do site precisa mudar?” ou “A Marina já respondeu?”"
+    yield _fim(sessao, f"Não peguei bem o que você quis. Pode repetir? Por exemplo: {sug}")
+
+
 def responder_sem_ia(sessao, pergunta: str) -> Iterator[dict]:
     yield _evento("aviso", texto="Modo sem IA: roteiro local decidindo os passos, com as mesmas ferramentas.")
     s = _sem_acento(pergunta)
@@ -313,7 +322,7 @@ def responder_sem_ia(sessao, pergunta: str) -> Iterator[dict]:
         yield from _rota(sessao, uf, pergunta)
     elif any(k in s for k in ["prazo", "sla", "proposta", "site", "concorrente"]):
         yield from _prazo(sessao, uf, pergunta)
-    elif any(k in s for k in ["desempenho", "cumprimento", "como esta", "no prazo", "ranking"]):
+    elif uf or transp or any(k in s for k in ["desempenho", "cumprimento", "como esta", "no prazo", "ranking", "entrega", "situacao", "resumo", "panorama", "geral", "como vai", "como estamos"]):
         yield from _desempenho(sessao, uf, transp)
     else:
-        yield from _desempenho(sessao, uf, transp)
+        yield from _nao_entendi(sessao)

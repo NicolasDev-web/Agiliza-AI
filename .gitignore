@@ -11,3 +11,5 @@ data/processed/transporte.db
 data/processed/*.tmp
 data/processed/estado.db*
 data/processed/cartoes/
+whatsapp/node_modules/
+whatsapp/sessao/

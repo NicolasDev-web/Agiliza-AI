@@ -7,9 +7,11 @@ colega trabalhando — em vez de um painel.
 from __future__ import annotations
 
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Iterator
 
 from . import ferramentas as F
+from .entender import para_fala
 from .llm import Cliente, ErroDaAPI, SemCredencial
 from .prompt import SISTEMA, SISTEMA_CONSULTA
 
@@ -36,8 +38,14 @@ class Sessao:
     def modo(self) -> str:
         return "ia" if self.cliente.configurado else "simulado"
 
-    def responder(self, pergunta: str) -> Iterator[dict]:
-        """Processa uma pergunta e vai emitindo os eventos do trabalho."""
+    def responder(self, pergunta: str, voz: bool = False) -> Iterator[dict]:
+        """Processa uma pergunta e vai emitindo os eventos do trabalho. Toda resposta leva também a versão para ouvir."""
+        for e in self._responder(pergunta, voz):
+            if e["tipo"] == "resposta":
+                e["fala"] = para_fala(e["texto"])
+            yield e
+
+    def _responder(self, pergunta: str, voz: bool) -> Iterator[dict]:
         yield _evento("inicio", pergunta=pergunta, modo=self.modo,
                       modelo=self.cliente.modelo if self.modo == "ia" else "roteiro local")
         if self.modo == "simulado":
@@ -45,8 +53,10 @@ class Sessao:
             yield from responder_sem_ia(self, pergunta)
             return
         pergunta_modelo = pergunta
+        if voz:   # a pessoa vai ouvir a resposta: curta e sem lista
+            pergunta_modelo = "[modo voz: responda em até 3 frases curtas, sem listas, sem emoji]\n" + pergunta
         if self.avisos:   # o que o gerente decidiu desde a última vez; o comentário dele é dado, não ordem
-            pergunta_modelo = "[avisos do sistema]\n" + "\n".join(self.avisos) + "\n[fim dos avisos]\n\n" + pergunta
+            pergunta_modelo = "[avisos do sistema]\n" + "\n".join(self.avisos) + "\n[fim dos avisos]\n\n" + pergunta_modelo
             self.avisos = []
         self.historico.append({"role": "user", "content": pergunta_modelo})
         try:
@@ -76,12 +86,19 @@ class Sessao:
             if r["texto"]:
                 yield _evento("nota", texto=r["texto"])
             self.historico.append(self.cliente.formatar_pedido_de_ferramenta(r))
-            for ch in r["chamadas"]:
+            chamadas = r["chamadas"]
+            for ch in chamadas:
                 f = F.POR_NOME.get(ch["nome"])
                 yield _evento("ferramenta", nome=ch["nome"], argumentos=ch["argumentos"],
                               tipo_ferramenta=f.tipo if f else "?",
                               rotulo=rotulo_da_ferramenta(ch["nome"], ch["argumentos"]))
-                res = F.executar(ch["nome"], ch["argumentos"], self.papel, self.diario)
+            somente_leitura = len(chamadas) > 1 and all(getattr(F.POR_NOME.get(c["nome"]), "tipo", "") == "leitura" for c in chamadas)
+            if somente_leitura:   # consultas que não dependem umas das outras andam juntas
+                with ThreadPoolExecutor(max_workers=min(4, len(chamadas))) as pool:
+                    resultados = list(pool.map(lambda c: F.executar(c["nome"], c["argumentos"], self.papel, self.diario), chamadas))
+            else:
+                resultados = [F.executar(c["nome"], c["argumentos"], self.papel, self.diario) for c in chamadas]
+            for ch, res in zip(chamadas, resultados):
                 yield _evento("resultado", nome=ch["nome"], resultado=res,
                               recusado=bool(res.get("recusado")), custo=self.diario.custo)
                 self.historico.extend(self.cliente.formatar_resposta_de_ferramenta(ch, res))

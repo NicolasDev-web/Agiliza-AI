@@ -1,0 +1,79 @@
+/* Visual mais macio para as telas de trabalho (analista e gerente): cantos redondos, sombras leves,
+   pílulas no lugar de caixas, mais respiro. Vem depois dos outros estilos e só sobrescreve. */
+:root { --raio: 14px; --raio-g: 20px; --sombra: 0 1px 2px rgba(21, 24, 79, .05), 0 8px 24px -12px rgba(21, 24, 79, .16); --linha: #e1e2ee; }
+body.pagina-analista, body.pagina-gerente, body.pagina-login { background: linear-gradient(180deg, #eef0fa 0%, var(--papel) 340px); background-attachment: fixed; }
+
+.painel, .ger-placar > div, .pan-cartao { border: 0; border-radius: var(--raio-g); box-shadow: var(--sombra); padding: 20px 22px; }
+.painel h2 { font-family: var(--sans); font-size: 15px; font-weight: 550; letter-spacing: -0.01em; color: var(--tinta); }
+.painel h2 em, .etiqueta { border-radius: 999px; }
+.nav.clara { border-radius: 0 0 var(--raio-g) var(--raio-g); box-shadow: 0 6px 24px -16px rgba(21, 24, 79, .4); }
+.nav-links, .nav-links a { border-radius: 999px; }
+
+.botao { border-radius: 999px; padding: 6px 16px 6px 6px; border-color: rgba(47, 55, 196, .35); transition: background var(--t-rapida), transform var(--t-rapida), box-shadow var(--t-rapida); }
+.botao-cheio { border-color: var(--cobalto); box-shadow: 0 6px 16px -8px rgba(47, 55, 196, .7); }
+.botao:hover { transform: translateY(-1px); }
+.botao-icone { border-radius: 50%; }
+.pequeno { padding: 7px 14px; }
+.usuario-papel { border-radius: 999px; padding: 3px 10px; }
+
+.an-topo h1, .ger-topo h1 { font-weight: 400; }
+.an-acoes { gap: 10px; }
+#mapa-rota { border: 0; border-radius: var(--raio); box-shadow: inset 0 0 0 1px var(--linha); overflow: hidden; }
+.aprov, .pedido, .zap, .alerta-fin, details.alerta-fin { border-radius: var(--raio); }
+.pedido { border: 0; background: #fff7f1; box-shadow: 0 0 0 1px rgba(232, 99, 30, .28), var(--sombra); padding: 18px 20px; gap: 10px; }
+.pedido textarea, .pedido input[type="number"] { border-radius: 12px; background: var(--papel-claro); border-color: transparent; }
+.aprov { border: 0; box-shadow: 0 0 0 1px rgba(232, 99, 30, .3); padding: 14px 16px; }
+.aprov.aprovada, .aprov.ajustada { box-shadow: 0 0 0 1px #9ad6b9; }
+.aprov.recusada { box-shadow: 0 0 0 1px #e8aaa4; }
+.alerta-fin, details.alerta-fin { border-left: 0; background: var(--papel-claro); padding: 12px 16px; }
+.historico-lin { border-top: 0; padding: 10px 14px; background: var(--papel-claro); border-radius: 12px; margin-bottom: 6px; }
+.ger-placar b { font-size: 34px; }
+.barra-limite { border-radius: 999px; height: 8px; }
+.barra-limite i { border-radius: 999px; }
+
+.aw-avatar { border-radius: 50%; }
+.aw-painel { border: 0; border-radius: 22px; }
+.aw-bolha { border-radius: 16px; }
+.aw-bolha.eu { border-bottom-right-radius: 5px; } .aw-bolha.ag { border-bottom-left-radius: 5px; }
+.entrada-form input { border-radius: 14px; }
+.demo button, .erro { border-radius: 14px; }
+
+/* ---------- panorama (as mesmas informações do painel, resumidas) ---------- */
+.panorama { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; padding: 0 var(--g) 4px; }
+.pan-cartao { background: var(--branco); }
+.pan-kpis { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.pan-kpi { background: var(--branco); border-radius: var(--raio-g); box-shadow: var(--sombra); padding: 14px 18px; }
+.pan-kpi b { display: block; font-size: 30px; font-weight: 400; letter-spacing: -0.03em; color: var(--cobalto); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.pan-kpi b.ruim { color: var(--perda); }
+.pan-kpi span { font-size: 12.5px; color: var(--tinta-2); }
+.pan-transp { grid-column: span 4; } .pan-mapa { grid-column: span 4; } .pan-piores { grid-column: span 4; }
+.pan-cartao h3 { font-size: 15px; font-weight: 550; letter-spacing: -0.01em; margin-bottom: 4px; }
+.pan-cartao > small { display: block; color: var(--tinta-3); font-size: 12px; margin-bottom: 14px; }
+.barra-lin { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 10px; font-size: 13px; padding: 6px 0; }
+.barra-lin .trilho { position: relative; height: 10px; background: var(--papel); border-radius: 999px; }
+.barra-lin .trilho i { position: absolute; inset: 0 auto 0 0; background: var(--s4); border-radius: 999px; }
+.barra-lin .trilho i.ruim { background: var(--o4); }
+.barra-lin .trilho u { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--tinta); border-radius: 2px; opacity: .55; }
+.barra-lin b { font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.legenda-meta { font-size: 11.5px; color: var(--tinta-3); margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+.legenda-meta u { width: 2px; height: 12px; background: var(--tinta); opacity: .55; display: inline-block; }
+.pan-mapa svg { width: 100%; height: auto; display: block; max-height: 300px; }
+.pan-mapa path { stroke: #fff; stroke-width: .6; transition: opacity var(--t-rapida); }
+.pan-mapa path:hover { opacity: .75; }
+.pan-escala { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--tinta-3); margin-top: 8px; }
+.pan-escala i { flex: 1; height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--o4), var(--o1) 45%, #dfe1f6 55%, var(--s5)); }
+.pior-lin { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 9px 0; border-top: 1px solid var(--papel); font-size: 13.5px; }
+.pior-lin:first-of-type { border-top: 0; }
+.pior-lin b { font-weight: 500; } .pior-lin small { color: var(--tinta-3); font-size: 12px; }
+.pior-lin .pct { grid-row: span 2; align-self: center; font-size: 20px; letter-spacing: -0.02em; color: var(--perda); font-variant-numeric: tabular-nums; }
+@media (max-width: 1100px) { .pan-transp, .pan-mapa, .pan-piores { grid-column: span 12; } }
+
+/* ---------- WhatsApp da gerente ---------- */
+.zap-qr { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.zap-qr img { border-radius: var(--raio); box-shadow: 0 0 0 1px var(--linha); background: #fff; padding: 6px; }
+.zap-qr ol { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13.5px; color: var(--tinta-2); flex: 1; min-width: 160px; }
+.zap-nota { font-size: 12px; color: var(--tinta-3); margin-top: 10px; }
+.zap-ok { font-size: 14px; margin-bottom: 10px; }
+.painel h2 em.zap-pilula { font-style: normal; font-size: 11px; background: var(--papel); color: var(--tinta-2); padding: 3px 10px; }
+.painel h2 em.zap-pilula.conectado { background: #d9f0e6; color: #0b6b47; }
+.painel h2 em.zap-pilula.aguardando_qr { background: #fde8d8; color: #a8470f; }

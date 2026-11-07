@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="agente.css">
   <link rel="stylesheet" href="usuarios.css">
+  <link rel="stylesheet" href="suave.css">
 </head>
 <body class="pagina-analista">
   <header class="nav clara" id="topo">
@@ -29,6 +30,8 @@
     <p class="an-sub">Peça por escrito ou por voz no agente do canto. Ele cuida das rotas e leva os prazos para a Marina.</p>
     <div class="an-acoes" id="acoes"></div>
   </section>
+
+  <div id="panorama" aria-label="Panorama das entregas"></div>
 
   <main class="an-grade">
     <section class="painel" aria-label="Melhor rota">
@@ -51,7 +54,9 @@
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="data.js"></script>
   <script src="ufs.js"></script>
+  <script src="panorama.js"></script>
   <script src="usuario.js"></script>
   <script src="widget.js"></script>
   <script src="analista.js"></script>

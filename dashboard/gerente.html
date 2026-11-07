@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="agente.css">
   <link rel="stylesheet" href="usuarios.css">
+  <link rel="stylesheet" href="suave.css">
 </head>
 <body class="pagina-gerente">
   <header class="nav clara" id="topo">
@@ -35,6 +36,8 @@
 
   <section class="ger-placar" id="placar" aria-label="Placar"></section>
 
+  <div id="panorama" aria-label="Panorama das entregas"></div>
+
   <main class="ger-grade">
     <div class="ger-coluna">
       <section class="painel" aria-label="Aguardando decisão">
@@ -47,6 +50,10 @@
       </section>
     </div>
     <div class="ger-coluna">
+      <section class="painel" aria-label="WhatsApp" id="zap-painel">
+        <h2>WhatsApp do Lucas <span id="zap-estado"></span></h2>
+        <div id="zap-corpo"><p class="vazio">verificando…</p></div>
+      </section>
       <section class="painel" aria-label="Financeiro">
         <h2>Financeiro · rotas trocadas <span id="n-alertas"></span></h2>
                 <div id="alertas"><p class="vazio">Nenhuma troca de rota ainda.</p></div>
@@ -54,6 +61,9 @@
     </div>
   </main>
 
+  <script src="data.js"></script>
+  <script src="ufs.js"></script>
+  <script src="panorama.js"></script>
   <script src="usuario.js"></script>
   <script src="widget.js"></script>
   <script src="gerente.js"></script>

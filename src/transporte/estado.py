@@ -323,6 +323,20 @@ def registrar_mensagem(aprovacao_id: int, para_usuario: str, texto: str, origem:
     return m
 
 
+def mensagens_pendentes() -> list[dict]:
+    return _linhas("select * from mensagens where situacao = 'pendente' order by id")
+
+
+def atualizar_mensagem(mid: int, situacao: str, aviso: str | None) -> None:
+    with _TRAVA:
+        c = con()
+        c.execute("update mensagens set situacao = ?, aviso = ? where id = ?", (situacao, aviso, mid))
+        c.commit()
+        m = _linhas("select * from mensagens where id = ?", (mid,))[0]
+    m["imagem"] = f"/api/cartao/{m['aprovacao_id']}.png"
+    BARRAMENTO.publicar(m["para_usuario"], "whatsapp", mensagem=m)
+
+
 def listar_mensagens(uid: str, limite: int = 10) -> list[dict]:
     r = _linhas("select * from mensagens where para_usuario = ? order by id desc limit ?", (uid, int(limite)))
     for m in r:

@@ -177,3 +177,44 @@ def test_avaliar_traz_trajeto_com_origem_destino_e_distancia():
     for k in ("cd_lat", "cd_lon", "destino_lat", "destino_lon", "distancia_km", "cd_nome"):
         assert r.get(k) is not None
     assert r["distancia_km"] > 0
+
+
+# ---------------------------------------------------------------- entender a voz
+def test_voz_conserta_nomes_do_dominio_sem_mexer_no_resto():
+    from transporte.agente.entender import corrigir, escolher, para_fala
+    assert corrigir("como está a trans norte em belem") == "como está a TransNorte em Belém"
+    assert corrigir("o prazo de maraba é seis dias") == "o prazo de Marabá é 6 dias"
+    assert corrigir("qual a melhor rota para os envios novos de SP?") == "qual a melhor rota para os envios novos de SP?"
+    assert escolher(["como esta a trans note", "como esta a trans norte em maraba"]).endswith("Marabá")
+    assert escolher([]) == ""
+
+
+def test_fala_da_resposta_e_curta_e_sem_marcacao():
+    from transporte.agente.entender import para_fala
+    f = para_fala("✅ *Aprovado* em Belém.\n- custo R$ 1.234 evitado\nUma. Duas. Três. Quatro. Cinco.")
+    assert "*" not in f and "✅" not in f and "1234 reais" in f and f.count(".") <= 4
+
+
+def test_frase_sem_sentido_vira_pedido_de_repeticao_com_sugestoes():
+    s = Sessao(cliente=Cliente(url="", token=""), usuario="lucas")
+    r = [e for e in s.responder("blá blá blá xyz") if e["tipo"] == "resposta"][0]
+    assert "Não peguei" in r["texto"] and "melhor rota" in r["texto"]
+
+
+def test_consultas_independentes_rodam_juntas_e_voltam_na_ordem():
+    class Falso:
+        configurado, modelo, formato = True, "m", "openai"
+        def __init__(self): self.n = 0
+        def responder(self, msgs, ferr=None):
+            self.n += 1
+            if self.n == 1:
+                return {"texto": "", "bruto": {"role": "assistant", "tool_calls": []}, "chamadas": [
+                    {"id": "1", "nome": "medir_desempenho", "argumentos": {}}, {"id": "2", "nome": "consultar_problemas", "argumentos": {"agrupar_por": "uf"}}]}
+            return {"texto": "ok", "chamadas": [], "bruto": {}}
+        def formatar_pedido_de_ferramenta(self, r): return r["bruto"]
+        def formatar_resposta_de_ferramenta(self, ch, res): return [{"role": "tool", "tool_call_id": ch["id"], "content": "{}"}]
+    ev = list(Sessao(cliente=Falso(), usuario="lucas").responder("oi"))
+    tipos = [e["tipo"] for e in ev]
+    assert tipos.count("ferramenta") == 2 and tipos.count("resultado") == 2
+    assert [e["nome"] for e in ev if e["tipo"] == "resultado"] == ["medir_desempenho", "consultar_problemas"]
+    assert tipos[-1] == "resposta"

@@ -90,18 +90,25 @@ Como o ciclo fecha, ao vivo (SSE por usuário):
 O motivo escrito pela gerente é tratado como **dado, nunca como ordem** (no prompt de reescrita e no aviso ao agente).
 As regras valem no servidor (`src/transporte/estado.py`, `tests/test_estado.py`): só o gerente decide, nunca a própria proposta, no máximo 12 aprovações por cenário (R$ 15 cada pedido), prazo inteiro de no mínimo 2 dias úteis. O estado fica em `data/processed/estado.db` (gravável, ignorado pelo git); a base do desafio segue só de leitura. "Reiniciar demonstração" na tela da gerente zera tudo.
 
-### WhatsApp (envio ao analista)
+### WhatsApp por QR code (sem API da Meta)
 
-Dois modos, escolhidos pelo `.env` (`src/transporte/whatsapp.py`):
+A Marina conecta o WhatsApp dela lendo um QR code, uma vez, na tela dela ("WhatsApp do Lucas"). Dali em diante cada decisão sai pelo número dela para o número do analista, com o texto escrito pelo agente e o cartão em imagem.
 
-- **meta**: WhatsApp Cloud API oficial. Preencha `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` e `WHATSAPP_DESTINO` (só dígitos, com 55 e DDD). O número do analista deve estar cadastrado como destinatário de teste. A mensagem livre só vale até 24 h depois do último "oi" do analista ao número de teste.
-- **previa** (padrão sem credencial): nada sai; a tela do analista mostra a mensagem e o cartão como o WhatsApp mostraria, e avisa que é prévia. Se o envio real falhar, cai nisso com um aviso, e a demonstração segue.
+1. Uma vez: `cd whatsapp && npm install` (precisa de Node 18+).
+2. No `.env`: `WHATSAPP_DESTINO=55DDDNUMERO` (o número do Lucas, só dígitos). Nunca vai para o repositório.
+3. `python servidor.py` liga a ponte sozinho. Entre como Marina, abra a tela de decisões, e no celular: WhatsApp > Aparelhos conectados > Conectar um aparelho.
 
-O número fica só no `.env`, nunca no repositório.
+Estados da mensagem: **enviada** (ponte conectada), **pendente** (ponte ligada, QR ainda não lido: sai sozinha quando a Marina conectar), **prévia** (sem ponte: a tela do Lucas mostra a mensagem como o WhatsApp mostraria). Qualquer falha vira aviso e a demonstração segue.
+
+Para ensaiar sem celular: `WHATSAPP_SIMULAR=1 python servidor.py` mostra um QR de mentira; `curl -X POST localhost:8765/simular/escanear` "conecta".
+
+Atenção: é o WhatsApp Web (biblioteca Baileys), não a via oficial. Serve para a demonstração; use um número de teste, porque o WhatsApp pode restringir números usados assim. A sessão fica em `whatsapp/sessao/` (fora do git).
 
 ### Voz
 
-O microfone do agente usa o reconhecimento de voz do navegador (pt-BR, Chrome/Edge, sem gastar token). Em navegador sem isso, grava o áudio e o servidor transcreve por `/v1/audio/transcriptions` do proxy do evento (`AI_PROXY_MODELO_AUDIO`, padrão `whisper-1`), **se o proxy tiver um modelo de áudio**: abra `/api/saude` e veja a lista. O botão de alto-falante faz o agente ler as respostas em voz alta.
+O microfone do agente usa o reconhecimento de voz do navegador (pt-BR, Chrome/Edge, sem gastar token). Em navegador sem isso, grava o áudio e o servidor transcreve por `/v1/audio/transcriptions` do proxy do evento (`AI_PROXY_MODELO_AUDIO`, padrão `whisper-1`), **se o proxy tiver um modelo de áudio**: abra `/api/saude` e veja a lista. O botão de alto-falante faz o agente ler as respostas em voz alta (versão curta, sem lista).
+
+O que a voz entende errado é consertado antes de o agente ler: o reconhecedor devolve até 3 alternativas, o servidor fica com a que mais parece logística e troca trechos quase iguais a nomes conhecidos ("trans norte" → TransNorte, "maraba" → Marabá, "seis dias" → 6 dias). A tela mostra "entendi: …" para a pessoa conferir. Código em `src/transporte/agente/entender.py`.
 
 ### Base de dados e geografia real
 
@@ -163,7 +170,8 @@ src/transporte/      calendario, portais, entregas, desempenho, concorrentes, pr
 src/transporte/agente/  ferramentas, roteamento, llm (proxy), loop (eventos), simulado, prompt
 servidor.py          servidor: conversa por SSE, eventos por usuário, aprovações, arquivos do painel
 src/transporte/estado.py   login, fila de aprovação, alertas financeiros, tempo real (estado.db)
-src/transporte/cartao.py, whatsapp.py   cartão de imagem e envio da decisão ao analista
+src/transporte/cartao.py, whatsapp.py   cartão de imagem e envio da decisão ao analista (pela ponte em whatsapp/)
+src/transporte/agente/entender.py     correção do que a voz entendeu e versão falada da resposta
 src/transporte/base.py, geo.py   base SQLite e geografia (coordenadas, distâncias)
 scripts/             01_processar.py, 02_base_de_dados.py
 dashboard/           login, analista, gerente, agente (modo apresentação), index (painel), widget.js (agente no canto), data.js (gerado)

@@ -1,0 +1,13 @@
+{
+  "name": "agiliza-ponte-whatsapp",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Ponte entre o Agiliza AI e o WhatsApp Web. A gerente lê o QR code e o envio sai do número dela.",
+  "main": "ponte.js",
+  "scripts": { "start": "node ponte.js" },
+  "dependencies": {
+    "@whiskeysockets/baileys": "6.7.22",
+    "pino": "^9.0.0",
+    "qrcode": "^1.5.4"
+  }
+}

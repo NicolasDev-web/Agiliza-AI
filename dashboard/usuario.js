@@ -8,6 +8,7 @@
     try { const r = await fetch("/api/eu"); return r.ok ? (await r.json()).usuario : null; } catch (e) { return null; }
   }
   async function sair() {
+    try { Object.keys(sessionStorage).filter((k) => k.startsWith("agiliza.")).forEach((k) => sessionStorage.removeItem(k)); } catch (e) { /* sem storage */ }
     try { await fetch("/api/sair", { method: "POST", body: "{}" }); } catch (e) { /* segue para o login */ }
     location.href = "login.html";
   }
@@ -19,7 +20,7 @@
     el.append(papel, nome, b); return el;
   }
 
-  window.Agiliza = {
+  window.Agiliza = Object.assign(window.Agiliza || {}, {
     CASAS,
     eu,
     sair,
@@ -32,5 +33,5 @@
       document.dispatchEvent(new CustomEvent("agiliza:usuario", { detail: u }));
       return u;
     },
-  };
+  });
 })();
