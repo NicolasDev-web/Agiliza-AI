@@ -143,6 +143,16 @@ O painel precisa de internet só para a fonte e o Leaflet. O token do proxy de I
 (próximas partes) fica em `.env`, que está no `.gitignore`. Copie `.env.example` e **nunca
 publique o token**.
 
+### Se a tela ainda for a antiga
+
+O sintoma é abrir `http://localhost:8000` e ver só o painel ou o chat antigo. Quase sempre é o **servidor velho ainda rodando** na porta 8000.
+
+1. Abra `http://localhost:8000/api/saude`. A versão nova mostra `"app": "Agiliza AI"` e a versão do commit. Se der erro 404 ou faltar isso, é o servidor antigo.
+2. Feche o antigo (Windows: `netstat -ano | findstr :8000` e `taskkill /PID <número> /F`; Mac/Linux: `lsof -i :8000` e `kill <pid>`), rode `git pull` e `python servidor.py`.
+3. O terminal agora imprime o endereço de entrada e avisa se a porta estava ocupada (e em qual porta subiu).
+
+Telas: `/login.html` (entrada), `/analista.html`, `/gerente.html`, `/agente.html` (modo apresentação) e `/index.html` (painel de dados).
+
 ## Estrutura
 
 ```

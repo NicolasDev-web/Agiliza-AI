@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import os
 import re
 import sys
 import threading
@@ -27,6 +28,19 @@ from transporte.agente.loop import Sessao  # noqa: E402
 
 PUBLICO = RAIZ / "dashboard"
 COOKIE = "agiliza_sessao"
+TELAS = ["/login.html", "/analista.html", "/gerente.html", "/agente.html", "/index.html"]
+
+
+def versao() -> str:
+    """Identifica o código que está rodando: o commit do git, para ninguém confundir com a versão antiga."""
+    try:
+        import subprocess
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=RAIZ, capture_output=True, text=True, timeout=3).stdout.strip() or "sem-git"
+    except Exception:
+        return "sem-git"
+
+
+VERSAO = versao()
 SESSOES: dict[str, Sessao] = {}
 TRAVA = threading.Lock()
 
@@ -38,6 +52,12 @@ def sessao(sid: str, usuario: str = "lucas", papel_usuario: str = "analista_logi
             papel = PAPEL_CONSULTA if papel_usuario == "gerente" else PAPEL_AGENTE
             SESSOES[sid] = Sessao(papel=papel, usuario=usuario, sid=sid)
         return SESSOES[sid]
+
+
+class Servidor(ThreadingHTTPServer):
+    # No Windows, reaproveitar a porta deixa DOIS servidores no mesmo endereço e a versão antiga continua
+    # respondendo sem avisar. Lá a porta ocupada tem que dar erro.
+    allow_reuse_address = os.name != "nt"
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -60,7 +80,8 @@ class Handler(BaseHTTPRequestHandler):
         url = urlparse(self.path)
         if url.path == "/api/saude":
             c = Cliente()
-            return self._json({"modo": "ia" if c.configurado else "simulado", "modelo": c.modelo,
+            return self._json({"app": "Agiliza AI", "versao": VERSAO, "telas": TELAS, "whatsapp": whatsapp.configuracao()["canal"],
+                               "modo": "ia" if c.configurado else "simulado", "modelo": c.modelo,
                                "url": c.url, "formato": c.formato, "modelos_disponiveis": c.modelos()[:20]})
         q = parse_qs(url.query)
         if url.path == "/api/conversa":
@@ -257,6 +278,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", f"{tipo}; charset=utf-8" if "text" in tipo or "javascript" in tipo else tipo)
         self.send_header("Content-Length", str(len(corpo)))
+        self.send_header("Cache-Control", "no-store")   # tela velha em cache é o pior bug de demonstração
         self.end_headers()
         self.wfile.write(corpo)
 
@@ -271,8 +293,21 @@ def main() -> None:
     from transporte.agente.contexto import aquecer
     aquecer()
     estado.con()
-    print(f"Agente de logística em http://localhost:{args.porta}  |  modo: {modo}", flush=True)
-    ThreadingHTTPServer(("0.0.0.0", args.porta), Handler).serve_forever()
+    servidor, porta = None, args.porta
+    for tentativa in range(11):
+        try:
+            servidor = Servidor(("0.0.0.0", porta), Handler)
+            break
+        except OSError:
+            print(f"\n!! A porta {porta} já está em uso por outro programa, provavelmente a VERSÃO ANTIGA do app.\n"
+                  f"   Feche-o (Windows: netstat -ano | findstr :{porta}  e  taskkill /PID <número> /F) ou use a porta abaixo.", flush=True)
+            porta += 1
+    if servidor is None:
+        raise SystemExit("Nenhuma porta livre entre %d e %d." % (args.porta, args.porta + 10))
+    print(f"\nAgiliza AI · versão {VERSAO} · modo: {modo}", flush=True)
+    print(f"  Entrar:   http://localhost:{porta}/login.html", flush=True)
+    print(f"  Conferir: http://localhost:{porta}/api/saude  (deve mostrar \"app\": \"Agiliza AI\" e versão {VERSAO})\n", flush=True)
+    servidor.serve_forever()
 
 
 if __name__ == "__main__":
