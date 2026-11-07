@@ -71,7 +71,7 @@
         h("span", { class: "piloto-marca", "aria-hidden": "true" }, MARCA[p.situacao] || "○"),
         h("span", {}, p.rotulo, p.resumo ? h("small", {}, " · " + p.resumo) : p.situacao === "agora" ? h("small", {}, " · trabalhando…") : null))))) : null;
     const lista = (dados.decisoes || []).filter((d) => d.tipo !== "modo" || papel === "gerente").slice(0, 12);
-    raiz.replaceChildren(
+    raiz.replaceChildren(...[   // replaceChildren escreve "null" na tela se receber null: os vazios saem antes
       h("div", { class: "piloto-topo" },
         h("div", {},
           h("h2", {}, "Piloto automático ", h("span", { class: "piloto-estado " + (dados.rodando ? "rodando" : ligado ? "ligado" : "pausado") }, h("i"),
@@ -92,7 +92,7 @@
             h("span", { class: "piloto-ico", "aria-hidden": "true" }, ICONE[d.tipo] || "•"),
             h("div", {}, h("p", {}, h("b", {}, d.titulo), h("small", {}, ` · ${ROTULO[d.tipo] || d.tipo} · ${String(d.quando).slice(11, 16)}`)), h("p", { class: "piloto-txt" }, d.texto)))))
         : h("p", { class: "vazio" }, ligado ? "O primeiro ciclo roda em instantes. Tudo que o agente decidir sozinho aparece aqui, com o porquê." : "Piloto pausado: o agente só age quando alguém pede no chat."),
-      dados.erro ? h("p", { class: "piloto-erro" }, "O último ciclo teve um problema; o próximo tenta de novo.") : null);
+      dados.erro ? h("p", { class: "piloto-erro" }, "O último ciclo teve um problema; o próximo tenta de novo.") : null].filter(Boolean));
     setTimeout(() => novas.clear(), 4000);
     tique();
   }
