@@ -28,9 +28,11 @@ compara com os concorrentes e **propõe o prazo do site**. Quando a decisão nã
 
 <div align="center">
 
-[![Assistir ao vídeo do Agiliza AI](docs/midia/video-capa.jpg)](video/AgilizaAI.mp4)
+<video src="https://github.com/NicolasDev-web/Agiliza-AI/raw/main/video/AgilizaAI.mp4" poster="docs/midia/video-capa.jpg" controls muted width="720"></video>
 
-**▶ Clique na imagem para assistir** (30 s, [`video/AgilizaAI.mp4`](video/AgilizaAI.mp4))
+[![Assistir ao vídeo do Agiliza AI](docs/midia/video-capa.jpg)](https://github.com/NicolasDev-web/Agiliza-AI/raw/main/video/AgilizaAI.mp4)
+
+**▶ Se o player não aparecer, clique na imagem** (30 s; o navegador pode baixar o arquivo)
 
 </div>
 
